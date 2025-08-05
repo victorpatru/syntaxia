@@ -11,13 +11,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@auth/core": "0.37.0",
+    "@auth/core": "catalog:",
     "@convex-dev/auth": "^0.0.80",
-    "@convex-dev/polar": "npm:@erquhart/convex-polar@0.2.0-alpha.5",
-    "@polar-sh/sdk": "^0.26.1",
-    "convex": "^1.19.2",
-    "convex-helpers": "^0.1.63",
-    "openai": "^4.61.1",
-    "standardwebhooks": "^1.0.0"
+    "@convex-dev/polar": "^0.6.1",
+    "@polar-sh/sdk": "^0.34.9",
+    "convex": "^1.25.4",
+    "convex-helpers": "^0.1.101"
   }
 }
