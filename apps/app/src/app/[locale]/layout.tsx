@@ -1,7 +1,7 @@
-import "@v1/ui/globals.css";
+import "@syntaxia/ui/globals.css";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
-import { TooltipProvider } from "@v1/ui/tooltip";
-import { cn } from "@v1/ui/utils";
+import { TooltipProvider } from "@syntaxia/ui/tooltip";
+import { cn } from "@syntaxia/ui/utils";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
@@ -9,7 +9,7 @@ import { ThemeProvider } from "next-themes";
 import { ConvexClientProvider } from "../convex-client-provider";
 
 export const metadata: Metadata = {
-  title: "Create v1",
+  title: "Syntaxia",
   description: "Production ready Next.js app",
 };
 

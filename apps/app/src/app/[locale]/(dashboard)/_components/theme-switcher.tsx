@@ -3,11 +3,10 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-} from "@v1/ui/select";
-import { cn } from "@v1/ui/utils";
+} from "@syntaxia/ui/select";
+import { cn } from "@syntaxia/ui/utils";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
 
 export function ThemeSwitcher({ triggerClass }: { triggerClass?: string }) {
   const { theme: currentTheme, setTheme, themes } = useTheme();

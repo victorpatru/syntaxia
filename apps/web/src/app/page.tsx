@@ -5,7 +5,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@v1/ui/tooltip";
+} from "@syntaxia/ui/tooltip";
 import Image from "next/image";
 
 export default function Page() {

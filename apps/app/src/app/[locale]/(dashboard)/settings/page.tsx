@@ -2,15 +2,15 @@
 
 import { useScopedI18n } from "@/locales/client";
 import { useAuthActions } from "@convex-dev/auth/react";
+import { api } from "@syntaxia/backend/convex/_generated/api";
+import type { Id } from "@syntaxia/backend/convex/_generated/dataModel";
+import * as validators from "@syntaxia/backend/convex/utils/validators";
+import { Button } from "@syntaxia/ui/button";
+import { Input } from "@syntaxia/ui/input";
+import { UploadInput } from "@syntaxia/ui/upload-input";
+import { useDoubleCheck } from "@syntaxia/ui/utils";
 import { useForm } from "@tanstack/react-form";
 import { zodValidator } from "@tanstack/zod-form-adapter";
-import { api } from "@v1/backend/convex/_generated/api";
-import type { Id } from "@v1/backend/convex/_generated/dataModel";
-import * as validators from "@v1/backend/convex/utils/validators";
-import { Button } from "@v1/ui/button";
-import { Input } from "@v1/ui/input";
-import { UploadInput } from "@v1/ui/upload-input";
-import { useDoubleCheck } from "@v1/ui/utils";
 import type { UploadFileResponse } from "@xixixao/uploadstuff/react";
 import { useAction, useMutation, useQuery } from "convex/react";
 import { Upload } from "lucide-react";

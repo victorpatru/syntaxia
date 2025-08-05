@@ -2,8 +2,8 @@
 
 import { useAuthActions } from "@convex-dev/auth/react";
 import { CheckoutLink } from "@convex-dev/polar/react";
-import { api } from "@v1/backend/convex/_generated/api";
-import { Button, buttonVariants } from "@v1/ui/button";
+import { api } from "@syntaxia/backend/convex/_generated/api";
+import { Button, buttonVariants } from "@syntaxia/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,9 +11,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@v1/ui/dropdown-menu";
-import { Logo } from "@v1/ui/logo";
-import { cn } from "@v1/ui/utils";
+} from "@syntaxia/ui/dropdown-menu";
+import { cn } from "@syntaxia/ui/utils";
 import { type Preloaded, usePreloadedQuery } from "convex/react";
 import {
   Check,

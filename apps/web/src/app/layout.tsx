@@ -1,8 +1,7 @@
-import "@v1/ui/globals.css";
+import "@syntaxia/ui/globals.css";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
-import { Provider as AnalyticsProvider } from "@v1/analytics/client";
-import { cn } from "@v1/ui/utils";
+import { cn } from "@syntaxia/ui/utils";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
@@ -39,8 +38,6 @@ export default function RootLayout({
           {children}
           <Footer />
         </ConvexClientProvider>
-
-        <AnalyticsProvider />
       </body>
     </html>
   );
