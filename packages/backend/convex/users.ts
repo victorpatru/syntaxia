@@ -1,4 +1,5 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { type } from "arktype";
 import { v } from "convex/values";
 import { asyncMap } from "convex-helpers";
 import { internal } from "./_generated/api";
@@ -39,12 +40,12 @@ export const updateUsername = mutation({
     if (!userId) {
       return;
     }
-    const validatedUsername = username.safeParse(args.username);
+    const validatedUsername = username(args.username);
 
-    if (!validatedUsername.success) {
-      throw new Error(validatedUsername.error.message);
+    if (validatedUsername instanceof type.errors) {
+      throw new Error(validatedUsername.summary);
     }
-    await ctx.db.patch(userId, { username: validatedUsername.data });
+    await ctx.db.patch(userId, { username: validatedUsername });
   },
 });
 

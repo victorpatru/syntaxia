@@ -1,12 +1,11 @@
-import { z } from "zod";
+import { type } from "arktype";
 
-export const username = z
-  .string()
-  .min(3)
-  .max(32)
-  .toLowerCase()
-  .trim()
-  .regex(
-    /^[a-zA-Z0-9]+$/,
-    "Username may only contain alphanumeric characters.",
-  );
+export const username = type("string")
+  .pipe((s) => s.trim().toLowerCase())
+  .narrow((s, ctx) => {
+    if (s.length < 3) return ctx.mustBe("at least 3 characters");
+    if (s.length > 32) return ctx.mustBe("at most 32 characters");
+    if (!/^[a-zA-Z0-9]+$/.test(s))
+      return ctx.mustBe("alphanumeric characters only");
+    return true;
+  });
