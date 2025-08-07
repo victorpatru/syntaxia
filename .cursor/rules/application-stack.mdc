@@ -1,0 +1,176 @@
+---
+description: Syntaxia application stack architecture, dependencies, and version guidelines
+globs:
+alwaysApply: false
+---
+
+# Syntaxia Application Stack
+
+## Architecture Overview
+
+**Monorepo Structure** using Bun workspaces with package catalog for shared dependencies:
+- `apps/app` - TanStack Start frontend application
+- `packages/backend` - Convex backend services
+- `packages/ui` - Shared UI component library
+- `packages/logger` - Shared logging utilities
+- `tooling/` - Shared development tooling
+
+## Core Technology Stack
+
+### Frontend Framework
+- **React 19.1.0** - Latest stable with concurrent features
+- **TanStack Start 1.128.0** - Full-stack React framework with SSR
+- **TanStack Router 1.128.0** - Type-safe file-based routing
+- **Clerk** - Authentication and user management
+
+### Backend & Database
+- **Convex 1.25.4** - Real-time backend-as-a-service
+- **Convex Auth 0.0.80** - Authentication integration
+- **Polar SDK 0.34.9** - Payment and subscription management
+
+### Styling & UI
+- **Tailwind CSS 4.1.11** - Utility-first CSS (bleeding edge)
+- **Shadcn UI components** - Accessible component library
+- **Radix primitives** - Unstyled accessible components
+
+### Development Tools
+- **Bun 1.2.29** - Package manager and runtime
+- **TypeScript 5.9.2** - Type safety and modern language features
+- **Biome 2.1.3** - Fast Rust-based linting and formatting
+- **Turbo 2.5.5** - Monorepo build orchestration
+
+### Validation & Environment
+- **ArkType 2.1.20** - Runtime type validation
+- **@t3-oss/env-core 0.13.8** - Environment variable validation
+
+## Version Guidelines & Best Practices
+
+### React 19 Considerations
+```typescript
+// Leverage React 19's automatic batching and transitions
+import { useTransition } from 'react';
+
+function Component() {
+  const [isPending, startTransition] = useTransition();
+  
+  // Wrap state updates in transitions for better UX
+  const handleUpdate = () => {
+    startTransition(() => {
+      // Non-urgent state updates
+    });
+  };
+}
+```
+
+### TanStack Start Patterns
+```typescript
+// Use server functions for data fetching
+import { createServerFn } from '@tanstack/start';
+
+export const getUser = createServerFn('GET', async () => {
+  // Server-side logic here
+  return userData;
+});
+
+// File-based routing structure
+// src/routes/
+// ├── __root.tsx     (layout)
+// ├── index.tsx      (home page)
+// ├── about.tsx      (static route)
+// └── users.$id.tsx  (dynamic route)
+```
+
+### Convex Best Practices
+```typescript
+// Use Convex validators for type safety
+import { v } from 'convex/values';
+
+export const createUser = mutation({
+  args: {
+    email: v.string(),
+    name: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Mutation logic
+  },
+});
+```
+
+### Package Management
+- **Always use Bun** - `bun install`, `bun run`, `bun add`
+- **Never use npm/yarn** - Bun is configured as the project's package manager
+- **Use catalog entries** for shared dependencies across workspace
+
+### Tailwind CSS 4.x Notes
+- Using bleeding-edge version with new features
+- May require compatibility checks with UI libraries
+- Leverage new CSS functions and improved performance
+
+### ArkType Validation
+```typescript
+import { type } from 'arktype';
+
+// Define runtime-validated types
+const User = type({
+  id: 'string',
+  email: 'email',
+  age: 'number>=18'
+});
+
+// Use for form validation and API contracts
+type UserType = typeof User.infer;
+```
+
+## Dependency Update Strategy
+
+### Stable Dependencies (Update Quarterly)
+- React, TypeScript core
+- Convex platform dependencies
+- Authentication libraries
+
+### Active Dependencies (Update Monthly)
+- TanStack ecosystem
+- Development tooling (Biome, Turbo)
+- UI component libraries
+
+### Bleeding Edge (Monitor Weekly)
+- Tailwind CSS 4.x
+- Bun runtime features
+- Experimental React features
+
+## Common Patterns
+
+### Environment Configuration
+```typescript
+// Use @t3-oss/env-core for type-safe environment variables
+import { createEnv } from '@t3-oss/env-core';
+
+export const env = createEnv({
+  server: {
+    DATABASE_URL: z.string().url(),
+  },
+  client: {
+    NEXT_PUBLIC_APP_URL: z.string().url(),
+  },
+  runtimeEnv: process.env,
+});
+```
+
+### Monorepo Package References
+```json
+{
+  "dependencies": {
+    "@syntaxia/ui": "workspace:*",
+    "@syntaxia/logger": "workspace:*",
+    "react": "catalog:"
+  }
+}
+```
+
+## Performance Considerations
+
+- **SSR by default** with TanStack Start
+- **Real-time updates** via Convex subscriptions
+- **Type-safe APIs** end-to-end
+- **Fast development** with Bun and Turbo
+- **Modern bundling** with Vite integration
