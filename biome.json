@@ -4,9 +4,12 @@
   "linter": {
     "includes": [
       "**",
-      "!**/node_modules",
-      "!**/.next",
-      "!**/packages/tsconfig"
+      "!**/node_modules/**",
+      "!**/.vite/**",
+      "!**/packages/tsconfig",
+      "!**/dist/**",
+      "!**/routeTree.gen.ts",
+      "!bun.lock"
     ],
     "enabled": true,
     "rules": {
@@ -26,6 +29,15 @@
     }
   },
   "formatter": {
-    "indentStyle": "space"
+    "indentStyle": "space",
+    "includes": [
+      "**",
+      "!**/node_modules/**",
+      "!**/.vite/**",
+      "!**/packages/tsconfig",
+      "!**/dist/**",
+      "!**/routeTree.gen.ts",
+      "!bun.lock"
+    ]
   }
 }
