@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "assist": { "actions": { "source": { "organizeImports": "on" } } },
-  "linter": {
+  "files": {
     "includes": [
       "**",
       "!**/node_modules/**",
@@ -9,8 +9,11 @@
       "!**/packages/tsconfig",
       "!**/dist/**",
       "!**/routeTree.gen.ts",
+      "!**/_generated/**",
       "!bun.lock"
-    ],
+    ]
+  },
+  "linter": {
     "enabled": true,
     "rules": {
       "recommended": true,
@@ -29,15 +32,6 @@
     }
   },
   "formatter": {
-    "indentStyle": "space",
-    "includes": [
-      "**",
-      "!**/node_modules/**",
-      "!**/.vite/**",
-      "!**/packages/tsconfig",
-      "!**/dist/**",
-      "!**/routeTree.gen.ts",
-      "!bun.lock"
-    ]
+    "indentStyle": "space"
   }
 }
