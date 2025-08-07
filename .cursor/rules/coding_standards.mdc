@@ -1,25 +1,33 @@
-Code Style and Structure:
+---
+description: TypeScript and TanStack Start coding standards and best practices
+globs: **/*.ts,**/*.tsx,**/*.js,**/*.jsx
+alwaysApply: true
+---
+
+# Coding Standards and Best Practices
+
+## Code Style and Structure
 - Write concise, technical TypeScript code with accurate examples
 - Use functional and declarative programming patterns; avoid classes
 - Prefer iteration and modularization over code duplication
 - Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
 - Structure files: exported component, subcomponents, helpers, static content, types
 
-Naming Conventions:
+## Naming Conventions
 - Use lowercase with dashes for directories (e.g., components/auth-wizard)
 - Favor named exports for components
 
-TypeScript Usage:
+## TypeScript Usage
 - Use TypeScript for all code; prefer interfaces over types
 - Avoid enums; use maps instead
 - Use functional components with TypeScript interfaces
 
-Syntax and Formatting:
+## Syntax and Formatting
 - Use the "function" keyword for pure functions
 - Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements
 - Use declarative JSX
 
-Error Handling and Validation:
+## Error Handling and Validation
 - Prioritize error handling: handle errors and edge cases early
 - Use early returns and guard clauses
 - Implement proper error logging and user-friendly messages
@@ -27,18 +35,18 @@ Error Handling and Validation:
 - Model expected errors as return values in server functions
 - Use error boundaries for unexpected errors
 
-UI and Styling:
+## UI and Styling
 - Use Shadcn UI, Radix, and Tailwind Aria for components and styling
 - Implement responsive design with Tailwind CSS; use a mobile-first approach
 
-Performance Optimization:
+## Performance Optimization
 - Minimize 'use client', 'useEffect', and 'setState'; favor server-side rendering patterns
 - Wrap client components in Suspense with fallback
 - Use dynamic loading for non-critical components with TanStack Router's lazy loading
 - Optimize images: use WebP format, include size data, implement lazy loading
 - Leverage TanStack Start's streaming SSR for improved perceived performance
 
-Key Conventions:
+## Key Conventions
 - Use TanStack Router's built-in search parameter APIs for URL state management
 - Optimize Web Vitals (LCP, CLS, FID) with TanStack Start's SSR and streaming
 - Structure routes with file-based routing conventions:
@@ -49,7 +57,7 @@ Key Conventions:
 - Prefer server functions for data fetching over client-side requests
 - Use loaders and actions in route definitions for data management
 
-Project Structure:
+## Project Structure
 - Keep `src/router.tsx` for router configuration
 - Use `src/client.tsx` for client entry point
 - Use `src/ssr.tsx` for server-side rendering entry
@@ -57,4 +65,9 @@ Project Structure:
 - Use `app.config.ts` for TanStack Start configuration
 - Generated `routeTree.gen.ts` should not be manually edited
 
+## Package Management
+- Use Bun for package management and running commands (bun install, bun run, etc.)
+- Do NOT use npm or yarn - always prefer Bun
+
+## Framework Guidelines
 Follow TanStack Start and TanStack Router docs for Data Fetching, Rendering, and Routing
