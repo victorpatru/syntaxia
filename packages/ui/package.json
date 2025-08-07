@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "catalog:",
-    "autoprefixer": "^10.4.20",
+    "autoprefixer": "catalog:",
     "postcss": "^8.4.43",
     "react": "catalog:",
     "react-dom": "catalog:",

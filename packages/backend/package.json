@@ -16,8 +16,8 @@
     "@convex-dev/polar": "^0.6.1",
     "@polar-sh/sdk": "^0.34.9",
     "@t3-oss/env-core": "catalog:",
+    "arktype": "catalog:",
     "convex": "^1.25.4",
-    "convex-helpers": "^0.1.101",
-    "arktype": "catalog:"
+    "convex-helpers": "^0.1.101"
   }
 }
