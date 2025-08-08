@@ -1,5 +1,6 @@
 "use client";
 
+import { UserButton } from "@clerk/tanstack-react-start";
 import {
   IconCamera,
   IconChartBar,
@@ -22,7 +23,6 @@ import type * as React from "react";
 import { NavDocuments } from "./nav-documents";
 import { NavMain } from "./nav-main";
 import { NavSecondary } from "./nav-secondary";
-import { NavUser } from "./nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -174,7 +174,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <div className="flex justify-end px-3 py-3">
+          <UserButton />
+        </div>
       </SidebarFooter>
     </Sidebar>
   );

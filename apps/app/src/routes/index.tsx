@@ -1,11 +1,5 @@
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  UserButton,
-} from "@clerk/tanstack-react-start";
-import { Button } from "@syntaxia/ui/button";
-import { createFileRoute } from "@tanstack/react-router";
+import { SignedIn, SignedOut, SignIn } from "@clerk/tanstack-react-start";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -14,17 +8,13 @@ export const Route = createFileRoute("/")({
 function Home() {
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Index Route</h1>
       <SignedIn>
-        <p className="mb-4">You are signed in</p>
-        <UserButton />
-        <div className="flex flex-wrap items-center gap-2 md:flex-row">
-          <Button>Button</Button>
-        </div>
+        <Navigate to="/dashboard" />
       </SignedIn>
       <SignedOut>
-        <p className="mb-4">You are signed out</p>
-        <SignInButton />
+        <div className="max-w-md mx-auto p-6">
+          <SignIn />
+        </div>
       </SignedOut>
     </div>
   );

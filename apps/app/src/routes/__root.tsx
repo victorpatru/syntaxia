@@ -1,12 +1,6 @@
 /// <reference types="vite/client" />
 
-import {
-  ClerkProvider,
-  SignedIn,
-  SignedOut,
-} from "@clerk/tanstack-react-start";
-import { AppSidebar } from "@syntaxia/ui/app-sidebar";
-import { SidebarInset, SidebarProvider } from "@syntaxia/ui/sidebar";
+import { ClerkProvider } from "@clerk/tanstack-react-start";
 import {
   createRootRoute,
   HeadContent,
@@ -57,13 +51,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <HeadContent />
         </head>
         <body>
-          <SignedIn>
-            <SidebarProvider>
-              <AppSidebar />
-              <SidebarInset>{children}</SidebarInset>
-            </SidebarProvider>
-          </SignedIn>
-          <SignedOut>{children}</SignedOut>
+          {children}
           <TanStackRouterDevtools position="bottom-right" />
           <Scripts />
         </body>
