@@ -1,0 +1,176 @@
+<context>
+# Overview
+An MVP web app that simulates a 30-minute technical phone screening for software engineers using ElevenLabs Conversational AI. The agent conducts a structured interview via voice in the browser, asks calibrated questions by track and difficulty, probes with follow‑ups, and produces a rubric‑based post‑call evaluation with a concise study plan.
+
+- Audience: SWE candidates preparing for real phone screens.
+- Value: realistic voice interaction, breadth-first coverage, actionable feedback.
+- Scope focus: phone-screen only (not live coding, not full system design).
+
+# Core Features
+- Voice Interviewer (Real-time): In-browser, low-latency two-way audio leveraging ElevenLabs Web SDK/assistant.
+- Session Configuration: Track (backend, frontend, mobile); difficulty (mid, senior).
+- Run of Show: Agent intro → topic coverage rotation → difficulty calibration → timed 30 min session → close.
+- Dynamic Probing: Hints and follow-ups based on user responses.
+- Transcript & Metrics: Transcript capture, questions attempted, hints used, misconceptions.
+- Post-call Summary: Weighted rubric scores, decision (advance/hold/review), weak/strong topics, study plan.
+- Session History: View past sessions and summaries.
+- Credits & Payments: Users purchase credits via Polar; 1 credit equals 60 minutes of interviewing. Sessions consume minutes from balance.
+
+# User Experience
+- Personas:
+  - Candidate: wants fast practice and precise feedback.
+  - Returning candidate: wants to track improvement over time.
+- Key Flows:
+  - Start: Select track + difficulty → Start session → Mic allow → Live interview → End → Summary.
+  - Review: Open past session → Read transcript + rubric → See gaps/resources → Retake.
+- UI/UX considerations:
+  - Minimal, distraction-free in-call screen (timer, end button, mic state).
+  - Accessible controls; mobile-first layout; SSR via TanStack Start.
+  - Clear summary: scores, evidence snippets, top 3 gaps, next steps.
+  - Design system: Use Shadcn components from `packages/ui` with a minimalistic “brutalist” theme (high contrast, bold typography, simple borders, reduced chrome, clear focus states). Reuse `packages/ui/src/globals.css` and avoid ornamental gradients/shadows.
+</context>
+
+<PRD>
+# Technical Architecture
+- System Components
+  - Frontend (apps/app):
+    - TanStack Start + Router routes
+      - `/` (index): Configure track/difficulty; start session
+      - `/session`: In-call UI with ElevenLabs Web SDK
+      - `/summary/$id`: Post-call report and transcript
+    - Shadcn UI + Tailwind for layout and components. Consume shared components from `packages/ui` and apply the minimalistic “brutalist” theme (monochrome base + brand accent, minimal rounding, strong contrast, obvious focus outlines). Centralize theme tokens in Tailwind config and `packages/ui/src/globals.css`.
+  - Voice/Agent (ElevenLabs):
+    - Assistant created via Dashboard using Blank template; configured system prompt, voice, Analysis, Data Collection, and Knowledge Base.
+    - Web SDK/widget embedded for real-time conversation.
+    - References: ElevenLabs Conversational AI Quickstart (setup, analysis, widget) [Quickstart](https://elevenlabs.io/docs/conversational-ai/quickstart).
+  - Payments (Polar):
+    - Use Polar for checkout and billing. We do not store card details. Credits are minute-based (1 credit = 60 minutes) and tracked in our database.
+  - Backend (packages/backend/convex):
+    - Storage: users, sessions, transcripts, evaluations, question_sets.
+    - APIs: createSession, endSession, saveTranscript, saveEvaluation, getSessionSummary, listSessions.
+    - Optional: Webhook endpoint to receive post-call analytics payloads.
+- Data Models (initial)
+  - users: { id, email?, createdAt }
+  - sessions: { id, userId?, track: 'backend'|'frontend'|'mobile', difficulty: 'mid'|'senior', startedAt, endedAt?, durationMs?, agentConfigVersion: string }
+  - transcripts: { sessionId, segments: [{ role: 'assistant'|'user', text, startMs?, endMs?, topicTag? }] }
+  - evaluations: { sessionId, rubric: { correctness, depth, practicality, clarity, autonomy }, weightedAverage, decision: 'advance'|'hold'|'review', rationale, weakTopics: string[], strongTopics: string[], metrics: { questionsAttempted: number, hintsUsed: number, misconceptions: number } }
+  - question_sets: { id, track, kbVersion, questions: [{ id, prompt, canonicalAnswer, difficulty, tags: string[], followups: string[] }] }
+  - credits_ledger: { id, userId, minutesDelta: number, reason: 'purchase'|'reserve'|'finalize'|'refund', sessionId?, createdAt }
+  - purchases: { id, userId, polarCheckoutId, creditsPurchased: number, minutesPurchased: number, currency, amount, status: 'pending'|'paid'|'refunded', createdAt }
+- APIs (Convex)
+  - createSession({ track, difficulty, agentConfigVersion }) → { sessionId }
+  - endSession({ sessionId }) → { ok }
+  - saveTranscript({ sessionId, segments[] }) → { ok }
+  - saveEvaluation({ sessionId, evaluation }) → { ok }
+  - listSessions({ userId? }) → { sessions[] }
+  - getSessionSummary({ sessionId }) → { session, transcript, evaluation }
+  - getCreditBalance({ userId }) → { minutesRemaining }
+  - createCheckout({ userId, credits }) → { polarCheckoutUrl, polarCheckoutId }
+  - handlePolarWebhook(event) → updates `purchases`, appends to `credits_ledger` on successful payment
+  - reserveSessionMinutes({ sessionId, minutesEstimate }) → ledger entry (negative) to reserve minutes at start
+  - finalizeSessionMinutes({ sessionId, actualMinutes }) → adjust ledger (refund unused or charge extra within available balance)
+- ElevenLabs Assistant Configuration
+  - System Prompt (essentials)
+    - Role: Senior engineer conducting a 30-min phone screen.
+    - Structure: greet → confirm track/difficulty → 1 question at a time → 1–2 probing follow-ups → calibrate difficulty after ~3 questions → breadth-first topic rotation → brief closing summary.
+    - Rules: concise turns; prefer hints over lecturing; avoid trivia; never divulge full canonical answers unless asked.
+    - Tracking (internal): mark answer quality (correct/partial/incorrect) and topic coverage for analysis.
+  - Knowledge Base (Hybrid Strategy)
+    - In-app question bank (versioned JSON) for deterministic prompts, tags, follow-ups; stored in `question_sets`.
+    - ElevenLabs KB “fact sheets” (topic-scoped 250–600 words) uploaded via dashboard to ground hints and post-call explanations.
+    - Versioning: `kbVersion`/`agentConfigVersion` stored on sessions.
+  - Voice
+    - Choose a low-latency, clear voice suitable for Q&A; balance quality vs. latency per Quickstart guidance.
+  - Analysis & Data Collection (Dashboard)
+    - Evaluation rubric (weights sum 1.0):
+      - correctness 0.35, depth 0.25, practicality 0.20, clarity 0.15, autonomy 0.05
+    - Floors:
+      - mid: no criterion < 3.0; senior: no criterion < 4.0
+    - Pass thresholds (weighted average):
+      - mid: ≥ 3.6 with ≥ 20 attempted; ≤ 2 major misconceptions; hints allowed
+      - senior: ≥ 4.2 with ≥ 25 attempted; 0 major misconceptions; ≤ 3 hints
+    - Coverage: ≥ 5 distinct topics; ≤ 40% on any one topic.
+    - Disqualifiers: fabricated facts after correction, refusal to engage, security red flags, inability to discuss tradeoffs.
+    - Data items to extract:
+      - weak_topics: string[]
+      - strong_topics: string[]
+      - misconceptions: string[]
+      - hints_used: number
+      - questions_attempted: number
+      - kb_version: string
+- Privacy/Security
+  - Store transcripts and evaluations per session; allow delete on request.
+  - Display notice that sessions are recorded for feedback.
+  - Rate limiting and session duration caps to control cost.
+  - Payments via Polar; no card data stored. Secure webhook verification. Show balance transparently.
+
+# Development Roadmap
+- MVP (this PRD)
+  - Assistant, voice, KB fact sheets (seed set), Analysis + Data Collection configured.
+  - Frontend routes: index/session/summary; live audio; timer; end button.
+  - Convex models and CRUD APIs; session lifecycle.
+  - Transcript capture and storage.
+  - Evaluation ingestion (via webhook or SDK events) and persistence.
+  - Summary page with rubric scores, evidence snippets, top gaps, and suggested study links.
+  - Polar payments and credit gating (purchase credits, show balance, reserve/finalize minutes per session).
+- Phase 1+
+  - Session history with filters; “Retake with same settings.”
+  - Difficulty auto-calibration improvements.
+  - Expanded question banks and fact sheets; content management tools.
+  - Cost dashboard (avg turn latency, $/session).
+- Future Enhancements (non-goals for MVP)
+  - Phone numbers / PSTN (SIP/Twilio).
+  - Coding and system design modes.
+  - Personalization (resume import), longitudinal learning plans.
+
+# Logical Dependency Chain
+1) ElevenLabs assistant setup (prompt, voice, Analysis, Data Collection, KB fact sheets).  
+2) Backend: Convex schema + createSession/endSession APIs.  
+3) Frontend routes and session flow; integrate Web SDK for real-time audio.  
+4) Transcript capture → persistence.  
+5) Evaluation payload ingestion → persistence.  
+6) Summary page rendering.  
+7) Session history list and details (optional if time allows).
+
+# Risks and Mitigations
+- Latency causing poor UX → keep turns short, pick low-latency voice, avoid long assistant messages.
+- Hallucinations/incorrect guidance → rely on scoped “fact sheets”; keep answers concise; prefer hints.
+- Coverage imbalance → enforce topic rotation schedule and coverage rule in the prompt and Analysis.
+- Cost overrun → hard 30-min cap; retry/backoff; monitor questions_attempted and hints_used.
+- Mic/permissions issues → preflight mic check with clear fallback UI.
+
+# Appendix
+- References
+  - ElevenLabs Conversational AI Quickstart [Quickstart](https://elevenlabs.io/docs/conversational-ai/quickstart)
+- Sample Question JSON (in-app bank)
+  {
+    "id": "fe-react-state-001",
+    "track": "frontend",
+    "topic": "state-management",
+    "difficulty": "mid",
+    "prompt": "Explain the tradeoffs between Context API and Redux for state management.",
+    "canonicalAnswer": "Context suits low-frequency global state; Redux offers predictable updates, middleware, devtools...",
+    "tags": ["react", "state", "tradeoffs"],
+    "followups": [
+      "When would you avoid Context?",
+      "How do you handle async flows in Redux Toolkit?"
+    ]
+  }
+- Analysis Criteria Prompt (Dashboard)
+  The assistant must output:
+  {
+    "scores": { "correctness": x, "depth": y, "practicality": z, "clarity": a, "autonomy": b },
+    "weightedAverage": w,
+    "decision": "advance" | "hold" | "review",
+    "evidence": ["short snippet 1", "short snippet 2", "short snippet 3"],
+    "weakTopics": ["topicA", "topicB"],
+    "strongTopics": ["topicC"],
+    "metrics": { "questionsAttempted": N, "hintsUsed": H, "misconceptions": M },
+    "kbVersion": "v1"
+  }
+  Apply weights: correctness 0.35, depth 0.25, practicality 0.20, clarity 0.15, autonomy 0.05.
+  Floors: mid ≥ 3.0 per criterion; senior ≥ 4.0 per criterion.
+  Pass thresholds: mid ≥ 3.6 (≥ 20 attempted, ≤ 2 misconceptions, hints allowed); senior ≥ 4.2 (≥ 25 attempted, 0 misconceptions, ≤ 3 hints).
+  Coverage: ≥ 5 distinct topics; ≤ 40% concentration on any one topic.
+  Disqualifiers: fabricated facts after correction, refusal to engage, security red flags, inability to discuss tradeoffs.
+</PRD>

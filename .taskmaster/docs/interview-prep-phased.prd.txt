@@ -1,0 +1,145 @@
+<context>
+# Overview  
+An interview-prep web app for software engineers that simulates the end-to-end hiring journey using voice and interactive modules. It starts with a realistic, low-latency voice phone screen powered by ElevenLabs Conversational AI and expands with hands-on practice for live coding and debugging. The system delivers structured, rubric-based evaluations with actionable study plans.
+
+- Audience: Mid/Senior SWE candidates (frontend, backend, mobile)
+- Core Value: Realistic practice flows + concise, evidence-based feedback
+- Near-Term Focus: Phase 1 (Live Coding + Debugging) on top of the existing phone-screen MVP foundation
+
+# Core Features  
+- Voice Interview (Phone Screen): In-browser two-way audio; calibrated Q&A; probing hints; transcript and summary.
+- Live Coding Module (Phase 1): Timed tasks in a browser editor; hidden tests; complexity discussion; post-run feedback.
+- Debugging Module (Phase 1): Broken code + logs; root-cause identification; fix + regression test; scoring.
+- Analytics & History: Transcript, attempts, scores, gaps, and trend insights across sessions.
+- Study Plan: Targeted resources by weak topic, based on rubric results and KB version.
+
+Non-goals (global):
+- Full PSTN/phone number routing (future).  
+- Long-form take-homes or full system design in the near-term build.
+
+# User Experience  
+- Personas:
+  - Candidate: Practices realistic interview steps and receives concrete guidance per session.
+  - Returning Candidate: Tracks progress and targets weak areas.
+- Key Flows:
+  - Phone Screen: Select track/difficulty → Start voice session → End → Summary.
+  - Live Coding (Phase 1): Pick problem set → Read prompt → Code → Run tests → Submit → Feedback + rubric.
+  - Debugging (Phase 1): Inspect failing program/logs → Diagnose → Patch → Add regression test → Verify.
+- UI/UX:
+  - Minimal in-call screen (timer, mic state, end).  
+  - Coding workspace with editor, tests output pane, timer, and submission controls.
+  - Clear summaries: weighted rubric, evidence snippets, top gaps, next steps.
+</context>
+
+<PRD>
+# Technical Architecture  
+- System Components
+  - Frontend (apps/app):
+    - TanStack Start + Router routes
+      - `/` (index): Configure track/difficulty; links to modules
+      - `/session`: Phone-screen (voice) UI with ElevenLabs Web SDK
+      - `/coding`: Live coding workspace (Phase 1)
+      - `/debugging`: Debugging workspace (Phase 1)
+      - `/summary/$id`: Post-session report (voice/coding/debug)
+    - Shadcn UI + Tailwind.
+  - Voice/Agent (ElevenLabs):
+    - Assistant configured in Dashboard (Blank template) with system prompt, voice, Knowledge Base, Analysis, Data Collection.
+    - Real-time through the Web SDK/widget. Reference: ElevenLabs Conversational AI Quickstart (setup, analysis, widget).
+  - Backend (packages/backend/convex):
+    - Storage: users, sessions, transcripts, evaluations, question_sets, coding_sets, submissions, test_runs, bug_scenarios.
+    - APIs: 
+      - Phone screen: `createSession`, `endSession`, `saveTranscript`, `saveEvaluation`, `getSessionSummary`, `listSessions`.
+      - Live coding: `createCodingSession`, `fetchCodingPrompt`, `submitSolution`, `runTests`, `saveCodingEvaluation`.
+      - Debugging: `createDebugSession`, `fetchBugScenario`, `submitFix`, `runDebugTests`, `saveDebugEvaluation`.
+    - Optional webhook ingestion for agent analytics payloads.
+
+- Data Models (initial)
+  - users: { id, email?, createdAt }
+  - sessions (voice): { id, userId?, track: 'backend'|'frontend'|'mobile', difficulty: 'mid'|'senior', startedAt, endedAt?, durationMs?, agentConfigVersion: string }
+  - transcripts: { sessionId, segments: [{ role: 'assistant'|'user', text, startMs?, endMs?, topicTag? }] }
+  - evaluations (voice): { sessionId, rubric: { correctness, depth, practicality, clarity, autonomy }, weightedAverage, decision: 'advance'|'hold'|'review', rationale, weakTopics: string[], strongTopics: string[], metrics: { questionsAttempted: number, hintsUsed: number, misconceptions: number }, kbVersion: string }
+  - question_sets: { id, track, kbVersion, questions: [{ id, prompt, canonicalAnswer, difficulty, tags: string[], followups: string[] }] }
+  - coding_sets (Phase 1): { id, track, difficulty, prompts: [{ id, title, statement, starterCode, hiddenTestsRef, tags: string[] }] }
+  - submissions (Phase 1): { id, codingSessionId, code, language, submittedAt }
+  - test_runs (Phase 1): { id, submissionId, passed: number, failed: number, logs?: string, durationMs }
+  - bug_scenarios (Phase 1): { id, track, description, repoRef|starterCode, failingTestsRef, hints?: string[] }
+  - debug_sessions (Phase 1): { id, userId?, scenarioId, startedAt, endedAt?, result: 'fixed'|'partial'|'unresolved' }
+  - debug_evaluations (Phase 1): { debugSessionId, rubric: { diagnosis, fixCorrectness, testingRigor, communication }, weighted: number, evidence: string[] }
+
+- ElevenLabs Assistant Configuration (Phone Screen)
+  - System Prompt: 30-minute technical phone screen; concise turns; calibrated difficulty; probing hints; topic rotation; closing summary. Tracks: backend/frontend/mobile; difficulty: mid/senior.
+  - Knowledge Base Strategy: Hybrid
+    - In-app question bank (versioned JSON) for deterministic coverage and tags.
+    - ElevenLabs KB topic fact sheets (250–600 words) for grounded hints/explanations.
+    - Versioning via `kbVersion`/`agentConfigVersion` on sessions.
+  - Analysis & Data Collection (Dashboard)
+    - Weights: correctness 0.35, depth 0.25, practicality 0.20, clarity 0.15, autonomy 0.05
+    - Floors: mid ≥ 3.0; senior ≥ 4.0
+    - Pass: mid ≥ 3.6 (≥ 20 attempted, ≤ 2 misconceptions, hints allowed); senior ≥ 4.2 (≥ 25 attempted, 0 misconceptions, ≤ 3 hints)
+    - Coverage: ≥ 5 topics; ≤ 40% concentration
+    - Disqualifiers: fabricated facts after correction, refusal to engage, security red flags, inability to discuss tradeoffs
+    - Data items: weak_topics[], strong_topics[], misconceptions[], hints_used, questions_attempted, kb_version
+  - Voice: Low-latency clear voice; short turns.
+
+- Live Coding/Debugging Execution (Phase 1)
+  - Sandbox Runner: Secure execution (containerized or restricted runtime); per-run timeouts; resource caps; log capture.
+  - Hidden Tests: Deterministic scoring with partial credit; test summaries persisted in `test_runs`.
+  - Editor: Language-appropriate syntax and formatting; input/output pane; run/submit buttons; timer.
+  - Debugging: Provide failing test output/logs; require regression test on fix; score diagnosis + fix + tests.
+
+# Development Roadmap  
+- Phase 0 (Baseline/MVP – Phone Screen Voice)
+  - Supported: Voice Q&A via ElevenLabs Web SDK; transcript; rubric summary; weak/strong topics.
+  - Not Supported: Phone numbers/PSTN, multi-agent flows, advanced personalization.
+
+- Phase 1 (Current Focus) – Live Coding + Debugging
+  - Supported: 
+    - Live coding workspace with timed problems, run tests, submit, and rubric results.
+    - Debugging scenarios with failing tests/logs; patch + regression test; scoring.
+    - Storage for prompts, submissions, test runs, and evaluations.
+  - Not Supported: Multi-language matrix, complex project scaffolds, custom libraries beyond standard sets.
+
+- Phase 2 – Behavioral Voice + API Design
+  - Supported: 
+    - Behavioral voice simulations (STAR), evidence extraction, rubric for clarity/impact/ownership.
+    - API design challenges (REST/GraphQL) with schema, errors, pagination/versioning rubric.
+  - Not Supported: Full product spec documents, cross-team interview panels.
+
+- Phase 3 – System Design + Code Review Simulation
+  - Supported:
+    - System design: Mid (feature-scale) to Senior (product-scale) prompts, diagrams, rubric for scalability/operability/tradeoffs.
+    - Code review: Present PR diffs; candidate comments and rationale; defect/maintainability scoring.
+  - Not Supported: Org-level architecture migrations, repos with multi-service dependency graphs.
+
+- Phase 4 – Take-home Harness + Career Readiness
+  - Supported: Mini take-home harness with automated checks; reviewer rubric; negotiation roleplay and checklist.
+  - Not Supported: Long multi-day projects, full ATS resume rewrites.
+
+Emphasis: The immediate implementation is Phase 1 only. Phase 0 remains as foundation; Phases 2–4 are planned but not in current scope.
+
+# Logical Dependency Chain  
+1) Phase 0 baseline solid (assistant configured, transcript/evaluation persistence).  
+2) Phase 1: Coding data models/APIs → sandbox runner → editor UI → scoring/rubrics → summaries.  
+3) Phase 2: Behavioral voice and API design evaluators.  
+4) Phase 3: System design workspace + PR review simulator.  
+5) Phase 4: Take-home harness + career readiness flows.
+
+# Risks and Mitigations  
+- Latency/UX (voice): Keep turns short; pick low-latency voice; avoid long speaking blocks.  
+- Hallucinations (voice): Use scoped fact sheets; prioritize hints over lectures.  
+- Sandbox Security (coding): Containerization/restrictions, timeouts, resource caps, no outbound network by default.  
+- Cost Control: Hard time caps, per-run limits, cached results for identical submissions.  
+- Coverage Drift: Enforce topic rotation and coverage checks in evaluators.  
+- Privacy: Inform about recording/storage; allow per-session deletion.
+
+# Appendix  
+- References
+  - ElevenLabs Conversational AI Quickstart (assistant setup, analysis, widget)
+- Live Coding Rubric (Phase 1)
+  - Correctness (tests passed), Complexity discussion, Code quality, Clarity (narration), Time management.
+- Debugging Rubric (Phase 1)
+  - Diagnosis accuracy, Fix correctness, Testing rigor (regression), Communication.
+- Knowledge Base Strategy (Phone Screen)
+  - Hybrid: in-app question bank + uploaded topic fact sheets; versioned and referenced in sessions.
+</PRD>
+
