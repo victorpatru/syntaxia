@@ -9,8 +9,6 @@
  */
 
 import type * as auth from "../auth.js";
-import type * as email_index from "../email/index.js";
-import type * as email_templates_subscriptionEmail from "../email/templates/subscriptionEmail.js";
 import type * as env from "../env.js";
 import type * as http from "../http.js";
 import type * as init from "../init.js";
@@ -24,6 +22,7 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+
 /**
  * A utility for referencing Convex functions in your app's API.
  *
@@ -34,8 +33,6 @@ import type {
  */
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
-  "email/index": typeof email_index;
-  "email/templates/subscriptionEmail": typeof email_templates_subscriptionEmail;
   env: typeof env;
   http: typeof http;
   init: typeof init;
@@ -87,6 +84,7 @@ export declare const components: {
               storageVersion: string | null;
               version: string | null;
             }>;
+            metadata?: Record<string, any>;
             modifiedAt: string | null;
             name: string;
             organizationId: string;
@@ -119,12 +117,14 @@ export declare const components: {
             currency: string | null;
             currentPeriodEnd: string | null;
             currentPeriodStart: string;
+            customerCancellationComment?: string | null;
+            customerCancellationReason?: string | null;
             customerId: string;
             endedAt: string | null;
             id: string;
             metadata: Record<string, any>;
             modifiedAt: string | null;
-            priceId: string;
+            priceId?: string;
             productId: string;
             recurringInterval: "month" | "year" | null;
             startedAt: string | null;
@@ -145,12 +145,14 @@ export declare const components: {
           currency: string | null;
           currentPeriodEnd: string | null;
           currentPeriodStart: string;
+          customerCancellationComment?: string | null;
+          customerCancellationReason?: string | null;
           customerId: string;
           endedAt: string | null;
           id: string;
           metadata: Record<string, any>;
           modifiedAt: string | null;
-          priceId: string;
+          priceId?: string;
           product: {
             createdAt: string;
             description: string | null;
@@ -176,6 +178,7 @@ export declare const components: {
               storageVersion: string | null;
               version: string | null;
             }>;
+            metadata?: Record<string, any>;
             modifiedAt: string | null;
             name: string;
             organizationId: string;
@@ -203,7 +206,7 @@ export declare const components: {
         "query",
         "internal",
         { userId: string },
-        { id: string; userId: string } | null
+        { id: string; metadata?: Record<string, any>; userId: string } | null
       >;
       getProduct: FunctionReference<
         "query",
@@ -234,6 +237,7 @@ export declare const components: {
             storageVersion: string | null;
             version: string | null;
           }>;
+          metadata?: Record<string, any>;
           modifiedAt: string | null;
           name: string;
           organizationId: string;
@@ -264,12 +268,14 @@ export declare const components: {
           currency: string | null;
           currentPeriodEnd: string | null;
           currentPeriodStart: string;
+          customerCancellationComment?: string | null;
+          customerCancellationReason?: string | null;
           customerId: string;
           endedAt: string | null;
           id: string;
           metadata: Record<string, any>;
           modifiedAt: string | null;
-          priceId: string;
+          priceId?: string;
           productId: string;
           recurringInterval: "month" | "year" | null;
           startedAt: string | null;
@@ -279,7 +285,7 @@ export declare const components: {
       insertCustomer: FunctionReference<
         "mutation",
         "internal",
-        { id: string; userId: string },
+        { id: string; metadata?: Record<string, any>; userId: string },
         string
       >;
       listCustomerSubscriptions: FunctionReference<
@@ -294,12 +300,14 @@ export declare const components: {
           currency: string | null;
           currentPeriodEnd: string | null;
           currentPeriodStart: string;
+          customerCancellationComment?: string | null;
+          customerCancellationReason?: string | null;
           customerId: string;
           endedAt: string | null;
           id: string;
           metadata: Record<string, any>;
           modifiedAt: string | null;
-          priceId: string;
+          priceId?: string;
           productId: string;
           recurringInterval: "month" | "year" | null;
           startedAt: string | null;
@@ -335,6 +343,7 @@ export declare const components: {
             storageVersion: string | null;
             version: string | null;
           }>;
+          metadata?: Record<string, any>;
           modifiedAt: string | null;
           name: string;
           organizationId: string;
@@ -366,12 +375,14 @@ export declare const components: {
           currency: string | null;
           currentPeriodEnd: string | null;
           currentPeriodStart: string;
+          customerCancellationComment?: string | null;
+          customerCancellationReason?: string | null;
           customerId: string;
           endedAt: string | null;
           id: string;
           metadata: Record<string, any>;
           modifiedAt: string | null;
-          priceId: string;
+          priceId?: string;
           product: {
             createdAt: string;
             description: string | null;
@@ -397,6 +408,7 @@ export declare const components: {
               storageVersion: string | null;
               version: string | null;
             }>;
+            metadata?: Record<string, any>;
             modifiedAt: string | null;
             name: string;
             organizationId: string;
@@ -419,6 +431,12 @@ export declare const components: {
           startedAt: string | null;
           status: string;
         }>
+      >;
+      syncProducts: FunctionReference<
+        "action",
+        "internal",
+        { polarAccessToken: string; server: "sandbox" | "production" },
+        any
       >;
       updateProduct: FunctionReference<
         "mutation",
@@ -449,6 +467,7 @@ export declare const components: {
               storageVersion: string | null;
               version: string | null;
             }>;
+            metadata?: Record<string, any>;
             modifiedAt: string | null;
             name: string;
             organizationId: string;
@@ -469,6 +488,57 @@ export declare const components: {
         },
         any
       >;
+      updateProducts: FunctionReference<
+        "mutation",
+        "internal",
+        {
+          polarAccessToken: string;
+          products: Array<{
+            createdAt: string;
+            description: string | null;
+            id: string;
+            isArchived: boolean;
+            isRecurring: boolean;
+            medias: Array<{
+              checksumEtag: string | null;
+              checksumSha256Base64: string | null;
+              checksumSha256Hex: string | null;
+              createdAt: string;
+              id: string;
+              isUploaded: boolean;
+              lastModifiedAt: string | null;
+              mimeType: string;
+              name: string;
+              organizationId: string;
+              path: string;
+              publicUrl: string;
+              service?: string;
+              size: number;
+              sizeReadable: string;
+              storageVersion: string | null;
+              version: string | null;
+            }>;
+            metadata?: Record<string, any>;
+            modifiedAt: string | null;
+            name: string;
+            organizationId: string;
+            prices: Array<{
+              amountType?: string;
+              createdAt: string;
+              id: string;
+              isArchived: boolean;
+              modifiedAt: string | null;
+              priceAmount?: number;
+              priceCurrency?: string;
+              productId: string;
+              recurringInterval?: "month" | "year" | null;
+              type?: string;
+            }>;
+            recurringInterval?: "month" | "year" | null;
+          }>;
+        },
+        any
+      >;
       updateSubscription: FunctionReference<
         "mutation",
         "internal",
@@ -481,12 +551,14 @@ export declare const components: {
             currency: string | null;
             currentPeriodEnd: string | null;
             currentPeriodStart: string;
+            customerCancellationComment?: string | null;
+            customerCancellationReason?: string | null;
             customerId: string;
             endedAt: string | null;
             id: string;
             metadata: Record<string, any>;
             modifiedAt: string | null;
-            priceId: string;
+            priceId?: string;
             productId: string;
             recurringInterval: "month" | "year" | null;
             startedAt: string | null;
@@ -498,7 +570,7 @@ export declare const components: {
       upsertCustomer: FunctionReference<
         "mutation",
         "internal",
-        { customerId: string; userId: string },
+        { id: string; metadata?: Record<string, any>; userId: string },
         string
       >;
     };

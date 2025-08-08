@@ -1,27 +1,31 @@
 import {
   SignedIn,
-  UserButton,
   SignedOut,
   SignInButton,
-} from '@clerk/tanstack-react-start'
-import { createFileRoute } from '@tanstack/react-router'
+  UserButton,
+} from "@clerk/tanstack-react-start";
+import { Button } from "@syntaxia/ui/button";
+import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute("/")({
   component: Home,
-})
+});
 
 function Home() {
   return (
-    <div>
-      <h1>Index Route</h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Index Route</h1>
       <SignedIn>
-        <p>You are signed in</p>
+        <p className="mb-4">You are signed in</p>
         <UserButton />
+        <div className="flex flex-wrap items-center gap-2 md:flex-row">
+          <Button>Button</Button>
+        </div>
       </SignedIn>
       <SignedOut>
-        <p>You are signed out</p>
+        <p className="mb-4">You are signed out</p>
         <SignInButton />
       </SignedOut>
     </div>
-  )
+  );
 }

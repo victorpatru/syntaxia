@@ -1,30 +1,52 @@
 /// <reference types="vite/client" />
-import * as React from 'react'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-import { ClerkProvider } from '@clerk/tanstack-react-start'
+
+import { ClerkProvider } from "@clerk/tanstack-react-start";
 import {
+  createRootRoute,
   HeadContent,
   Outlet,
   Scripts,
-  createRootRoute,
-} from '@tanstack/react-router'
+} from "@tanstack/react-router";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import type * as React from "react";
+import appCss from "@/styles/app.css?url";
 
 export const Route = createRootRoute({
+  head: () => ({
+    meta: [
+      {
+        charSet: "utf-8",
+      },
+      {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1",
+      },
+      {
+        title: "TanStack Start Starter",
+      },
+    ],
+    links: [
+      {
+        rel: "stylesheet",
+        href: appCss,
+      },
+    ],
+  }),
   component: RootComponent,
-})
+});
 
 function RootComponent() {
   return (
     <RootDocument>
       <Outlet />
     </RootDocument>
-  )
+  );
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider>
-      <html>
+      <html lang="en">
         <head>
           <HeadContent />
         </head>
@@ -35,5 +57,5 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         </body>
       </html>
     </ClerkProvider>
-  )
+  );
 }
