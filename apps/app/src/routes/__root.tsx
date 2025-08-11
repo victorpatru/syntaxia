@@ -1,6 +1,5 @@
 /// <reference types="vite/client" />
 
-import { ClerkProvider } from "@clerk/tanstack-react-start";
 import {
   createRootRoute,
   HeadContent,
@@ -9,6 +8,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type * as React from "react";
+import { Providers } from "@/providers";
 import appCss from "@/styles/app.css?url";
 
 export const Route = createRootRoute({
@@ -22,7 +22,7 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "TanStack Start Starter",
+        title: "Syntaxia",
       },
     ],
     links: [
@@ -45,8 +45,8 @@ function RootComponent() {
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider>
-      <html lang="en">
+    <html lang="en">
+      <Providers>
         <head>
           <HeadContent />
         </head>
@@ -55,7 +55,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <TanStackRouterDevtools position="bottom-right" />
           <Scripts />
         </body>
-      </html>
-    </ClerkProvider>
+      </Providers>
+    </html>
   );
 }
