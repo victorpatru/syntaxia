@@ -2,6 +2,13 @@
   "name": "@syntaxia/backend",
   "version": "1.0.0",
   "description": "",
+  "exports": {
+    ".": {
+      "types": "./convex/_generated/api.d.ts",
+      "default": "./convex/_generated/api.js"
+    },
+    "./convex/*": "./convex/*"
+  },
   "scripts": {
     "dev": "convex dev --tail-logs",
     "setup": "convex dev --once && convex env set VALIDATE_ENV=true",
@@ -12,7 +19,6 @@
   "license": "ISC",
   "dependencies": {
     "@auth/core": "catalog:",
-    "@convex-dev/auth": "^0.0.80",
     "@convex-dev/polar": "^0.6.1",
     "@polar-sh/sdk": "^0.34.9",
     "@t3-oss/env-core": "catalog:",
