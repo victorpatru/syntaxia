@@ -1,29 +1,24 @@
-import {
-  SignedIn,
-  SignedOut,
-  SignIn,
-  // UserButton,
-} from "@clerk/tanstack-react-start";
 import { AppSidebar } from "@syntaxia/ui/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@syntaxia/ui/sidebar";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { Authenticated, Unauthenticated } from "convex/react";
 
 export const Route = createFileRoute("/_authed")({
   component: () => (
     <>
-      <SignedIn>
+      <Authenticated>
         <SidebarProvider>
           <AppSidebar />
           <SidebarInset>
             <Outlet />
           </SidebarInset>
         </SidebarProvider>
-      </SignedIn>
-      <SignedOut>
+      </Authenticated>
+      <Unauthenticated>
         <div className="max-w-md mx-auto p-6">
-          <SignIn />
+          <p>Please sign in to continue.</p>
         </div>
-      </SignedOut>
+      </Unauthenticated>
     </>
   ),
 });
