@@ -1,77 +1,82 @@
 {
-  "phase-0-phone-screen": {
+  "master": {
     "tasks": [
       {
         "id": 1,
-        "title": "Setup Project Repository",
-        "description": "Initialize the project repository with appropriate structure and dependencies.",
-        "details": "Create a new Git repository. Set up the project structure with separate folders for frontend, backend, and configuration files. Initialize package.json for both frontend and backend. Install necessary dependencies such as TanStack, Tailwind, and Convex.",
-        "testStrategy": "Verify that the repository is correctly initialized and all dependencies are installed without errors.",
-        "priority": "medium",
+        "title": "Analyze Existing Codebase and Project Structure",
+        "description": "Perform a comprehensive analysis of the current codebase to identify implemented components, technology stack, and architectural patterns.",
+        "details": "Use Glob to list all files (e.g., **/*.ts, **/*.tsx, **/*.json, **/README.md). Use Grep to search for existing implementations of session setup, voice agent, Convex backend, and content packs. Read package.json, README.md, and main entry points to confirm frameworks (TanStack Start, Convex, Node/TypeScript) and existing modules. Document findings for reference in subsequent tasks.",
+        "testStrategy": "Verify that all relevant files and modules are identified and catalogued. Ensure documentation accurately reflects the current state of implementation.",
+        "priority": "high",
         "dependencies": [],
         "status": "done",
         "subtasks": [
           {
             "id": 1,
-            "title": "Create and Initialize Git Repository",
-            "description": "Create a new Git repository and perform the initial commit.",
+            "title": "Enumerate and Catalog Project Files",
+            "description": "Use Glob patterns to list all relevant files in the codebase, including TypeScript, JSON, and documentation files, to establish a comprehensive inventory.",
             "dependencies": [],
-            "details": "Use Git to initialize a new repository in the project root. Add a README.md file to document the project and a .gitignore file to exclude unnecessary files from version control.",
+            "details": "Execute Glob queries such as **/*.ts, **/*.tsx, **/*.json, and **/README.md to identify all source, configuration, and documentation files. Organize results by file type and directory structure.\n<info added on 2025-08-10T19:30:41.080Z>\nImplementation plan for 1.1 Enumerate and Catalog Project Files:\n\n- Scope\n  - Target directories: apps/app, packages/backend/convex, packages/ui, tooling, root configs.\n- Method\n  - Enumerate files with glob patterns: **/*.ts, **/*.tsx, **/*.json, **/README.md.\n  - Prioritize entry points: apps/app/src/router.tsx, apps/app/src/routes/**, packages/backend/convex/**, packages/ui/src/**.\n  - Capture top-level package.json files for workspace and each package to confirm stack and scripts.\n- Outputs\n  - Create a structured inventory grouped by workspace: App (TanStack Start), Backend (Convex), UI package.\n  - Note special files: app.config.ts, routeTree.gen.ts (don’t edit), convex config/schema, ui globals.css.\n- Verification\n  - Cross-check counts between glob listings and manual spot checks.\n- Next\n  - Feed inventory into 1.2 (identify key implemented components) via targeted searches (Convex queries/mutations, TanStack routes, ElevenLabs SDK usage).\n</info added on 2025-08-10T19:30:41.080Z>\n<info added on 2025-08-10T19:33:55.945Z>\nFile inventory (grouped) — 2025-08-10\n\nApp (TanStack Start)\n- TS/TSX\n  - apps/app/src/router.tsx\n  - apps/app/src/routes/__root.tsx\n  - apps/app/src/routes/index.tsx\n  - apps/app/src/routes/login.tsx\n  - apps/app/src/routes/_authed/route.tsx\n  - apps/app/src/routes/_authed/dashboard.tsx\n  - apps/app/src/routeTree.gen.ts (generated, do not edit)\n  - apps/app/src/server.ts\n  - apps/app/vite.config.ts\n- JSON/Config\n  - apps/app/package.json\n  - apps/app/tsconfig.json\n  - apps/app/components.json\n\nBackend (Convex)\n- TS\n  - packages/backend/convex/auth.ts\n  - packages/backend/convex/auth.config.ts\n  - packages/backend/convex/convex.config.ts\n  - packages/backend/convex/env.ts\n  - packages/backend/convex/http.ts\n  - packages/backend/convex/init.ts\n  - packages/backend/convex/schema.ts\n  - packages/backend/convex/subscriptions.ts\n  - packages/backend/convex/users.ts\n  - packages/backend/convex/utils/validators.ts\n  - packages/backend/convex/web.ts\n- Generated TS\n  - packages/backend/convex/_generated/api.d.ts\n  - packages/backend/convex/_generated/dataModel.d.ts\n  - packages/backend/convex/_generated/server.d.ts\n- JSON/Docs\n  - packages/backend/package.json\n  - packages/backend/convex/tsconfig.json\n  - packages/backend/convex/README.md\n\nUI Library (@syntaxia/ui)\n- TS/TSX\n  - packages/ui/src/hooks/use-mobile.ts\n  - packages/ui/src/utils/index.ts\n  - packages/ui/src/utils/use-double-check.ts\n  - packages/ui/src/components/* (40+ components including button, input, table, sidebar, app-sidebar, etc.)\n- JSON/Config\n  - packages/ui/package.json\n  - packages/ui/tsconfig.json\n  - packages/ui/components.json\n\nLogger Package\n- TS\n  - packages/logger/src/index.ts\n- JSON/Config\n  - packages/logger/package.json\n  - packages/logger/tsconfig.json\n\nTooling & Root\n- JSON/Config\n  - package.json\n  - tsconfig.json\n  - turbo.json\n  - biome.json\n  - tooling/typescript/base.json\n  - tooling/typescript/react-library.json\n  - tooling/typescript/nextjs.json\n  - tooling/typescript/package.json\n\nNotes\n- routes, Convex functions, and UI components align with the PRD stack (TanStack Start + Convex + UI kit). No stray frameworks detected.\n- Next: run targeted searches to map key implementations for 1.2 (session setup, voice agent hooks, Convex endpoints, content packs).\n</info added on 2025-08-10T19:33:55.945Z>",
             "status": "done",
-            "testStrategy": "Verify that the repository is initialized, README.md and .gitignore are present, and the initial commit is successful."
+            "testStrategy": "Verify that all expected files are listed and categorized, cross-checking with manual inspection for completeness."
           },
           {
             "id": 2,
-            "title": "Establish Project Directory Structure",
-            "description": "Set up the directory structure with separate folders for frontend, backend, and configuration files.",
+            "title": "Identify Key Implemented Components",
+            "description": "Search the codebase for implementations of session setup, voice agent, Convex backend, and content packs using Grep or equivalent tools.",
             "dependencies": [
               "1.1"
             ],
-            "details": "Create 'frontend', 'backend', and 'config' directories. Ensure each directory is empty or contains placeholder files as needed for initialization.",
+            "details": "Run targeted Grep searches for keywords and module names related to session setup, voice agent, Convex backend, and content packs. Document locations and brief descriptions of each identified component.\n<info added on 2025-08-10T19:35:00.840Z>\nSearch results summary:\n\nVoice agent / ElevenLabs:\n- No in-repo code references found for ElevenLabs/ConvAI SDKs (`@11labs/react`, `useConversation`, `clientTools`, `show_snippet`, `highlight_lines`). Only mentions appear in PRD docs. Conclusion: voice agent integration not yet implemented.\n\nConvex backend API endpoints (per PRD):\n- No direct matches for `createSession|endSession|listSessions|getSessionSummary|saveTranscript|saveEvaluation` in code.\n- Existing Convex modules present: `packages/backend/convex/{auth.ts, auth.config.ts, http.ts, init.ts, schema.ts, subscriptions.ts, users.ts, web.ts, utils/validators.ts}`.\n\nTanStack routes / Router:\n- App routes and router entries confirmed:\n  - `apps/app/src/router.tsx`, `apps/app/src/routes/{__root.tsx,index.tsx,login.tsx,_authed/route.tsx,_authed/dashboard.tsx}` and generated `routeTree.gen.ts`.\n\nContent packs / JD conditioning:\n- No code references for snippet library or scenario seeds; only PRD mentions in `docs/technical-phone-screen-mvp.md`.\n\nImplications:\n- Backend: Convex scaffolding exists, but PRD-specific APIs are not implemented yet.\n- Frontend: TanStack Start routes scaffolded. No voice or content services wired.\n\nNext for 1.2:\n- Drill into Convex files to catalog current queries/mutations (users, auth, subscriptions) for reuse or refactor points.\n- Then proceed to 1.3 (stack confirmation from package.json + entry points) and 1.4 (module relationship mapping).\n</info added on 2025-08-10T19:35:00.840Z>\n<info added on 2025-08-10T19:36:32.318Z>\nConvex catalog (existing)\n- Queries/Mutations/Actions exports:\n  - users.ts (query/mutation signatures present)\n  - web.ts (exports present)\n  - http.ts (httpRouter/addRoute present)\n- Auth usage\n  - No direct ctx.auth or getUserIdentity references detected in grep; auth.ts/auth.config.ts exist and will need auditing (likely Clerk JWT per notes in tasks).\n- Config/schema\n  - schema.ts, convex.config.ts present; subscriptions.ts, utils/validators.ts present; init.ts exists for seeding.\n\nStack confirmation (from package.json files)\n- Monorepo managed by Turbo + Bun. Workspaces: packages/*, apps/*, tooling/*\n- App (@syntaxia/app): TanStack Start/Router v1.128.x, Vite 7, Clerk Start SDK, Tailwind v4, uses @syntaxia/ui.\n- Backend (@syntaxia/backend): convex ^1.25.4; @convex-dev/auth present (migration work planned); Polar SDK present (payments); arktype + env-core present.\n- UI (@syntaxia/ui): Shadcn/Radix-based component lib with exports for sidebar/app-sidebar and globals.css.\n\nConclusion\n- Good scaffold across app/backend/ui. PRD-specific endpoints and voice integration remain to be implemented. Next: proceed to 1.3/1.4 to lock stack and map relationships, then we can pick the first implementation task (most likely Convex schema/APIs per PRD).\n</info added on 2025-08-10T19:36:32.318Z>",
             "status": "done",
-            "testStrategy": "Check that the directory structure matches the specification and all folders are tracked in the repository."
+            "testStrategy": "Confirm that all relevant implementations are found and mapped to their respective files and modules."
           },
           {
             "id": 3,
-            "title": "Initialize Package Managers",
-            "description": "Initialize package.json files for both frontend and backend directories.",
+            "title": "Analyze Technology Stack and Frameworks",
+            "description": "Review package.json, README.md, and main entry points to determine the frameworks, libraries, and runtime environments used in the project.",
             "dependencies": [
-              "1.2"
+              "1.1"
             ],
-            "details": "Run 'npm init -y' or equivalent in both the frontend and backend directories to generate package.json files.",
+            "details": "Extract and document dependencies, scripts, and configuration from package.json. Cross-reference with README.md and entry files to confirm usage of TanStack Start, Convex, Node/TypeScript, and other major technologies.\n<info added on 2025-08-10T19:38:37.448Z>\nStack confirmation:\n\n- Monorepo: Turbo + Bun workspaces (packages/*, apps/*, tooling/*)\n- Frontend: TanStack Start/Router (^1.128), Vite 7, Clerk Start SDK, Tailwind v4, uses @syntaxia/ui\n- Backend: Convex ^1.25.4, @convex-dev/auth present, Polar SDK present, arktype, env-core; Convex modules in packages/backend/convex/*\n- UI: Shadcn/Radix components in @syntaxia/ui with many exports including sidebar/app-sidebar and globals.css\n- Tooling: Biome, TS 5.9 catalog, turbo scripts\n\nKey files:\n- apps/app/src/router.tsx, apps/app/src/routes/**, apps/app/src/routeTree.gen.ts (generated)\n- packages/backend/convex/{schema.ts, users.ts, web.ts, http.ts, auth.ts, auth.config.ts, init.ts}\n- packages/ui/src/components/*, packages/ui/src/utils/*, globals via exports\n\nVerdict:\n- Stack matches PRD: TanStack Start + Convex + Voice agent TBD + content packs TBD.\n- Ready to proceed to schema/APIs per PRD and voice integration tasks.\n</info added on 2025-08-10T19:38:37.448Z>",
             "status": "done",
-            "testStrategy": "Confirm that package.json exists in both directories and contains default values."
+            "testStrategy": "Validate findings against actual code imports and usage patterns in main entry points."
           },
           {
             "id": 4,
-            "title": "Install Core Dependencies",
-            "description": "Install required dependencies such as TanStack, Tailwind, and Convex in the appropriate directories.",
+            "title": "Map Architectural Patterns and Module Relationships",
+            "description": "Analyze the organization of code and inter-module dependencies to identify architectural patterns and system structure.",
             "dependencies": [
+              "1.1",
+              "1.2",
               "1.3"
             ],
-            "details": "Use npm or yarn to install TanStack and Tailwind in the frontend, and Convex in the backend. Update package.json and lock files accordingly.",
+            "details": "Use static analysis tools and manual inspection to map out module dependencies, control flow, and architectural conventions (e.g., layering, service boundaries). Document findings with diagrams or structured notes.\n<info added on 2025-08-10T19:39:04.892Z>\nModule relationship map (1.4) — high level\n\n- Frontend (apps/app)\n  - `src/router.tsx` configures TanStack Router; routes under `src/routes/**` provide layout (`__root.tsx`) and pages (`index.tsx`, `login.tsx`, `_authed/*`).\n  - UI dependencies imported from `@syntaxia/ui/*` (design system). No direct backend calls found here yet.\n\n- Backend (packages/backend/convex)\n  - `schema.ts` defines data model; `_generated/*` provides typed clients.\n  - HTTP: `http.ts` exposes routes via Convex `httpRouter` (no auth routes wired yet per grep).\n  - App logic files present: `users.ts`, `web.ts`, `subscriptions.ts` (likely Convex query/mutation/action containers).\n  - Auth: `auth.ts` and `auth.config.ts` exist; migration to Clerk tokens is planned in tasks.\n\n- UI Library (packages/ui)\n  - Components consumed by app; no cross-backend coupling.\n\n- Cross-boundaries\n  - No voice agent module present (TBD).\n  - No explicit clientTools or agent→UI bridge in app yet (TBD).\n  - Payments libs present in backend but no exposed checkout/webhook handlers yet.\n\nNext\n- This map is sufficient to proceed with Task 3: design Convex schema and APIs (sessions, transcripts, evaluations, question_sets) and implement endpoints (`createSession`, `endSession`, `saveTranscript`, `saveEvaluation`, `listSessions`, `getSessionSummary`).\n</info added on 2025-08-10T19:39:04.892Z>",
             "status": "done",
-            "testStrategy": "Verify that all dependencies are listed in package.json and can be imported without errors."
+            "testStrategy": "Ensure that the documented architecture accurately reflects the codebase, validated by peer review or automated dependency graphs."
           },
           {
             "id": 5,
-            "title": "Configure Repository Security and Best Practices",
-            "description": "Apply repository best practices including branch protection, security scanning, and documentation.",
+            "title": "Document Findings for Reference",
+            "description": "Compile all analysis results into a structured document for use in subsequent tasks and onboarding.",
             "dependencies": [
+              "1.1",
+              "1.2",
+              "1.3",
               "1.4"
             ],
-            "details": "Enable branch protection rules, set up Dependabot alerts, add SECURITY.md, and ensure sensitive files are excluded via .gitignore.",
+            "details": "Create a comprehensive report summarizing file inventory, implemented components, technology stack, and architectural patterns. Include references to source files and diagrams where applicable.\n<info added on 2025-08-10T19:40:06.742Z>\nWhere to find all findings (Task 1 consolidated)\n\n- 1.1 Inventory: See subtask 1.1 details in `.taskmaster/tasks/tasks.json` (grouped file list by workspace)\n- 1.2 Components: See subtask 1.2 details (search results: routes present; no ElevenLabs integration; PRD Convex APIs not yet implemented; Convex scaffold exists)\n- 1.3 Stack: See subtask 1.3 details (frameworks, key versions, key files)\n- 1.4 Map: See subtask 1.4 details (module relationships and next implications)\n\nQuick links\n- App router and routes: `apps/app/src/router.tsx`, `apps/app/src/routes/**`\n- Convex core: `packages/backend/convex/{schema.ts, users.ts, web.ts, http.ts, auth.ts, auth.config.ts, init.ts}`\n- UI kit: `packages/ui/src/components/*`, `packages/ui/src/utils/*`, exports in `packages/ui/package.json`\n- Workspace manifests: root `package.json`, `apps/app/package.json`, `packages/backend/package.json`, `packages/ui/package.json`\n\nConclusion\n- All findings are embedded in Task 1’s subtasks (1.1–1.4). Use `task-master show 1.1,1.2,1.3,1.4` to view them together, or open `.taskmaster/tasks/tasks.json` and search for those IDs.\n- Ready to proceed to Task 3 (Convex schema/APIs per PRD).\n</info added on 2025-08-10T19:40:06.742Z>",
             "status": "done",
-            "testStrategy": "Check that security features are enabled, documentation files are present, and no sensitive files are tracked."
+            "testStrategy": "Review documentation for completeness, clarity, and accuracy; ensure it supports downstream implementation and planning."
           }
         ]
       },
       {
         "id": 2,
-        "title": "Configure ElevenLabs Assistant",
-        "description": "Set up the ElevenLabs assistant with the required configuration for the MVP.",
-        "details": "Use the ElevenLabs Dashboard to create an assistant using the Blank template. Configure the system prompt, voice, analysis, data collection, and knowledge base as per the PRD. Ensure the assistant is capable of conducting a 30-minute phone screen with dynamic probing and topic rotation.\n<info added on 2025-08-07T22:02:28.920Z>\nIncorporate Polar payments and minute-based credits as per the updated PRD. Add dependencies to the backend schema/APIs for managing credits and transactions, and update the frontend UI to display user balance and implement gating based on available credits.\n</info added on 2025-08-07T22:02:28.920Z>",
-        "testStrategy": "Conduct a test session to ensure the assistant follows the configured structure and rules.",
+        "title": "Implement JD-Conditioned Session Setup",
+        "description": "Enable users to input a job description (JD), select target bar and domain track, and generate a session plan conditioned on JD competencies.",
+        "details": "Create a UI flow for JD input, level/domain selection, and session preview using TanStack Start. Implement backend logic in Convex to parse JD, extract competencies, and generate session sections (A–D) with calibrated prompts/snippets. Use TypeScript for type safety and ensure streaming SSR for responsiveness.",
+        "testStrategy": "Test with various JDs to confirm correct competency extraction, session plan generation, and UI updates. Validate backend parsing and session creation logic.",
         "priority": "high",
         "dependencies": [
           1
@@ -80,607 +85,406 @@
         "subtasks": [
           {
             "id": 1,
-            "title": "Create Assistant Using Blank Template",
-            "description": "Use the ElevenLabs Dashboard to create a new assistant instance starting from the Blank template.",
+            "title": "Design and Implement JD Input and Selection UI Flow",
+            "description": "Create a user interface using TanStack Start that allows users to input a job description (JD), select the target bar, and choose a domain track. Ensure the UI supports previewing the generated session plan.",
             "dependencies": [],
-            "details": "Access the ElevenLabs Dashboard, select 'Create Assistant', and choose the Blank template as the starting point for configuration.",
-            "status": "in-progress",
-            "testStrategy": "Verify that a new assistant instance is created and accessible in the dashboard."
+            "details": "Utilize TanStack Start's routing and component system to build a multi-step form for JD input, bar selection, and domain track selection. Integrate real-time validation and preview capabilities for session plans.",
+            "status": "pending",
+            "testStrategy": "Test UI flow with various JDs and selection combinations to confirm correct data capture, navigation, and preview rendering."
           },
           {
             "id": 2,
-            "title": "Configure System Prompt and Voice",
-            "description": "Set up the system prompt and select the appropriate voice according to the PRD requirements.",
+            "title": "Implement Backend JD Parsing and Competency Extraction in Convex",
+            "description": "Develop Convex backend logic to parse the submitted JD and extract relevant competencies required for session plan generation.",
             "dependencies": [
               "2.1"
             ],
-            "details": "Edit the assistant's system prompt to match the PRD. Choose a voice from ElevenLabs' options that aligns with the assistant's intended tone and clarity.",
+            "details": "Create Convex server functions to receive JD input, apply parsing algorithms or models, and output a structured list of competencies. Ensure robust error handling and logging for edge cases.",
             "status": "pending",
-            "testStrategy": "Test the assistant's initial responses and voice output to ensure they match the desired prompt and vocal characteristics."
+            "testStrategy": "Validate competency extraction accuracy using a diverse set of JDs, including edge cases and ambiguous descriptions."
           },
           {
             "id": 3,
-            "title": "Set Up Analysis and Data Collection Parameters",
-            "description": "Configure how the assistant analyzes conversations and collects data, ensuring compliance with the PRD.",
+            "title": "Generate Session Plan Sections (A–D) with Calibrated Prompts and Snippets",
+            "description": "Based on extracted competencies, generate session plan sections (A–D) with tailored prompts and code snippets, ensuring alignment with the selected bar and domain track.",
             "dependencies": [
               "2.2"
             ],
-            "details": "Define analysis rules (e.g., dynamic probing, topic rotation) and specify what data is collected during sessions, such as transcripts and metadata.",
+            "details": "Implement logic to map competencies to session sections, calibrate prompts/snippets for each section, and ensure content is dynamically generated per user input.",
             "status": "pending",
-            "testStrategy": "Run a simulated session and confirm that analysis features and data collection operate as specified."
+            "testStrategy": "Test session plan generation for completeness, relevance, and calibration across multiple JD/domain/bar combinations."
           },
           {
             "id": 4,
-            "title": "Integrate and Populate Knowledge Base",
-            "description": "Connect and upload relevant knowledge base content as outlined in the PRD.",
+            "title": "Ensure Type Safety and Streaming SSR for Responsiveness",
+            "description": "Integrate TypeScript throughout the stack for type safety and implement streaming server-side rendering (SSR) in TanStack Start to optimize responsiveness during session plan generation.",
             "dependencies": [
               "2.3"
             ],
-            "details": "Upload documents, embeddings, or structured data to the assistant's knowledge base to support dynamic conversation and topic rotation.",
+            "details": "Define and enforce TypeScript types for all data structures and API contracts. Configure TanStack Start to use streaming SSR for session plan previews and updates.",
             "status": "pending",
-            "testStrategy": "Query the assistant with knowledge-based questions and verify accurate, context-aware responses."
+            "testStrategy": "Run type checks and SSR performance tests. Confirm that session previews update responsively and type errors are caught during development."
           },
           {
             "id": 5,
-            "title": "Validate 30-Minute Phone Screen Capability",
-            "description": "Ensure the assistant can conduct a 30-minute phone screen with dynamic probing and topic rotation.",
+            "title": "Integrate and Validate End-to-End Session Setup Flow",
+            "description": "Combine UI, backend, and SSR components into a seamless end-to-end flow, ensuring users can input a JD, select options, and receive a generated session plan preview.",
             "dependencies": [
               "2.4"
             ],
-            "details": "Simulate a full-length phone screen session, monitoring for adherence to timing, dynamic probing, and topic rotation as per the PRD.",
+            "details": "Wire up all components, handle state management, and ensure error handling and user feedback are robust. Prepare for integration with downstream tasks such as content packs and analytics.",
             "status": "pending",
-            "testStrategy": "Conduct a test session and review logs to confirm the assistant maintains structure, adapts topics, and completes the session within the required timeframe."
+            "testStrategy": "Perform end-to-end tests with real and synthetic JDs, verifying correct flow, data integrity, and user experience from input to session preview."
           }
         ]
       },
       {
         "id": 3,
-        "title": "Design Backend Schema and APIs",
-        "description": "Design the database schema and implement the necessary APIs for session management.",
-        "details": "Define the data models for users, sessions, transcripts, evaluations, and question_sets. Implement the Convex APIs: createSession, endSession, saveTranscript, saveEvaluation, listSessions, and getSessionSummary.",
-        "testStrategy": "Write unit tests for each API to ensure they perform CRUD operations correctly and handle edge cases.",
+        "title": "Develop Voice Interview Flow (A–D Sections)",
+        "description": "Build the core voice interview experience with agent-driven turn-taking, barge-in support, and section transitions (Background, Code, Scenario, Wrap-up).",
+        "details": "Integrate ElevenLabs TTS via ConvAI WebSocket and React SDK (@11labs/react). Implement STT streaming with Whisper/Deepgram. Design a state machine to orchestrate interview flow (A–D), handling agent prompts, candidate responses, and UI sync. Ensure agent can trigger UI updates via clientTools (e.g., show_snippet, highlight_lines).",
+        "testStrategy": "Simulate full interview sessions, testing voice input/output, section transitions, barge-in, and agent-driven UI events. Validate STT/TTS accuracy and latency.",
         "priority": "high",
         "dependencies": [
-          1
+          2
         ],
         "status": "pending",
         "subtasks": [
           {
             "id": 1,
-            "title": "Define Data Models for Core Entities",
-            "description": "Design and document the database schema for users, sessions, transcripts, evaluations, and question_sets, ensuring all necessary fields and relationships are specified.",
+            "title": "Integrate ElevenLabs TTS and STT Streaming",
+            "description": "Implement real-time text-to-speech (TTS) using ElevenLabs via ConvAI WebSocket and React SDK, and set up streaming speech-to-text (STT) using Whisper or Deepgram for accurate, low-latency transcription.",
             "dependencies": [],
-            "details": "Create Convex schema definitions for each entity, including indexes and relationships (e.g., sessions linked to users, transcripts linked to sessions). Consider requirements for anonymous and authenticated users.",
+            "details": "Establish bidirectional audio streaming between the client and backend, ensuring seamless TTS output and STT input. Optimize for minimal latency and high transcription accuracy.",
             "status": "pending",
-            "testStrategy": "Validate schema by creating and querying sample records for each entity, ensuring referential integrity and correct indexing."
+            "testStrategy": "Simulate voice input/output in various network conditions. Measure TTS/STT latency and transcription accuracy across all interview sections."
           },
           {
             "id": 2,
-            "title": "Implement Session Management APIs",
-            "description": "Develop Convex APIs for creating, ending, and listing sessions, handling both authenticated and anonymous users.",
+            "title": "Design and Implement Interview State Machine",
+            "description": "Develop a robust state machine to orchestrate the interview flow across the Background, Code, Scenario, and Wrap-up sections, managing agent prompts, candidate responses, and transitions.",
             "dependencies": [
               "3.1"
             ],
-            "details": "Implement createSession, endSession, and listSessions functions. Ensure session IDs are generated, tracked, and associated with user or anonymous identifiers as appropriate.",
+            "details": "Define clear states and transitions for each interview section. Ensure the state machine supports agent-driven turn-taking, barge-in handling, and error recovery.",
             "status": "pending",
-            "testStrategy": "Write unit tests to verify session creation, termination, and retrieval, including edge cases for duplicate or invalid sessions."
+            "testStrategy": "Run simulated interviews to verify correct state transitions, section sequencing, and recovery from unexpected user input."
           },
           {
             "id": 3,
-            "title": "Develop Transcript and Evaluation APIs",
-            "description": "Create APIs to save transcripts and evaluations, associating them with the correct session and user records.",
+            "title": "Implement Agent-Driven Turn-Taking and Barge-In Support",
+            "description": "Enable the agent to manage conversational turns, detect and handle user barge-ins (interruptions), and resume or adapt the flow accordingly.",
             "dependencies": [
-              "3.1",
               "3.2"
             ],
-            "details": "Implement saveTranscript and saveEvaluation functions, ensuring data is validated and linked to the appropriate session. Support optional metadata such as timing and topic tags.",
+            "details": "Integrate logic for detecting user interruptions during agent prompts. Allow the agent to pause, resume, or adjust its responses based on barge-in events.",
             "status": "pending",
-            "testStrategy": "Test saving and retrieving transcripts and evaluations, including handling of missing or malformed data."
+            "testStrategy": "Test with users interrupting agent prompts at various points. Validate that the system gracefully handles interruptions and maintains conversational coherence."
           },
           {
             "id": 4,
-            "title": "Implement Session Summary Retrieval API",
-            "description": "Develop the getSessionSummary API to aggregate and return session details, including transcripts and evaluations.",
+            "title": "Synchronize UI with Agent Actions via clientTools",
+            "description": "Ensure the agent can trigger UI updates (e.g., show_snippet, highlight_lines) in real time using clientTools, keeping the visual interface in sync with the voice interaction.",
             "dependencies": [
-              "3.1",
-              "3.2",
-              "3.3"
+              "3.2"
             ],
-            "details": "Design the API to efficiently fetch and format all relevant data for a session summary, supporting frontend requirements for detailed session views.",
+            "details": "Implement clientTools hooks in the frontend and connect them to agent actions in the state machine. Support dynamic UI updates based on agent instructions.",
             "status": "pending",
-            "testStrategy": "Test summary retrieval for sessions with varying data completeness, ensuring correct aggregation and error handling."
+            "testStrategy": "Simulate agent-triggered UI events during interviews. Confirm that UI updates occur promptly and accurately in response to agent commands."
           },
           {
             "id": 5,
-            "title": "Write Comprehensive Unit Tests for All APIs",
-            "description": "Develop and execute unit tests for each API to ensure correct CRUD operations, data validation, and error handling.",
+            "title": "Validate End-to-End Interview Flow and Section Transitions",
+            "description": "Conduct comprehensive testing of the full voice interview experience, including section transitions, agent-candidate interactions, barge-in handling, and UI synchronization.",
             "dependencies": [
-              "3.2",
               "3.3",
               "3.4"
             ],
-            "details": "Cover normal and edge cases, including invalid input, missing data, and concurrent operations. Ensure tests are automated and reproducible.",
+            "details": "Simulate realistic interview sessions covering all A–D sections. Monitor for smooth transitions, accurate voice input/output, and correct UI behavior throughout.",
             "status": "pending",
-            "testStrategy": "Run all tests and verify 100% pass rate. Review test coverage to confirm all API endpoints and major logic branches are exercised."
+            "testStrategy": "Run end-to-end interview scenarios with multiple users. Collect feedback on flow, latency, and usability. Address any breakdowns in state, voice, or UI synchronization."
           }
         ]
       },
       {
         "id": 4,
-        "title": "Implement Frontend Routes and UI",
-        "description": "Develop the frontend routes and user interface for session configuration and management.",
-        "details": "Use TanStack Start and Router to create routes: '/', '/session', and '/summary/$id'. Implement the UI using Shadcn UI and Tailwind for layout and components. Ensure the UI is mobile-first and accessible.",
-        "testStrategy": "Perform end-to-end testing to ensure navigation between routes works as expected and the UI is responsive.",
-        "priority": "medium",
+        "title": "On-Screen Content Rendering and Voice-Only Fallback",
+        "description": "Render code snippets, diffs, and logs in the UI during the interview, with voice-only fallback for semantic summaries and on-demand readouts.",
+        "details": "Implement UI components for displaying code/logs/diffs using TanStack Start. Enable agent to reference line ranges/blocks and trigger highlights/zoom via clientTools. For voice-only mode, provide structured summaries and readouts of ≤25-line blocks. Ensure accessibility and responsive design.",
+        "testStrategy": "Test rendering of various content types during sessions. Validate agent-triggered UI updates and fallback summaries/readouts in voice-only mode.",
+        "priority": "high",
         "dependencies": [
-          1
+          3
         ],
         "status": "pending",
         "subtasks": [
           {
             "id": 1,
-            "title": "Set Up TanStack Start Project Structure",
-            "description": "Initialize the project structure required for TanStack Start, including the routes, router, and configuration files.",
+            "title": "Design and Implement UI Components for Code, Diff, and Log Rendering",
+            "description": "Develop reusable UI components using TanStack Start to render code snippets, diffs, and logs with support for syntax highlighting, line numbers, and responsive layouts.",
             "dependencies": [],
-            "details": "Create the necessary folders and files such as app/routes, app/router.tsx, and app.config.ts. Ensure the project is ready for route and UI implementation.",
+            "details": "Ensure components handle various content types and integrate with TanStack Start's SSR and routing features for optimal performance and maintainability.",
             "status": "pending",
-            "testStrategy": "Verify that the project builds successfully and the initial route renders without errors."
+            "testStrategy": "Test rendering of diverse code, diff, and log samples across devices and screen sizes. Validate SSR behavior and client-side navigation."
           },
           {
             "id": 2,
-            "title": "Define Frontend Routes Using TanStack Router",
-            "description": "Implement the routes '/', '/session', and '/summary/$id' using TanStack Router within the project.",
+            "title": "Integrate Agent-Driven Line Range Referencing and Highlight/Zoom Controls",
+            "description": "Enable the agent to reference specific line ranges or blocks within rendered content and trigger UI highlights or zoom actions via clientTools.",
             "dependencies": [
               "4.1"
             ],
-            "details": "Configure the route tree and ensure each route points to the correct component. Use file-based or code-based routing as appropriate.\n<info added on 2025-08-08T09:03:05.962Z>\nImplementation progress: Added stub routes using TanStack Router. Updated the `/` route to a dashboard scaffold using `@syntaxia/ui` Button and Clerk components. Added a new `/session` route with placeholders, gated by `convex/react` Authenticated/Unauthenticated wrappers. Added a new `/summary/$id` route with parameter rendering and placeholder content. Ensured layout and CSS via `@syntaxia/ui/globals.css` and applied a mono font brutalist theme. Next steps include filling content for session live UI and wiring real data for the summary route.\n</info added on 2025-08-08T09:03:05.962Z>",
-            "status": "done",
-            "testStrategy": "Navigate to each route and confirm the correct component renders for '/', '/session', and '/summary/$id'."
+            "details": "Implement mechanisms for the agent to specify line/block references and for the UI to respond with visual highlights or focused views. Ensure seamless interaction between agent commands and UI updates.",
+            "status": "pending",
+            "testStrategy": "Simulate agent commands to reference and highlight/zoom lines or blocks. Verify correct UI response and user feedback."
           },
           {
             "id": 3,
-            "title": "Develop UI Components with Shadcn UI and Tailwind",
-            "description": "Build the user interface components for session configuration, management, and summary views using Shadcn UI and Tailwind CSS.",
+            "title": "Develop Voice-Only Fallback Mode with Structured Summaries and Readouts",
+            "description": "Implement a voice-only mode that provides semantic summaries and on-demand readouts of ≤25-line content blocks, ensuring clarity and structure.",
             "dependencies": [
-              "4.2"
+              "4.1"
             ],
-            "details": "Design and implement reusable components for forms, lists, and summaries. Apply Tailwind classes for layout and styling.",
+            "details": "Design logic to segment content into ≤25-line blocks, generate structured summaries, and support on-demand readouts triggered by agent or user requests.",
             "status": "pending",
-            "testStrategy": "Check that all UI components render correctly and match the design specifications across all routes."
+            "testStrategy": "Test fallback behavior by disabling visual UI and verifying summary/readout accuracy, structure, and responsiveness to triggers."
           },
           {
             "id": 4,
-            "title": "Ensure Mobile-First and Accessible Design",
-            "description": "Adapt the UI to be mobile-first and accessible, following best practices for responsive design and accessibility.",
+            "title": "Ensure Accessibility and Responsive Design for All Content Modes",
+            "description": "Apply accessibility best practices and responsive design principles to all UI components and voice-only interactions, supporting diverse user needs and devices.",
             "dependencies": [
+              "4.1",
+              "4.2",
               "4.3"
             ],
-            "details": "Use Tailwind's responsive utilities and Shadcn UI's accessibility features. Test with screen readers and keyboard navigation.",
+            "details": "Implement ARIA roles, keyboard navigation, screen reader support, and responsive layouts. Validate that both visual and voice-only modes are fully accessible.",
             "status": "pending",
-            "testStrategy": "Test the UI on various device sizes and with accessibility tools to confirm responsiveness and accessibility compliance."
+            "testStrategy": "Conduct accessibility audits using automated tools and manual testing. Validate responsive behavior on multiple devices and screen sizes."
           },
           {
             "id": 5,
-            "title": "Implement and Validate Route Navigation and UI Integration",
-            "description": "Integrate the routes and UI components, ensuring seamless navigation and state management between views.",
+            "title": "Validate Agent-Triggered UI Updates and Fallbacks During Live Sessions",
+            "description": "Test the end-to-end flow of agent-triggered content rendering, highlights, and voice-only fallbacks during simulated interview sessions.",
             "dependencies": [
+              "4.2",
+              "4.3",
               "4.4"
             ],
-            "details": "Wire up navigation between routes, manage session state, and ensure data flows correctly between components.",
+            "details": "Simulate live sessions with agent-driven events, verifying that UI updates, highlights, zooms, and voice-only summaries/readouts function as intended in real time.",
             "status": "pending",
-            "testStrategy": "Perform end-to-end testing to verify navigation, UI responsiveness, and correct data handling across all routes."
+            "testStrategy": "Run comprehensive session simulations covering all content types, agent actions, and fallback scenarios. Log and resolve any discrepancies or failures."
           }
         ]
       },
       {
         "id": 5,
-        "title": "Integrate ElevenLabs Web SDK",
-        "description": "Integrate the ElevenLabs Web SDK for real-time audio interaction during sessions.",
-        "details": "Embed the ElevenLabs Web SDK into the '/session' route to enable low-latency two-way audio. Ensure the SDK is configured to handle dynamic probing and topic rotation.",
-        "testStrategy": "Conduct a live session to verify real-time audio interaction works seamlessly with low latency.",
+        "title": "Build Rubric-Based Scoring and Feedback Engine",
+        "description": "Create a scoring system based on rubric dimensions (Communication, Debugging, Breadth, Operationalization, Product sense) with anchored examples and comments.",
+        "details": "Implement backend logic in Convex for scoring responses per section. Use deterministic LLM prompts for minimal variance. Store scores and comments in Convex tables. Expose scoring API for frontend consumption. Ensure scores are anchored to explicit examples (1–4 scale).",
+        "testStrategy": "Validate scoring accuracy and consistency across sessions. Test with sample responses to ensure rubric anchors and comments are correctly applied.",
         "priority": "high",
         "dependencies": [
-          2,
-          4
+          3
         ],
         "status": "pending",
         "subtasks": [
           {
             "id": 1,
-            "title": "Install and Configure ElevenLabs Web SDK",
-            "description": "Add the ElevenLabs Web SDK to the project and configure it with the required API keys and environment variables.",
+            "title": "Define Rubric Schema and Anchored Examples",
+            "description": "Design the data schema for rubric dimensions (Communication, Debugging, Breadth, Operationalization, Product sense), including explicit 1–4 scale anchors and example responses for each score.",
             "dependencies": [],
-            "details": "Follow official ElevenLabs documentation to install the SDK via npm or yarn. Set up environment variables for API authentication and ensure the SDK is ready for use in the frontend application.",
+            "details": "Specify Convex table structures to store rubric definitions, scale anchors, and example comments. Ensure extensibility for future rubric updates.",
             "status": "pending",
-            "testStrategy": "Verify the SDK loads without errors and can authenticate using the provided API key."
+            "testStrategy": "Verify schema correctness by creating and retrieving rubric definitions and anchors via Convex queries."
           },
           {
             "id": 2,
-            "title": "Embed SDK in '/session' Route UI",
-            "description": "Integrate the ElevenLabs Web SDK components into the '/session' route to enable real-time audio interaction.",
+            "title": "Implement Deterministic LLM Scoring Logic",
+            "description": "Develop backend logic in Convex to score user responses per rubric section using deterministic LLM prompts, minimizing variance and ensuring reproducibility.",
             "dependencies": [
               "5.1"
             ],
-            "details": "Modify the '/session' route to include the SDK’s UI components or hooks, ensuring microphone access and audio playback are enabled for two-way communication.",
+            "details": "Integrate LLM scoring with prompt templates anchored to rubric examples. Ensure each response is scored on the 1–4 scale with rationale comments.",
             "status": "pending",
-            "testStrategy": "Check that users can start and stop audio sessions and that audio streams are transmitted in real time."
+            "testStrategy": "Test with sample responses to confirm deterministic outputs and correct application of rubric anchors."
           },
           {
             "id": 3,
-            "title": "Implement Dynamic Probing and Topic Rotation Logic",
-            "description": "Configure the SDK and session logic to support dynamic probing and automatic topic rotation during live sessions.",
+            "title": "Store Scores and Feedback in Convex Tables",
+            "description": "Create Convex tables and mutations to persist scores, rationale comments, and section-level feedback for each user response.",
             "dependencies": [
               "5.2"
             ],
-            "details": "Integrate logic that triggers probing questions and rotates topics based on session flow, leveraging SDK APIs or custom logic as needed.",
+            "details": "Design efficient data models for storing per-section scores and comments, linked to session and user identifiers.",
             "status": "pending",
-            "testStrategy": "Simulate sessions to confirm that probing and topic changes occur dynamically and as intended."
+            "testStrategy": "Validate that scores and comments are correctly stored and retrievable for multiple sessions and users."
           },
           {
             "id": 4,
-            "title": "Optimize for Low-Latency Two-Way Audio",
-            "description": "Tune SDK and network settings to minimize audio latency and ensure seamless two-way interaction.",
+            "title": "Expose Scoring and Feedback API",
+            "description": "Develop a Convex API endpoint to allow frontend clients to submit responses and retrieve rubric-based scores and feedback.",
             "dependencies": [
-              "5.2"
+              "5.3"
             ],
-            "details": "Adjust SDK configuration and browser audio settings to reduce round-trip latency. Test on various networks and devices to ensure consistent low-latency performance.",
+            "details": "Implement API functions for scoring requests, feedback retrieval, and error handling. Ensure secure and performant access patterns.",
             "status": "pending",
-            "testStrategy": "Measure end-to-end audio latency during test sessions and confirm it meets real-time interaction requirements."
+            "testStrategy": "Test API endpoints with simulated frontend requests, verifying correct scoring, feedback delivery, and error responses."
           },
           {
             "id": 5,
-            "title": "Conduct End-to-End Live Session Testing",
-            "description": "Run comprehensive live session tests to validate real-time audio, dynamic probing, topic rotation, and overall user experience.",
+            "title": "Validate Scoring Consistency and Anchor Alignment",
+            "description": "Systematically test the scoring engine for accuracy, consistency across sessions, and correct alignment with rubric anchors and example comments.",
             "dependencies": [
-              "5.3",
               "5.4"
             ],
-            "details": "Perform live walkthroughs of the '/session' route with multiple users, capturing feedback and identifying any integration or UX issues.",
+            "details": "Use a suite of sample responses to evaluate scoring variance, anchor application, and feedback quality. Document findings and iterate on prompt or schema as needed.",
             "status": "pending",
-            "testStrategy": "Verify that all features work seamlessly together and that the session experience meets project requirements."
+            "testStrategy": "Run repeated scoring tests with identical and varied responses, confirming minimal variance and correct anchor usage in feedback."
           }
         ]
       },
       {
         "id": 6,
-        "title": "Implement Transcript Capture and Storage",
-        "description": "Capture and store session transcripts for analysis and feedback.",
-        "details": "Develop functionality to capture real-time transcripts during sessions. Store transcripts in the database with session metadata. Ensure transcripts include roles, text, and optional timing and topic tags.",
-        "testStrategy": "Simulate a session and verify that transcripts are accurately captured and stored in the database.",
-        "priority": "medium",
+        "title": "Generate Transcript and Session Report",
+        "description": "Produce a full transcript with highlighted moments, rubric scores, prioritized action plan, and tailored follow-up prompts.",
+        "details": "Capture transcript segments during sessions, annotate highlights and timestamps. Implement report generator to compile transcript, scores, action plan, and practice prompts. Support export to Markdown, PDF, and JSON formats. Store reports in Convex for retrieval.",
+        "testStrategy": "Run end-to-end session and verify transcript accuracy, highlight detection, scoring integration, and export functionality.",
+        "priority": "high",
         "dependencies": [
-          3,
           5
         ],
         "status": "pending",
         "subtasks": [
           {
             "id": 1,
-            "title": "Integrate Real-Time Transcription Service",
-            "description": "Set up and configure a real-time transcription service (e.g., OpenAI, AWS Transcribe, Azure, or similar) to capture audio streams and convert them to text during live sessions.",
+            "title": "Capture and Segment Session Transcript",
+            "description": "Implement real-time or post-session transcription to capture all spoken content during the session, segmenting the transcript by speaker and timestamp.",
             "dependencies": [],
-            "details": "Research and select a suitable transcription API. Implement audio streaming from the client to the backend and connect to the chosen transcription provider using WebSockets or equivalent protocols.",
+            "details": "Utilize AI-powered transcription tools to record and segment session audio, ensuring accurate speaker labeling and timestamping for each segment.",
             "status": "pending",
-            "testStrategy": "Simulate a session with live audio input and verify that the transcription service returns accurate, real-time text output."
+            "testStrategy": "Run simulated sessions and verify that the transcript accurately reflects all spoken content, with correct segmentation and timestamps."
           },
           {
             "id": 2,
-            "title": "Parse and Structure Transcript Data",
-            "description": "Process the raw transcription output to extract and structure transcript entries, including speaker roles, text, and optional timing and topic tags.",
+            "title": "Annotate Highlights and Key Moments",
+            "description": "Develop functionality to annotate transcript segments with highlights, comments, and tags for significant moments during the session.",
             "dependencies": [
               "6.1"
             ],
-            "details": "Implement logic to segment the transcript by speaker turns, assign roles, and attach timestamps and topic tags where available.",
+            "details": "Enable manual or automated annotation of transcript segments to mark important exchanges, decisions, or noteworthy responses, storing highlight metadata alongside transcript data.",
             "status": "pending",
-            "testStrategy": "Feed sample transcription data and verify that the output includes correctly structured entries with all required metadata."
+            "testStrategy": "Review annotated transcripts to confirm that highlights and comments are correctly linked to relevant segments and timestamps."
           },
           {
             "id": 3,
-            "title": "Design and Implement Transcript Storage Schema",
-            "description": "Define and create the database schema for storing transcripts along with session metadata, ensuring scalability and efficient retrieval.",
+            "title": "Integrate Rubric Scoring and Feedback",
+            "description": "Incorporate rubric-based scoring for each relevant transcript segment, attaching scores and feedback comments to the transcript.",
             "dependencies": [
               "6.2"
             ],
-            "details": "Extend the backend data model to include transcript records linked to session IDs, with fields for roles, text, timestamps, topic tags, and any relevant metadata.",
+            "details": "Fetch or calculate rubric scores (e.g., Communication, Debugging) for each session section, and append structured feedback to the corresponding transcript segments.",
             "status": "pending",
-            "testStrategy": "Insert sample structured transcripts and confirm they are stored and retrievable with all associated metadata."
+            "testStrategy": "Validate that rubric scores and feedback are present, accurate, and correctly associated with transcript sections."
           },
           {
             "id": 4,
-            "title": "Implement Transcript Capture and Save Logic",
-            "description": "Develop backend logic to capture structured transcript data in real time and persist it to the database as the session progresses.",
+            "title": "Generate Action Plan and Follow-up Prompts",
+            "description": "Synthesize a prioritized action plan and tailored follow-up prompts based on transcript highlights and rubric feedback.",
             "dependencies": [
               "6.3"
             ],
-            "details": "Ensure transcript entries are saved incrementally or in batches during the session, with robust error handling and data integrity checks.",
+            "details": "Analyze annotated highlights and rubric feedback to automatically generate actionable next steps and personalized practice prompts for the participant.",
             "status": "pending",
-            "testStrategy": "Run a simulated session, verify that transcripts are saved in real time, and check for completeness and consistency in the database."
+            "testStrategy": "Check that the action plan and prompts are relevant, actionable, and tailored to the session content and participant performance."
           },
           {
             "id": 5,
-            "title": "Validate and Review Transcript Storage and Retrieval",
-            "description": "Test the end-to-end process by simulating sessions, reviewing stored transcripts, and ensuring all required data (roles, text, timing, topic tags) is accurately captured and accessible for analysis and feedback.",
+            "title": "Compile and Export Session Report",
+            "description": "Implement a report generator that compiles the full transcript, highlights, rubric scores, action plan, and prompts, supporting export to Markdown, PDF, and JSON formats, and storing reports in Convex.",
             "dependencies": [
               "6.4"
             ],
-            "details": "Perform comprehensive testing, including edge cases (e.g., rapid speaker changes, missing metadata), and review transcripts for accuracy and completeness.",
+            "details": "Design and build a report compilation and export module, ensuring all required elements are included and formatted for multiple export types. Integrate with Convex for persistent storage and retrieval.",
             "status": "pending",
-            "testStrategy": "Simulate multiple session scenarios, retrieve stored transcripts, and verify that all fields are present and correct for analysis and feedback workflows."
+            "testStrategy": "Export reports in all supported formats and verify completeness, formatting, and successful storage and retrieval from Convex."
           }
         ]
       },
       {
         "id": 7,
-        "title": "Develop Evaluation Ingestion and Persistence",
-        "description": "Implement the ingestion and storage of evaluation data post-session.",
-        "details": "Create functionality to receive evaluation payloads via webhook or SDK events. Store evaluations in the database with associated session data. Ensure evaluations include rubric scores, decisions, and metrics.",
-        "testStrategy": "Test the evaluation ingestion process with mock payloads to ensure data is correctly stored and retrievable.",
+        "title": "Integrate Content Packs and Scenario Seeds",
+        "description": "Provide a library of code snippets and scenario seeds with metadata for domain-specific practice and JD conditioning.",
+        "details": "Implement content service to manage snippet library (8–12 baseline snippets, 15–20 scenario seeds) with metadata (domain, risks, testability hooks). Enable retrieval based on JD/domain selection. Ensure extensibility for future specialized packs.",
+        "testStrategy": "Test snippet/scenario retrieval for various domains and JDs. Validate metadata integrity and correct matching to session requirements.",
         "priority": "medium",
         "dependencies": [
-          3,
-          6
+          2
         ],
         "status": "pending",
         "subtasks": [
           {
             "id": 1,
-            "title": "Design Evaluation Payload Schema and Validation Rules",
-            "description": "Define the structure and required fields for evaluation payloads, including rubric scores, decisions, and metrics. Establish validation rules to ensure data quality and completeness before ingestion.",
+            "title": "Design Metadata Schema for Snippets and Scenario Seeds",
+            "description": "Define a comprehensive metadata schema for code snippets and scenario seeds, including fields for domain, risks, testability hooks, and extensibility for future specialized packs.",
             "dependencies": [],
-            "details": "Document the expected schema for evaluation data and implement validation logic to check format, completeness, and business logic at the earliest stage.",
+            "details": "Specify required and optional metadata attributes, ensuring compatibility with retrieval and filtering mechanisms. Document schema for developer reference.",
             "status": "pending",
-            "testStrategy": "Create unit tests to verify that only valid payloads are accepted and invalid payloads are rejected with appropriate error messages."
+            "testStrategy": "Validate schema by creating sample metadata entries and ensuring all required fields are present and correctly typed."
           },
           {
             "id": 2,
-            "title": "Implement Webhook and SDK Event Handlers for Ingestion",
-            "description": "Develop endpoints and event listeners to receive evaluation payloads via webhooks and SDK events post-session.",
+            "title": "Implement Content Service for Library Management",
+            "description": "Develop a backend service to manage the library of code snippets (8–12 baseline) and scenario seeds (15–20), supporting CRUD operations and metadata association.",
             "dependencies": [
               "7.1"
             ],
-            "details": "Set up secure and scalable handlers to capture incoming evaluation data from external sources, ensuring support for both webhook and SDK-based ingestion.",
+            "details": "Use a scalable data store and API endpoints to add, update, delete, and retrieve content items with metadata. Ensure extensibility for future packs.",
             "status": "pending",
-            "testStrategy": "Simulate webhook and SDK event calls with mock payloads to confirm successful receipt and initial processing."
+            "testStrategy": "Test CRUD operations for snippets and seeds, verifying metadata integrity and service responsiveness."
           },
           {
             "id": 3,
-            "title": "Transform and Enrich Evaluation Data",
-            "description": "Process incoming evaluation payloads to standardize formats, enrich with session metadata, and prepare for storage.",
+            "title": "Enable JD/Domain-Based Retrieval and Matching",
+            "description": "Implement logic to retrieve relevant snippets and scenario seeds based on job description (JD) and domain selection, leveraging metadata for accurate matching.",
             "dependencies": [
               "7.2"
             ],
-            "details": "Apply necessary transformations such as data type normalization, schema mapping, and enrichment with session identifiers or timestamps.",
+            "details": "Develop filtering and ranking algorithms to select content items that best fit session requirements. Integrate with session setup flow.",
             "status": "pending",
-            "testStrategy": "Test transformation logic with diverse payloads to ensure correct mapping and enrichment of all required fields."
+            "testStrategy": "Simulate retrieval for various JDs and domains, confirming correct matching and relevance of returned items."
           },
           {
             "id": 4,
-            "title": "Persist Evaluation Data with Session Association",
-            "description": "Store validated and transformed evaluation data in the database, ensuring each record is linked to the correct session.",
+            "title": "Integrate Extensibility for Specialized Content Packs",
+            "description": "Design and implement mechanisms to support future addition of specialized content packs without disrupting existing functionality.",
             "dependencies": [
-              "7.3"
+              "7.2"
             ],
-            "details": "Implement database operations to insert evaluation records, maintaining referential integrity with session data and supporting efficient retrieval.",
+            "details": "Define interfaces and extension points for new packs, ensuring backward compatibility and ease of integration.",
             "status": "pending",
-            "testStrategy": "Verify that evaluations are correctly stored and associated with sessions by querying the database after ingestion."
+            "testStrategy": "Add a mock specialized pack and verify seamless integration, retrieval, and metadata handling."
           },
           {
             "id": 5,
-            "title": "Monitor, Audit, and Handle Ingestion Failures",
-            "description": "Establish monitoring, logging, and error handling for the ingestion pipeline to detect, alert, and recover from failures.",
+            "title": "Validate and Test Content Pack and Scenario Seed Library",
+            "description": "Conduct comprehensive testing of the content library, including retrieval accuracy, metadata integrity, and extensibility features.",
             "dependencies": [
+              "7.3",
               "7.4"
             ],
-            "details": "Set up real-time monitoring dashboards, automated alerts for ingestion errors, and audit logs for traceability. Implement retry and fallback mechanisms for failed ingestions.",
+            "details": "Develop test cases covering various domains, JDs, and pack extensions. Ensure all functionalities meet requirements and edge cases are handled.",
             "status": "pending",
-            "testStrategy": "Induce ingestion errors and verify that failures are logged, alerts are triggered, and recovery mechanisms function as intended."
+            "testStrategy": "Run automated and manual tests for retrieval, metadata validation, and extensibility. Review results and address any issues found."
           }
         ]
       },
       {
         "id": 8,
-        "title": "Create Summary Page Rendering",
-        "description": "Develop the summary page to display post-call evaluation and feedback.",
-        "details": "Implement the '/summary/$id' route to render the post-call summary. Display rubric scores, evidence snippets, top gaps, and suggested study links. Ensure the summary is clear and actionable.",
-        "testStrategy": "Verify the summary page displays all required information correctly and is accessible.",
-        "priority": "medium",
-        "dependencies": [
-          4,
-          7
-        ],
-        "status": "pending",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Design Summary Page Layout",
-            "description": "Create a clear and actionable layout for the summary page that organizes rubric scores, evidence snippets, top gaps, and suggested study links.",
-            "dependencies": [],
-            "details": "Define the visual structure and user flow for the summary page, ensuring each required element is prominently and intuitively displayed.",
-            "status": "pending",
-            "testStrategy": "Review wireframes or mockups with stakeholders to confirm clarity and completeness of all required sections."
-          },
-          {
-            "id": 2,
-            "title": "Implement '/summary/$id' Route and Data Fetching",
-            "description": "Develop the backend and frontend logic to handle the '/summary/$id' route and retrieve the relevant post-call evaluation data.",
-            "dependencies": [
-              "8.1"
-            ],
-            "details": "Set up routing and ensure the page loads the correct summary data based on the session ID, integrating with backend APIs as needed.",
-            "status": "pending",
-            "testStrategy": "Test navigation to various summary pages and verify correct data is loaded for each session."
-          },
-          {
-            "id": 3,
-            "title": "Render Rubric Scores and Evidence Snippets",
-            "description": "Display rubric scores and supporting evidence snippets for the evaluated call in a user-friendly format.",
-            "dependencies": [
-              "8.2"
-            ],
-            "details": "Map rubric scores and evidence data to visual components, ensuring scores are easily interpretable and evidence is clearly linked.",
-            "status": "pending",
-            "testStrategy": "Verify rubric scores and evidence snippets are displayed accurately and are visually distinct."
-          },
-          {
-            "id": 4,
-            "title": "Highlight Top Gaps and Suggested Study Links",
-            "description": "Identify and present the most significant performance gaps and provide actionable study resources or links.",
-            "dependencies": [
-              "8.3"
-            ],
-            "details": "Analyze evaluation data to determine top gaps, then display them alongside curated or dynamically generated study links.",
-            "status": "pending",
-            "testStrategy": "Check that top gaps are correctly identified and that all suggested study links are relevant and functional."
-          },
-          {
-            "id": 5,
-            "title": "Ensure Accessibility and Actionability",
-            "description": "Review and enhance the summary page for accessibility compliance and actionable feedback presentation.",
-            "dependencies": [
-              "8.4"
-            ],
-            "details": "Apply accessibility best practices (e.g., ARIA roles, keyboard navigation) and ensure feedback is clear, concise, and actionable for users.",
-            "status": "pending",
-            "testStrategy": "Conduct accessibility audits and user testing to confirm the page is usable by all and feedback is easily understood."
-          }
-        ]
-      },
-      {
-        "id": 9,
-        "title": "Implement Session History Feature",
-        "description": "Develop functionality to view and manage past sessions and summaries.",
-        "details": "Create a session history page that lists past sessions with filters. Allow users to view detailed summaries and retake sessions with the same settings.",
-        "testStrategy": "Test the session history page to ensure it lists sessions correctly and allows navigation to detailed summaries.",
-        "priority": "low",
-        "dependencies": [
-          8
-        ],
-        "status": "pending",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Design Session History Data Model",
-            "description": "Define the data structures required to store session metadata, summaries, and filters for the session history feature.",
-            "dependencies": [],
-            "details": "Specify fields such as session ID, user ID, timestamps, session settings, summary data, and any filterable attributes. Ensure compatibility with existing session and transcript schemas.",
-            "status": "pending",
-            "testStrategy": "Review the data model for completeness and validate with sample data to ensure all required information for history and filtering is captured."
-          },
-          {
-            "id": 2,
-            "title": "Implement Backend APIs for Session History",
-            "description": "Develop backend endpoints to list, filter, and retrieve detailed session summaries, and to initiate a new session with previous settings.",
-            "dependencies": [
-              "9.1"
-            ],
-            "details": "Create APIs for listing sessions with filters (date, user, etc.), fetching session details, and cloning session settings for retake functionality.",
-            "status": "pending",
-            "testStrategy": "Write unit and integration tests to verify correct data retrieval, filtering, and retake session initialization."
-          },
-          {
-            "id": 3,
-            "title": "Develop Session History Page UI",
-            "description": "Build the frontend page to display a list of past sessions with filtering options and navigation to session details.",
-            "dependencies": [
-              "9.2"
-            ],
-            "details": "Use the defined data model and APIs to render session lists, implement filter controls, and ensure responsive, accessible design.",
-            "status": "pending",
-            "testStrategy": "Perform UI tests to confirm sessions are listed, filters work, and navigation to details is functional on all supported devices."
-          },
-          {
-            "id": 4,
-            "title": "Implement Session Summary View and Retake Action",
-            "description": "Enable users to view detailed session summaries and provide a mechanism to retake sessions with the same settings.",
-            "dependencies": [
-              "9.3"
-            ],
-            "details": "Display all relevant summary data and include a 'Retake Session' button that pre-fills the session configuration with previous settings.",
-            "status": "pending",
-            "testStrategy": "Test summary rendering for various session types and verify that retake action correctly initializes a new session with matching settings."
-          },
-          {
-            "id": 5,
-            "title": "End-to-End Testing and Validation",
-            "description": "Conduct comprehensive testing of the session history feature, including listing, filtering, summary viewing, and retake functionality.",
-            "dependencies": [
-              "9.4"
-            ],
-            "details": "Simulate user workflows to ensure all components interact correctly and the feature meets requirements for usability and reliability.",
-            "status": "pending",
-            "testStrategy": "Execute end-to-end tests covering all user scenarios and edge cases, and address any identified issues before release."
-          }
-        ]
-      },
-      {
-        "id": 10,
-        "title": "Configure Privacy and Security Measures",
-        "description": "Implement privacy and security measures for session data.",
-        "details": "Ensure transcripts and evaluations are stored securely and can be deleted on request. Display a notice about session recording. Implement rate limiting and session duration caps.",
-        "testStrategy": "Conduct security testing to verify data protection measures and compliance with privacy requirements.",
-        "priority": "high",
-        "dependencies": [
-          3,
-          6,
-          7
-        ],
-        "status": "pending",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Implement Secure Storage for Session Data",
-            "description": "Ensure all transcripts and evaluations are stored using secure, encrypted storage mechanisms to protect sensitive session data from unauthorized access.",
-            "dependencies": [],
-            "details": "Use strong encryption algorithms for data at rest and restrict access to authorized personnel or services only. Regularly audit storage access logs.",
-            "status": "pending",
-            "testStrategy": "Verify encryption is applied to stored data and attempt unauthorized access to confirm protections are effective."
-          },
-          {
-            "id": 2,
-            "title": "Enable Data Deletion on User Request",
-            "description": "Provide functionality for users to request deletion of their transcripts and evaluations, ensuring compliance with privacy regulations.",
-            "dependencies": [
-              "10.1"
-            ],
-            "details": "Implement a user interface and backend API to handle deletion requests, and ensure all related data is permanently removed from storage and backups.",
-            "status": "pending",
-            "testStrategy": "Submit deletion requests and confirm that all associated data is irretrievable from both primary and backup storage."
-          },
-          {
-            "id": 3,
-            "title": "Display Session Recording Notice",
-            "description": "Clearly inform users that their session is being recorded and data will be stored, in compliance with transparency and consent requirements.",
-            "dependencies": [],
-            "details": "Add a prominent notice or modal at session start, requiring user acknowledgment before proceeding.",
-            "status": "pending",
-            "testStrategy": "Check that the notice is displayed before session initiation and that user acknowledgment is logged."
-          },
-          {
-            "id": 4,
-            "title": "Implement Rate Limiting and Session Duration Caps",
-            "description": "Set and enforce limits on the number of requests per user and maximum session duration to prevent abuse and reduce security risks.",
-            "dependencies": [],
-            "details": "Configure backend to reject requests exceeding rate limits and automatically terminate sessions that exceed the allowed duration.",
-            "status": "pending",
-            "testStrategy": "Simulate excessive requests and prolonged sessions to verify that limits are enforced and appropriate errors or terminations occur."
-          },
-          {
-            "id": 5,
-            "title": "Enforce Secure Session Management Practices",
-            "description": "Apply best practices for session management, including secure session ID generation, HTTPS enforcement, session expiration, and proper logout mechanisms.",
-            "dependencies": [],
-            "details": "Use cryptographically secure random session IDs, ensure all session data is transmitted over HTTPS, set reasonable session timeouts, and provide clear logout functionality.",
-            "status": "pending",
-            "testStrategy": "Review session ID properties, test session expiration and logout, and verify all session traffic is encrypted."
-          }
-        ]
-      },
-      {
-        "id": 11,
-        "title": "Setup Testing and CI/CD Pipeline",
-        "description": "Establish a testing framework and continuous integration/deployment pipeline.",
-        "details": "Set up Jest for testing and configure a CI/CD pipeline using GitHub Actions. Ensure tests are run on every commit and deployment is automated for both frontend and backend.",
-        "testStrategy": "Verify that the CI/CD pipeline triggers on commits and all tests pass successfully before deployment.",
+        "title": "Implement Secure Persistence and Data Models in Convex",
+        "description": "Define and implement Convex tables for sessions, transcripts, scores, JD profiles, and snippet metadata, ensuring secure and efficient storage.",
+        "details": "Design Convex schema per PRD data models. Implement server functions for CRUD operations and secure access. Store secrets in server environment and ensure PII-light transcripts by default.",
+        "testStrategy": "Test data creation, retrieval, update, and deletion for all models. Validate security and privacy requirements.",
         "priority": "medium",
         "dependencies": [
           1
@@ -689,574 +493,345 @@
         "subtasks": [
           {
             "id": 1,
-            "title": "Install and Configure Jest for Frontend and Backend",
-            "description": "Set up Jest as the testing framework for both frontend and backend codebases, ensuring all necessary dependencies and configuration files are in place.",
+            "title": "Design Convex Schema for Required Data Models",
+            "description": "Define Convex tables for sessions, transcripts, scores, JD profiles, and snippet metadata, ensuring alignment with PRD data models and privacy requirements.",
             "dependencies": [],
-            "details": "Install Jest and related libraries (such as @testing-library/react for frontend and any backend-specific adapters). Create or update jest.config.js files for both codebases and verify integration with the project structure.",
+            "details": "Draft the schema in convex/schema.ts using defineSchema and defineTable, specifying fields, types, and indexes as needed for efficient querying and minimal PII exposure.",
             "status": "pending",
-            "testStrategy": "Run 'jest --version' and execute a sample test in both frontend and backend to confirm setup."
+            "testStrategy": "Review schema definitions for completeness and correctness; validate type safety and field constraints using TypeScript."
           },
           {
             "id": 2,
-            "title": "Write and Organize Initial Test Suites",
-            "description": "Develop initial unit and integration tests for critical frontend and backend components, and establish a directory structure for ongoing test development.",
+            "title": "Implement Secure CRUD Server Functions",
+            "description": "Develop server-side functions for create, read, update, and delete operations on all defined tables, enforcing access control and argument validation.",
             "dependencies": [
-              "11.1"
+              "8.1"
             ],
-            "details": "Create test directories and write sample tests covering key modules and endpoints. Ensure tests are discoverable by Jest and follow best practices for maintainability.",
+            "details": "Use Convex query and mutation wrappers with argument validators for all public functions. Ensure only authorized users can access or modify data, and restrict updates to allowed fields.",
             "status": "pending",
-            "testStrategy": "Run all tests locally and verify that they pass and provide meaningful coverage reports."
+            "testStrategy": "Test all CRUD endpoints for correct behavior, access control enforcement, and input validation using automated and manual tests."
           },
           {
             "id": 3,
-            "title": "Configure GitHub Actions for CI Pipeline",
-            "description": "Set up GitHub Actions workflows to automatically run tests on every commit and pull request for both frontend and backend.",
+            "title": "Integrate Secure Secret and Environment Variable Storage",
+            "description": "Configure Convex to store sensitive secrets (e.g., API keys) in the server environment, ensuring they are never exposed to clients or persisted in user-accessible tables.",
             "dependencies": [
-              "11.2"
+              "8.1"
             ],
-            "details": "Create .github/workflows YAML files specifying jobs for installing dependencies, running Jest tests, and reporting results. Ensure the workflow triggers on push and pull_request events.",
+            "details": "Leverage Convex environment variable support and server-only code to access secrets. Document usage patterns and audit code for accidental exposure.",
             "status": "pending",
-            "testStrategy": "Push a test commit and confirm that the CI pipeline runs and reports test results in the GitHub interface."
+            "testStrategy": "Verify secrets are accessible only in server context and not leaked to clients or logs; attempt unauthorized access to confirm isolation."
           },
           {
             "id": 4,
-            "title": "Automate Deployment for Frontend and Backend",
-            "description": "Extend the CI pipeline to include automated deployment steps for both frontend and backend upon successful test completion.",
+            "title": "Enforce PII-Light Transcript Storage by Default",
+            "description": "Implement logic to sanitize and minimize personally identifiable information (PII) in transcript storage, applying redaction or exclusion rules as required.",
             "dependencies": [
-              "11.3"
+              "8.2"
             ],
-            "details": "Add deployment jobs to the GitHub Actions workflows, integrating with hosting services (e.g., Vercel, Netlify, AWS, or custom servers) and ensuring environment variables and secrets are securely managed.",
+            "details": "Develop helper functions to process transcripts before storage, removing or masking PII fields. Document sanitization rules and ensure compliance with privacy standards.",
             "status": "pending",
-            "testStrategy": "Trigger a deployment via a commit and verify that both frontend and backend are updated in their respective environments."
+            "testStrategy": "Create test transcripts with PII, store them, and verify that stored data is PII-light according to defined rules."
           },
           {
             "id": 5,
-            "title": "Enforce Pre-Deployment Test Gates",
-            "description": "Ensure that deployments are only triggered if all tests pass, preventing faulty code from reaching production.",
+            "title": "Validate Data Security, Privacy, and Performance",
+            "description": "Conduct comprehensive testing of data creation, retrieval, update, and deletion for all models, with a focus on security, privacy, and storage efficiency.",
             "dependencies": [
-              "11.4"
+              "8.2",
+              "8.3",
+              "8.4"
             ],
-            "details": "Configure the CI/CD workflow to halt deployment steps if any test fails, and set up branch protection rules if necessary.",
+            "details": "Perform end-to-end tests simulating real usage, including edge cases for access control, data leakage, and schema evolution. Monitor performance and storage metrics.",
             "status": "pending",
-            "testStrategy": "Intentionally introduce a failing test, push a commit, and verify that deployment does not proceed until the issue is resolved."
+            "testStrategy": "Run automated and manual tests covering all CRUD operations, security boundaries, and privacy requirements; review logs and metrics for anomalies."
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Enable Agent-Driven UI Control via Tools API",
+        "description": "Allow the voice agent to trigger UI updates (e.g., show_snippet, highlight_lines) using clientTools and ConvAI Tools API.",
+        "details": "Implement clientTools interface in frontend and backend endpoints in Convex for agent-driven UI events. Ensure idempotency and reliable event handling. Integrate with voice agent state machine.",
+        "testStrategy": "Simulate agent-triggered UI events during sessions. Validate correct UI updates and backend event processing.",
+        "priority": "medium",
+        "dependencies": [
+          3,
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design ClientTools Interface for UI Event Triggers",
+            "description": "Specify and document the clientTools interface to support agent-driven UI events such as show_snippet and highlight_lines, ensuring clear event payload structure and extensibility.",
+            "dependencies": [],
+            "details": "Define the event types, payload schemas, and invocation patterns for clientTools. Ensure compatibility with frontend frameworks and future UI actions.",
+            "status": "pending",
+            "testStrategy": "Review interface documentation and simulate event payloads to verify schema correctness and extensibility."
+          },
+          {
+            "id": 2,
+            "title": "Implement Frontend Event Handling via ClientTools",
+            "description": "Integrate the clientTools interface into the frontend, enabling the voice agent to trigger UI updates and ensuring correct rendering of events like show_snippet and highlight_lines.",
+            "dependencies": [
+              "9.1"
+            ],
+            "details": "Connect clientTools to UI components, handle incoming event payloads, and update the UI reactively. Ensure event deduplication and idempotency in the UI layer.",
+            "status": "pending",
+            "testStrategy": "Simulate agent-triggered events and validate UI updates, checking for correct rendering and prevention of duplicate actions."
+          },
+          {
+            "id": 3,
+            "title": "Develop Convex Backend Endpoints for UI Event Processing",
+            "description": "Create Convex backend endpoints to receive, process, and persist agent-driven UI events, ensuring reliable event delivery and state synchronization.",
+            "dependencies": [
+              "9.1"
+            ],
+            "details": "Implement endpoints to accept UI event requests, validate payloads, and update session state. Ensure backend logic supports idempotency and event ordering.",
+            "status": "pending",
+            "testStrategy": "Send test events to endpoints, verify correct state updates, and confirm idempotent processing under repeated requests."
+          },
+          {
+            "id": 4,
+            "title": "Integrate Agent State Machine with Tools API",
+            "description": "Connect the voice agent's state machine to the Tools API, enabling it to trigger UI events at appropriate dialogue states and transitions.",
+            "dependencies": [
+              "9.2",
+              "9.3"
+            ],
+            "details": "Modify the agent state machine to invoke clientTools and backend endpoints during relevant states (e.g., after agent prompts or candidate responses). Ensure event triggers are contextually accurate.",
+            "status": "pending",
+            "testStrategy": "Run simulated interview flows, verifying that agent actions result in correct UI events and backend updates at each state transition."
+          },
+          {
+            "id": 5,
+            "title": "Validate End-to-End Idempotency and Reliability of Agent-Driven UI Events",
+            "description": "Test the complete flow from agent event trigger to UI update and backend processing, ensuring idempotency, reliability, and correct event handling under various scenarios.",
+            "dependencies": [
+              "9.2",
+              "9.3",
+              "9.4"
+            ],
+            "details": "Design test cases for duplicate event triggers, network failures, and concurrent sessions. Monitor event propagation and verify that UI and backend states remain consistent and correct.",
+            "status": "pending",
+            "testStrategy": "Simulate edge cases and failure scenarios, confirming that repeated or failed events do not cause inconsistent UI or backend states."
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Implement Session Analytics and Feature Flagging (Optional MVP Scope)",
+        "description": "Add basic product analytics and feature flagging to monitor usage and enable/disable features for experimentation.",
+        "details": "Integrate analytics service (e.g., PostHog, Segment) for session tracking and event logging. Implement feature flagging system to control access to experimental features. Ensure privacy compliance and minimal performance impact.",
+        "testStrategy": "Verify analytics event capture and feature flag toggling. Test reporting and privacy controls.",
+        "priority": "low",
+        "dependencies": [
+          1,
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define Analytics Objectives and Key Metrics",
+            "description": "Establish clear objectives for product analytics and identify the key metrics and events to track, ensuring alignment with business goals and MVP requirements.",
+            "dependencies": [],
+            "details": "Collaborate with stakeholders to determine what user behaviors, feature usage, and session data are most critical to monitor. Document the specific events and KPIs (e.g., session start, feature engagement, retention) that will guide analytics implementation.",
+            "status": "pending",
+            "testStrategy": "Review documented objectives and metrics with stakeholders to confirm completeness and alignment with business priorities."
+          },
+          {
+            "id": 2,
+            "title": "Integrate Analytics Service for Session Tracking",
+            "description": "Select and integrate a suitable analytics service (e.g., PostHog, Segment) to capture session data and log defined events within the product.",
+            "dependencies": [
+              "10.1"
+            ],
+            "details": "Implement SDKs or APIs for the chosen analytics platform in the codebase. Configure event tracking for all identified metrics, ensuring data is sent accurately and efficiently.",
+            "status": "pending",
+            "testStrategy": "Trigger tracked events in a test environment and verify their appearance in the analytics dashboard. Confirm that all required events are logged with correct metadata."
+          },
+          {
+            "id": 3,
+            "title": "Implement Feature Flagging System",
+            "description": "Develop or integrate a feature flagging solution to enable or disable experimental features dynamically for targeted user segments.",
+            "dependencies": [
+              "10.1"
+            ],
+            "details": "Choose a feature flagging tool or build a lightweight system. Integrate it with the product to control feature access based on flags, supporting experimentation and gradual rollouts.",
+            "status": "pending",
+            "testStrategy": "Toggle feature flags in staging and verify that features are enabled/disabled as expected for different user groups."
+          },
+          {
+            "id": 4,
+            "title": "Ensure Privacy Compliance and Performance Optimization",
+            "description": "Review analytics and feature flagging implementations to ensure compliance with privacy regulations (e.g., GDPR) and minimize performance impact.",
+            "dependencies": [
+              "10.2",
+              "10.3"
+            ],
+            "details": "Audit data collection for PII, implement user consent mechanisms if required, and optimize event logging to avoid latency or resource overhead.",
+            "status": "pending",
+            "testStrategy": "Conduct privacy compliance checks and performance profiling. Validate that no unauthorized PII is collected and that analytics do not degrade user experience."
+          },
+          {
+            "id": 5,
+            "title": "Validate Analytics Reporting and Feature Flag Controls",
+            "description": "Test and verify that analytics dashboards accurately reflect user sessions and events, and that feature flag toggling works as intended for experimentation.",
+            "dependencies": [
+              "10.4"
+            ],
+            "details": "Generate sample reports and review dashboards for data accuracy. Simulate feature flag changes and confirm correct feature exposure in the product.",
+            "status": "pending",
+            "testStrategy": "Cross-check analytics reports with manual event logs. Test feature flag scenarios and document results for QA sign-off."
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Integrate Clerk Authentication with Convex",
+        "description": "Integrate Clerk authentication with Convex to authenticate queries and mutations using Clerk JWTs.",
+        "details": "To integrate Clerk authentication with Convex, follow these steps:\n\n1. **Backend Configuration**: Update the `auth.config.ts` file in the Convex backend to validate Clerk JWTs. Configure the issuer domain and application ID as 'convex'. Ensure that the configuration supports both development and production environments.\n\n2. **Frontend Integration**: Utilize `ConvexProviderWithClerk` and `ClerkProvider` in the frontend. Implement authentication gating using `Authenticated`, `Unauthenticated`, and `useConvexAuth` components to manage access to Convex queries and mutations.\n\n3. **Function Updates**: Replace any legacy Convex authentication methods with `ctx.auth.getUserIdentity()` checks in all queries, mutations, and actions within the Convex functions.\n\n4. **Environment Variables**: Ensure that `VITE_CLERK_PUBLISHABLE_KEY` is set in the frontend environment and `CLERK_JWT_ISSUER_DOMAIN` is configured in the Convex backend environment.\n\n5. **Cleanup**: Remove any existing Convex Auth HTTP routes or providers that are no longer needed, aligning the system with the new authentication flow.\n\nRefer to the official Convex and Clerk documentation for detailed guidance and best practices.",
+        "testStrategy": "1. **Backend Testing**: Deploy the updated Convex backend and verify that JWT validation works correctly by testing with valid and invalid tokens.\n\n2. **Frontend Testing**: Ensure that the frontend correctly uses `ConvexProviderWithClerk` and `ClerkProvider` by logging in and accessing Convex queries and mutations. Test both authenticated and unauthenticated states.\n\n3. **Function Testing**: Review all Convex functions to ensure they use `ctx.auth.getUserIdentity()` and test their behavior with authenticated and unauthenticated requests.\n\n4. **Environment Testing**: Verify that the environment variables `VITE_CLERK_PUBLISHABLE_KEY` and `CLERK_JWT_ISSUER_DOMAIN` are correctly set and accessible in their respective environments.\n\n5. **Cleanup Verification**: Confirm that all legacy Convex Auth routes and providers have been removed and that the new authentication flow is fully operational.",
+        "status": "done",
+        "dependencies": [
+          1,
+          8
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Configure Convex Backend for Clerk JWT Validation",
+            "description": "Update the Convex backend authentication configuration to validate Clerk JWTs, setting the issuer domain and application ID as 'convex'. Ensure the configuration supports both development and production environments.",
+            "dependencies": [],
+            "details": "Edit or create the `auth.config.ts` file in the Convex backend, referencing the Clerk issuer domain via environment variables (e.g., `CLERK_JWT_ISSUER_DOMAIN`) and set the application ID to 'convex'. Follow Convex and Clerk documentation for correct configuration.\n<info added on 2025-08-10T19:47:13.864Z>\nBackend edits completed:\n- Updated `convex/auth.config.ts` to use `process.env.CLERK_JWT_ISSUER_DOMAIN` with `applicationID: \"convex\"` per Convex & Clerk docs.\n- Removed Convex Auth HTTP routes from `convex/http.ts` (commented import and addHttpRoutes line).\n- Refactored `convex/users.ts` to Clerk via `ctx.auth.getUserIdentity()`; replaced `@convex-dev/auth` usages. Strongly typed identity.subject as `Id<\"users\">`.\n\nNext:\n- Ensure `CLERK_JWT_ISSUER_DOMAIN` is set in Convex dashboard (dev/prod) and `VITE_CLERK_PUBLISHABLE_KEY` in the app env. Then run `npx convex dev` to sync config.\n\nReference: [Convex & Clerk](https://docs.convex.dev/auth/clerk)\n</info added on 2025-08-10T19:47:13.864Z>",
+            "status": "done",
+            "testStrategy": "Deploy the backend and verify that valid Clerk JWTs are accepted and invalid tokens are rejected in both development and production environments."
+          },
+          {
+            "id": 2,
+            "title": "Set Required Environment Variables",
+            "description": "Ensure all necessary environment variables for Clerk and Convex integration are set in both frontend and backend environments.",
+            "dependencies": [
+              "11.1"
+            ],
+            "details": "Set `VITE_CLERK_PUBLISHABLE_KEY` in the frontend environment and `CLERK_JWT_ISSUER_DOMAIN` in the Convex backend environment. Confirm values are correct for each deployment environment.",
+            "status": "done",
+            "testStrategy": "Check that environment variables are loaded and accessible in both frontend and backend during local development and production deployment."
+          },
+          {
+            "id": 3,
+            "title": "Integrate Clerk and Convex Providers in Frontend",
+            "description": "Implement `ClerkProvider` and `ConvexProviderWithClerk` in the frontend, ensuring correct provider nesting and context propagation.",
+            "dependencies": [
+              "11.2"
+            ],
+            "details": "Wrap the application with `ClerkProvider` and then with a client-side wrapper for `ConvexProviderWithClerk`, passing Clerk's `useAuth` hook as required. Ensure provider order and context are correct as per documentation.",
+            "status": "done",
+            "testStrategy": "Render the application and verify that authentication context is available to all child components. Test login/logout flows and confirm Convex queries/mutations require authentication."
+          },
+          {
+            "id": 4,
+            "title": "Implement Authentication Gating in Frontend",
+            "description": "Use authentication gating components (`Authenticated`, `Unauthenticated`, `useConvexAuth`) to control access to Convex queries and mutations based on user authentication state.",
+            "dependencies": [
+              "11.3"
+            ],
+            "details": "Integrate gating components to restrict access to protected routes and UI elements. Display appropriate UI for authenticated and unauthenticated users.",
+            "status": "done",
+            "testStrategy": "Test navigation and access control by logging in and out, ensuring protected resources are only accessible to authenticated users."
+          },
+          {
+            "id": 5,
+            "title": "Update Convex Functions to Use Clerk Authentication",
+            "description": "Refactor all Convex queries, mutations, and actions to use `ctx.auth.getUserIdentity()` for authentication, replacing any legacy Convex authentication logic.",
+            "dependencies": [
+              "11.1"
+            ],
+            "details": "Audit all backend functions and update them to check user identity using Clerk JWTs via `ctx.auth.getUserIdentity()`. Remove or replace any deprecated authentication checks.",
+            "status": "done",
+            "testStrategy": "Invoke queries and mutations with and without valid authentication, confirming correct access control and error handling."
+          },
+          {
+            "id": 6,
+            "title": "Remove Legacy Convex Auth Providers and Routes",
+            "description": "Clean up the codebase by removing any obsolete Convex Auth HTTP routes or providers that are no longer needed after Clerk integration.",
+            "dependencies": [
+              "11.5"
+            ],
+            "details": "Identify and delete legacy authentication code, routes, and configuration files to prevent conflicts and maintain a clean authentication flow.\n<info added on 2025-08-10T21:52:31.870Z>\nCleanup completed:\n- Removed @convex-dev/auth dependency from `packages/backend/package.json`.\n- Removed legacy Google auth envs from `packages/backend/convex/env.ts`.\n- Confirmed no remaining references to `@convex-dev/auth` or `getAuthUserId`.\n\nFollow-ups:\n- Run `bun install` at repo root to refresh lockfile.\n- Verify Convex deploy remains healthy after dependency cleanup.\n\nReference: [Convex & Clerk](https://docs.convex.dev/auth/clerk)\n</info added on 2025-08-10T21:52:31.870Z>",
+            "status": "done",
+            "testStrategy": "Review the codebase to ensure no legacy authentication logic remains. Run end-to-end tests to confirm the new authentication flow is fully functional."
           }
         ]
       },
       {
         "id": 12,
-        "title": "Conduct User Acceptance Testing (UAT)",
-        "description": "Perform user acceptance testing to validate the application against requirements.",
-        "details": "Organize UAT sessions with stakeholders to test the application in real-world scenarios. Collect feedback and identify any issues or improvements needed.",
-        "testStrategy": "Document UAT findings and ensure all critical issues are resolved before release.",
-        "priority": "high",
+        "title": "Align Convex User Model with Clerk and Webhooks",
+        "description": "Integrate Clerk user management with Convex by maintaining user documents keyed by Clerk ID, adding webhooks, and ensuring user data synchronization.",
+        "details": "1. **User Document Management**: Implement a Convex table to store user-specific documents keyed by Clerk's subject ID (clerkId). This table should hold app-specific data such as subscriptions, credits, and user preferences.\n\n2. **Ensure Current User Mutation**: Develop a mutation named `ensureCurrentUserRecord` that upserts a user document upon the first authenticated call using the clerkId. This mutation should be idempotent, ensuring that repeated calls do not create duplicate entries.\n\n3. **Webhook Endpoint for Clerk Events**: Create a Convex httpAction endpoint at `/clerk/webhook` to handle Clerk webhook events, specifically `user.deleted`. This endpoint should delete the corresponding user document in Convex when a user is deleted in Clerk.\n\n4. **Remove Redundant Operations**: Eliminate any existing operations in Convex that duplicate Clerk's profile management, such as image or account deletion. Ensure that these operations are handled via the webhook to maintain consistency.\n\n5. **Data Integrity and Migration**: Ensure that there are no references to legacy Convex Auth tables. Migrate any necessary data to the new users table indexed by clerkId.",
+        "testStrategy": "1. **Identity Query Verification**: Test the `whoami` query to ensure it returns the correct identity information based on the Clerk authentication.\n\n2. **Mutation Testing**: Verify that the `ensureCurrentUserRecord` mutation correctly creates a user document when it does not exist and is idempotent upon repeated calls.\n\n3. **Webhook Functionality**: Simulate `user.deleted` events from Clerk and confirm that the `/clerk/webhook` endpoint deletes the corresponding user document in Convex.\n\n4. **Legacy System Check**: Ensure that there are no remaining references to the legacy Convex Auth tables and that all user data is correctly indexed by clerkId.",
+        "status": "pending",
         "dependencies": [
           8,
-          10
+          11
         ],
-        "status": "pending",
+        "priority": "high",
         "subtasks": [
           {
             "id": 1,
-            "title": "Define UAT Scope and Objectives",
-            "description": "Establish the scope, objectives, and success criteria for user acceptance testing based on business requirements and project documentation.",
+            "title": "Create Convex User Table Keyed by Clerk ID",
+            "description": "Implement a Convex table to store user-specific documents keyed by Clerk's subject ID (clerkId). This table should hold app-specific data such as subscriptions, credits, and user preferences.",
             "dependencies": [],
-            "details": "Review requirements and user stories to clarify what needs to be validated during UAT. Document the scope, objectives, and entry/exit criteria for the testing phase.",
+            "details": "Use the Convex schema definition to create a new table named 'users'. Define the primary key as 'clerkId' and include fields for storing user-specific data like subscriptions, credits, and preferences. Ensure the table schema is properly documented and integrated into the existing Convex setup.",
             "status": "pending",
-            "testStrategy": "Verify that all requirements and objectives are clearly documented and agreed upon by stakeholders before proceeding."
+            "testStrategy": "Verify the table creation by checking the Convex dashboard and ensure that the schema matches the requirements. Test inserting and retrieving data using the clerkId as the key."
           },
           {
             "id": 2,
-            "title": "Design UAT Test Cases and Scenarios",
-            "description": "Develop detailed test cases and real-world scenarios that reflect user requirements and expected workflows.",
+            "title": "Develop ensureCurrentUserRecord Mutation",
+            "description": "Create a mutation named `ensureCurrentUserRecord` that upserts a user document upon the first authenticated call using the clerkId. Ensure the mutation is idempotent.",
             "dependencies": [
               "12.1"
             ],
-            "details": "Create specific, measurable test cases for each feature or process to be validated. Ensure scenarios simulate realistic user interactions and cover critical functionality.",
+            "details": "Implement the `ensureCurrentUserRecord` mutation in the Convex backend. Use Convex's mutation API to check if a user document exists for the given clerkId. If not, create a new document with default values. Ensure that repeated calls with the same clerkId do not create duplicate entries.",
             "status": "pending",
-            "testStrategy": "Review test cases with stakeholders to confirm coverage and clarity; ensure each test case has clear pass/fail criteria."
+            "testStrategy": "Test the mutation by calling it with a new clerkId and verify that a new user document is created. Call it again with the same clerkId and ensure no duplicate document is created."
           },
           {
             "id": 3,
-            "title": "Prepare UAT Environment and Data",
-            "description": "Set up a dedicated UAT environment that closely mirrors production, including necessary hardware, software, and test data.",
+            "title": "Implement Clerk Webhook Endpoint for User Deletion",
+            "description": "Create a Convex httpAction endpoint at `/clerk/webhook` to handle Clerk webhook events, specifically `user.deleted`. This endpoint should delete the corresponding user document in Convex.",
             "dependencies": [
+              "12.1",
               "12.2"
             ],
-            "details": "Configure the environment to match production settings and load representative data sets to enable accurate testing.",
+            "details": "Set up a new HTTP endpoint in the Convex backend to listen for POST requests from Clerk's webhook. Parse the incoming request to extract the clerkId and delete the corresponding user document from the Convex table. Ensure proper authentication and validation of webhook requests.",
             "status": "pending",
-            "testStrategy": "Validate that the environment is stable and accessible to all testers, and that test data supports all planned scenarios."
+            "testStrategy": "Simulate a `user.deleted` event from Clerk and verify that the corresponding user document is removed from the Convex table. Check for proper handling of invalid or unauthorized requests."
           },
           {
             "id": 4,
-            "title": "Execute UAT Sessions with Stakeholders",
-            "description": "Coordinate and conduct UAT sessions, guiding stakeholders through test cases and capturing feedback, issues, and improvement suggestions.",
+            "title": "Remove Redundant Convex Operations and Migrate Data",
+            "description": "Eliminate any existing operations in Convex that duplicate Clerk's profile management and migrate necessary data to the new users table indexed by clerkId.",
             "dependencies": [
+              "12.1",
+              "12.2",
               "12.3"
             ],
-            "details": "Facilitate testing sessions, provide instructions, and ensure all scenarios are executed. Record defects, usability concerns, and enhancement requests.",
+            "details": "Review the current Convex operations related to user profile management and identify any that are redundant due to Clerk integration. Remove these operations and ensure that all necessary user data is migrated to the new 'users' table. Update any references in the codebase to use the new table structure.",
             "status": "pending",
-            "testStrategy": "Track completion of all test cases and document all findings in a centralized tracking tool."
-          },
-          {
-            "id": 5,
-            "title": "Document Results and Manage Sign-Off",
-            "description": "Compile UAT findings, track issue resolution, and obtain formal sign-off from stakeholders upon successful completion.",
-            "dependencies": [
-              "12.4"
-            ],
-            "details": "Summarize test results, prioritize and assign issues for resolution, and confirm that all critical items are addressed. Prepare a sign-off document for stakeholder approval.",
-            "status": "pending",
-            "testStrategy": "Ensure all critical issues are resolved and acceptance criteria are met before obtaining stakeholder sign-off."
-          }
-        ]
-      },
-      {
-        "id": 13,
-        "title": "Optimize Performance and Latency",
-        "description": "Improve application performance and reduce latency for a better user experience.",
-        "details": "Analyze performance bottlenecks and optimize code and configurations. Focus on reducing audio latency and improving response times.",
-        "testStrategy": "Conduct performance testing to measure improvements and ensure latency is within acceptable limits.",
-        "priority": "medium",
-        "dependencies": [
-          5,
-          11
-        ],
-        "status": "pending",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Identify and Analyze Performance Bottlenecks",
-            "description": "Profile the application to detect areas causing high latency or slow performance, with a focus on audio processing and response times.",
-            "dependencies": [],
-            "details": "Use profiling tools and performance monitoring to gather metrics on CPU, memory, network, and audio processing. Document the most significant bottlenecks affecting user experience.",
-            "status": "pending",
-            "testStrategy": "Establish baseline performance metrics and verify that bottlenecks are reproducible and measurable."
-          },
-          {
-            "id": 2,
-            "title": "Optimize Code and Resource Loading",
-            "description": "Refactor inefficient code, minimize HTTP requests, and optimize resource loading to improve overall application speed.",
-            "dependencies": [
-              "13.1"
-            ],
-            "details": "Reduce unnecessary HTTP requests, bundle and compress JavaScript and CSS files, and remove redundant code. Implement lazy loading for non-critical resources.",
-            "status": "pending",
-            "testStrategy": "Measure load times and resource usage before and after optimizations to confirm improvements."
-          },
-          {
-            "id": 3,
-            "title": "Implement Caching and Content Delivery Strategies",
-            "description": "Introduce caching mechanisms and utilize a Content Delivery Network (CDN) to reduce latency and accelerate asset delivery.",
-            "dependencies": [
-              "13.1"
-            ],
-            "details": "Configure server and client-side caching for static assets and frequently accessed data. Set up a CDN to serve static files closer to users.",
-            "status": "pending",
-            "testStrategy": "Test cache hit rates and CDN effectiveness by measuring asset load times from different geographic locations."
-          },
-          {
-            "id": 4,
-            "title": "Reduce Audio Latency and Optimize Audio Processing",
-            "description": "Analyze and optimize the audio pipeline to minimize latency and ensure real-time responsiveness.",
-            "dependencies": [
-              "13.1"
-            ],
-            "details": "Profile audio processing steps, optimize buffer sizes, and reduce unnecessary processing. Ensure audio codecs and streaming configurations are tuned for low latency.",
-            "status": "pending",
-            "testStrategy": "Conduct audio latency tests and verify that end-to-end audio delay meets target thresholds."
-          },
-          {
-            "id": 5,
-            "title": "Conduct Performance and Latency Testing",
-            "description": "Systematically test the application to validate performance improvements and ensure latency targets are met.",
-            "dependencies": [
-              "13.2",
-              "13.3",
-              "13.4"
-            ],
-            "details": "Use automated and manual testing tools to measure response times, throughput, and audio latency under various conditions. Document results and regressions.",
-            "status": "pending",
-            "testStrategy": "Compare test results against baseline metrics and acceptance criteria to confirm all optimizations are effective."
-          }
-        ]
-      },
-      {
-        "id": 14,
-        "title": "Prepare for Deployment and Release",
-        "description": "Finalize preparations for deploying the MVP to production.",
-        "details": "Ensure all features are complete and tested. Prepare deployment scripts and documentation. Coordinate with stakeholders for a smooth release.",
-        "testStrategy": "Perform a final review and checklist to ensure readiness for production deployment.",
-        "priority": "high",
-        "dependencies": [
-          12,
-          13
-        ],
-        "status": "pending",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Verify Feature Completion and Testing",
-            "description": "Ensure all MVP features are fully implemented and have passed comprehensive testing, including unit, integration, and user acceptance tests.",
-            "dependencies": [],
-            "details": "Review the feature list against requirements, confirm all acceptance criteria are met, and validate that all critical bugs are resolved. Conduct a final round of regression and smoke testing to ensure stability.",
-            "status": "pending",
-            "testStrategy": "Use a deployment readiness checklist and execute final test suites to confirm no critical issues remain before proceeding."
-          },
-          {
-            "id": 2,
-            "title": "Prepare Deployment Scripts and Automation",
-            "description": "Develop, review, and finalize deployment scripts and automation pipelines to ensure a repeatable and reliable production deployment process.",
-            "dependencies": [
-              "14.1"
-            ],
-            "details": "Create or update scripts for build, deployment, and rollback. Integrate with CI/CD tools and verify environment-specific configurations are correct.",
-            "status": "pending",
-            "testStrategy": "Perform a dry run of the deployment process in a staging environment and validate successful completion without errors."
-          },
-          {
-            "id": 3,
-            "title": "Finalize Documentation",
-            "description": "Complete and review all necessary documentation for deployment, release notes, and operational procedures.",
-            "dependencies": [
-              "14.1"
-            ],
-            "details": "Document deployment steps, environment variables, configuration settings, and troubleshooting procedures. Prepare release notes for stakeholders and end users.",
-            "status": "pending",
-            "testStrategy": "Have documentation peer-reviewed and validated by a team member not involved in its creation to ensure clarity and completeness."
-          },
-          {
-            "id": 4,
-            "title": "Coordinate Stakeholder Communication and Release Planning",
-            "description": "Engage with all relevant stakeholders to align on the deployment schedule, release plan, and support expectations.",
-            "dependencies": [
-              "14.2",
-              "14.3"
-            ],
-            "details": "Schedule release windows, communicate timelines, and ensure support resources are available. Confirm all stakeholders are informed of the release process and contingency plans.",
-            "status": "pending",
-            "testStrategy": "Conduct a release readiness meeting and distribute a release checklist to all stakeholders for sign-off."
-          },
-          {
-            "id": 5,
-            "title": "Execute Production Deployment and Post-Release Validation",
-            "description": "Deploy the MVP to the production environment and perform post-release validation to ensure successful launch and system stability.",
-            "dependencies": [
-              "14.4"
-            ],
-            "details": "Follow the finalized deployment process, monitor system health, and validate key user flows post-release. Be prepared to execute rollback procedures if critical issues are detected.",
-            "status": "pending",
-            "testStrategy": "Monitor application metrics, run smoke tests in production, and confirm with stakeholders that the release meets acceptance criteria."
-          }
-        ]
-      },
-      {
-        "id": 15,
-        "title": "Integrate Polar Payments with Minute-Based Credits",
-        "description": "Implement Polar payment integration with a system for managing minute-based credits, including checkout, webhooks, balance display, and session gating.",
-        "details": "To integrate Polar payments with minute-based credits, first, design a credit management system where 1 credit equals 60 minutes. Implement a checkout process that allows users to purchase credits via Polar. Set up webhooks to handle payment confirmations and update user balances accordingly. Display the current credit balance to users on their dashboard. Implement session gating to restrict access based on available credits, deducting credits as sessions are used. Ensure the backend schema supports transactions and credit management, and update APIs to handle credit operations.",
-        "testStrategy": "Verify the checkout process by simulating a purchase and ensuring credits are added to the user's account. Test webhooks by sending mock payment confirmations and checking balance updates. Display the credit balance on the user dashboard and ensure it reflects the correct amount. Conduct a session and verify that credits are deducted appropriately. Ensure session gating prevents access when credits are insufficient.",
-        "status": "pending",
-        "dependencies": [
-          1,
-          3,
-          7
-        ],
-        "priority": "high",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Design Convex Schema for Purchases and Credits Ledger",
-            "description": "Define and implement the backend Convex schema to support purchase records, a credits ledger, and user balances. Ensure the schema can track credit purchases, usage, and support transactional integrity.",
-            "dependencies": [],
-            "details": "Create tables/collections for purchases, credits_ledger, and user balances. Ensure each purchase and credit transaction is recorded with necessary metadata for auditing and reconciliation.",
-            "status": "pending",
-            "testStrategy": "Verify schema by creating, updating, and querying purchase and credit records. Ensure transactional consistency and correct balance calculations."
-          },
-          {
-            "id": 2,
-            "title": "Implement createCheckout API and Polar Checkout Link",
-            "description": "Develop an API endpoint to initiate Polar checkout sessions for purchasing minute-based credits. Integrate with Polar's SDK to generate checkout links tied to user accounts and selected credit packages.",
-            "dependencies": [
-              "15.1"
-            ],
-            "details": "Use Polar's API to create checkout sessions, passing user identifiers and product IDs. Return the checkout URL to the frontend for user redirection.",
-            "status": "pending",
-            "testStrategy": "Test API by initiating checkouts and confirming correct link generation and user association."
-          },
-          {
-            "id": 3,
-            "title": "Set Up Webhook Handler for Payment Confirmation and Ledger Updates",
-            "description": "Configure a secure webhook endpoint to receive payment confirmation events from Polar. On successful payment, update the credits ledger and user balance accordingly.",
-            "dependencies": [
-              "15.2"
-            ],
-            "details": "Implement webhook signature verification. On payment confirmation, record the purchase, update the credits ledger, and increment the user's available credits.",
-            "status": "pending",
-            "testStrategy": "Simulate webhook events from Polar and verify that user balances and ledger entries are updated accurately."
-          },
-          {
-            "id": 4,
-            "title": "Implement Credit Balance Query and UI Banner",
-            "description": "Develop backend and frontend logic to fetch and display the user's current credit balance. Show a prominent banner or indicator on the dashboard reflecting available minutes.",
-            "dependencies": [
-              "15.1",
-              "15.3"
-            ],
-            "details": "Expose an API to retrieve the current credit balance. Update the frontend to display this information in real time, ensuring users are always aware of their available minutes.",
-            "status": "pending",
-            "testStrategy": "Check that the balance display updates immediately after purchases and credit usage."
-          },
-          {
-            "id": 5,
-            "title": "Develop Session Minute Reservation and Finalization Logic",
-            "description": "Implement logic to reserve and deduct credits as sessions are started and completed. Ensure credits are only deducted for actual session usage and handle edge cases such as session cancellation.",
-            "dependencies": [
-              "15.1",
-              "15.4"
-            ],
-            "details": "On session start, reserve the required number of credits. On session end, finalize the deduction based on actual minutes used, updating the credits ledger and user balance.",
-            "status": "pending",
-            "testStrategy": "Run session simulations to verify correct credit reservation, deduction, and rollback on cancellation."
-          },
-          {
-            "id": 6,
-            "title": "Create Basic Admin Audit View for Purchases and Credits",
-            "description": "Build an admin interface to audit all purchases, credits ledger entries, and user balances. Provide filters and search to review transactions and investigate discrepancies.",
-            "dependencies": [
-              "15.1",
-              "15.3"
-            ],
-            "details": "Display a list of all purchases and ledger entries with relevant metadata. Allow admins to search by user, date, or transaction type.",
-            "status": "pending",
-            "testStrategy": "Verify that all transactions are visible, searchable, and accurately reflect the underlying data."
-          }
-        ]
-      },
-      {
-        "id": 16,
-        "title": "Codify Shadcn/Tailwind Theme Tokens for Brutalist UI",
-        "description": "Define and implement theme tokens for a minimalistic 'brutalist' UI using Shadcn and Tailwind in the packages/ui directory, and integrate them into the apps/app.",
-        "details": "Begin by researching the characteristics of a 'brutalist' UI to inform the design of theme tokens. Define a color palette that reflects the brutalist aesthetic, focusing on stark contrasts and minimalistic colors. Establish a typography scale that emphasizes bold, utilitarian fonts. Set up design tokens for border radius, border styles, spacing, and focus outlines to maintain consistency across the UI. Implement these tokens in the packages/ui directory using Tailwind's configuration files. Ensure that these tokens are wired into the apps/app, allowing for consistent styling across the application. Consider using Tailwind's theme extension capabilities to customize the default theme with these new tokens.",
-        "testStrategy": "Verify the implementation by creating sample components in the apps/app that utilize the new theme tokens. Check that the color palette, typography, and other design tokens are applied correctly and consistently. Conduct visual regression testing to ensure that the UI maintains a cohesive brutalist style. Test the responsiveness of the UI to ensure that the design tokens work well on different screen sizes. Additionally, review the Tailwind configuration files to confirm that the tokens are defined and integrated correctly.",
-        "status": "pending",
-        "dependencies": [
-          1,
-          4
-        ],
-        "priority": "medium",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Research and Define Brutalist UI Theme Tokens",
-            "description": "Research the characteristics of a 'brutalist' UI and define theme tokens including color palette, typography scale, border radius, border styles, spacing, and focus outlines.",
-            "dependencies": [],
-            "details": "Conduct research on brutalist design principles, focusing on stark contrasts and minimalistic elements. Define a color palette that reflects these principles. Establish a typography scale with bold, utilitarian fonts. Determine design tokens for border radius, border styles, spacing, and focus outlines to ensure consistency across the UI.",
-            "status": "pending",
-            "testStrategy": "Review the defined tokens with design stakeholders to ensure they align with brutalist principles."
-          },
-          {
-            "id": 2,
-            "title": "Implement Tailwind Theme Tokens in packages/ui",
-            "description": "Implement the defined theme tokens in the Tailwind configuration files within the packages/ui directory.",
-            "dependencies": [
-              "16.1"
-            ],
-            "details": "Modify the Tailwind configuration files in the packages/ui directory to include the newly defined theme tokens. Use Tailwind's theme extension capabilities to customize the default theme with the new tokens for colors, typography, spacing, border radius, and focus outlines.",
-            "status": "pending",
-            "testStrategy": "Create a sample Tailwind component in packages/ui to verify that the theme tokens are applied correctly."
-          },
-          {
-            "id": 3,
-            "title": "Export and Integrate Tokenized CSS Variables",
-            "description": "Export the theme tokens as CSS variables in globals.css and integrate them into the apps/app for consistent styling.",
-            "dependencies": [
-              "16.2"
-            ],
-            "details": "In the packages/ui directory, export the theme tokens as CSS variables in the globals.css file. Ensure these variables are accessible in the apps/app by importing the globals.css file. Verify that the tokens are correctly applied across different components in the app.",
-            "status": "pending",
-            "testStrategy": "Check that the CSS variables are correctly exported and consumed in the apps/app by inspecting the styles of various components."
-          },
-          {
-            "id": 4,
-            "title": "Audit and Apply Theme Tokens to Core Components",
-            "description": "Audit core components such as buttons, inputs, and dialogs to ensure they utilize the newly defined theme tokens.",
-            "dependencies": [
-              "16.3"
-            ],
-            "details": "Review the core components in the apps/app to identify areas where the new theme tokens can be applied. Update the component styles to use the tokenized CSS variables for colors, typography, spacing, and other design elements. Ensure that the components reflect the brutalist aesthetic consistently.",
-            "status": "pending",
-            "testStrategy": "Conduct visual regression testing on the core components to ensure they adhere to the brutalist design and that the theme tokens are applied consistently."
-          }
-        ]
-      },
-      {
-        "id": 17,
-        "title": "Migrate Authentication from Convex to Clerk",
-        "description": "Transition the authentication system from Convex's Google provider to Clerk, ensuring compatibility with the TanStack app.",
-        "details": "Begin by removing the existing Convex authentication setup, specifically targeting the @convex-dev/auth package and its Google provider integration. Install and configure Clerk as the new authentication provider. Update the authentication flow to utilize Clerk's session management and user verification features. Ensure that all existing authentication-related code and routes are updated to work with Clerk. This includes updating any backend logic in Convex to verify Clerk sessions and ensuring that user data is correctly handled and stored. Coordinate with frontend routes to ensure seamless integration with the new authentication system. Additionally, update any documentation and configuration files to reflect the changes in the authentication provider.",
-        "testStrategy": "Verify the migration by conducting end-to-end tests that include user login, session management, and logout processes using Clerk. Ensure that user data is correctly retrieved and stored during these processes. Test the integration with Convex to confirm that Clerk sessions are properly verified and that the application functions as expected without any authentication errors. Conduct regression testing on all routes and features that involve user authentication to ensure no disruptions occur.",
-        "status": "in-progress",
-        "dependencies": [
-          1,
-          3,
-          4
-        ],
-        "priority": "high",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Audit Current Authentication Usage",
-            "description": "Identify and document all instances where the current Convex authentication system is used within the codebase.",
-            "dependencies": [],
-            "details": "Search the codebase for imports and usage of Convex authentication methods such as getAuthUserId, convexAuth, and auth.addHttpRoutes. Document where these are used to understand the scope of changes required.\n<info added on 2025-08-07T22:13:35.247Z>\nFiles to audit for Convex auth usage: `packages/backend/convex/auth.ts` (convexAuth, providers), `packages/backend/convex/auth.config.ts` (provider domain), `packages/backend/convex/http.ts` (auth.addHttpRoutes), `packages/backend/convex/users.ts` (getAuthUserId), plus any imports from @convex-dev/auth/server. Goal: replace with Clerk per Convex docs.\n</info added on 2025-08-07T22:13:35.247Z>\n<info added on 2025-08-08T09:03:01.209Z>\nWork log: Migrating Convex Auth to Clerk JWT verification.\n- Verified frontend already uses Clerk via @clerk/tanstack-react-start and wrapped the app in ClerkProvider\n- Added ConvexProviderWithClerk and ConvexReactClient in `apps/app/src/routes/__root.tsx` and wired `useAuth`\n- Added `@syntaxia/ui/globals.css` and loaded Space Mono for the Brutalist mono theme; applied `font-mono`\n- Created stub routes: `/session` (gated with convex/react Authenticated/Unauthenticated) and `/summary/$id`\n- Backend: updated `packages/backend/convex/auth.config.ts` to use `process.env.CLERK_JWT_ISSUER_DOMAIN` with applicationID \"convex\" per Convex Clerk docs\n- Removed Convex Auth HTTP routes from `packages/backend/convex/http.ts` (will rely on Clerk JWT validation)\n- App: added `convex` dep and configured client with `VITE_CONVEX_URL`\nEnv/config to set:\n- VITE_CLERK_PUBLISHABLE_KEY in app env\n- VITE_CONVEX_URL in app env (Convex deployment URL)\n- CLERK_JWT_ISSUER_DOMAIN on Convex backend (Convex Dashboard) to match Clerk JWT template named \"convex\"\nReferences: https://docs.convex.dev/auth/clerk\n</info added on 2025-08-08T09:03:01.209Z>",
-            "status": "done",
-            "testStrategy": "Verify that all instances of Convex authentication usage are identified and documented."
-          },
-          {
-            "id": 2,
-            "title": "Install and Configure Clerk",
-            "description": "Set up Clerk as the new authentication provider by installing necessary packages and configuring environment variables.",
-            "dependencies": [
-              "17.1"
-            ],
-            "details": "Install Clerk's SDK and configure it by setting up environment variables for Clerk API keys. Ensure that Clerk is properly initialized in the application.\n<info added on 2025-08-07T22:13:37.223Z>\nConfigure Clerk for Convex by creating a Clerk JWT template named \"convex\". Set the `CLERK_JWT_ISSUER_DOMAIN` in the Convex dashboard or environment. In `packages/backend/convex/auth.config.ts`, set `providers[0].domain = process.env.CLERK_JWT_ISSUER_DOMAIN`. After making these changes, run `npx convex dev`.\n</info added on 2025-08-07T22:13:37.223Z>",
-            "status": "pending",
-            "testStrategy": "Test Clerk initialization by checking if the application can connect to Clerk's services without errors."
-          },
-          {
-            "id": 3,
-            "title": "Integrate Clerk with Backend",
-            "description": "Replace Convex authentication flows with Clerk's session management and user verification features in the backend.",
-            "dependencies": [
-              "17.1",
-              "17.2"
-            ],
-            "details": "Update backend logic to use Clerk's userId extraction and session verification methods. Replace Convex's getAuthUserId and convexAuth with Clerk's equivalent functions.\n<info added on 2025-08-07T22:13:39.770Z>\nRemove `getAuthUserId` from `@convex-dev/auth` and replace it with `const identity = await ctx.auth.getUserIdentity(); if (!identity) throw new Error(\"Not authenticated\"); const userId = identity.subject;`. Update all queries and mutations in `packages/backend/convex/users.ts` to reflect this change. Refer to the Clerk documentation for guidance on using authentication state in Convex functions.\n</info added on 2025-08-07T22:13:39.770Z>",
-            "status": "pending",
-            "testStrategy": "Ensure backend endpoints correctly authenticate and authorize users using Clerk."
-          },
-          {
-            "id": 4,
-            "title": "Remove Convex Authentication",
-            "description": "Disable and remove Convex authentication routes and providers from the application.",
-            "dependencies": [
-              "17.1",
-              "17.3"
-            ],
-            "details": "Remove or comment out code related to Convex authentication, including HTTP routes and provider configurations. Ensure no residual Convex authentication logic remains.\n<info added on 2025-08-07T22:13:41.940Z>\nDelete or retire `packages/backend/convex/auth.ts`. Remove `auth.addHttpRoutes(http)` from `packages/backend/convex/http.ts`. Delete Google provider environment variables (AUTH_GOOGLE_ID/SECRET) from `packages/backend/convex/env.ts`. Ensure `auth.config.ts` is configured for Clerk issuer as the sole provider.\n</info added on 2025-08-07T22:13:41.940Z>",
-            "status": "pending",
-            "testStrategy": "Verify that the application no longer attempts to use Convex authentication methods."
-          },
-          {
-            "id": 5,
-            "title": "Update Frontend Authentication Logic",
-            "description": "Modify frontend routes and components to use Clerk for authentication and session management.",
-            "dependencies": [
-              "17.2",
-              "17.3"
-            ],
-            "details": "Update frontend code to integrate Clerk's authentication UI components and session management. Ensure that login, logout, and session persistence are handled by Clerk.\n<info added on 2025-08-08T09:08:48.007Z>\nFrontend Clerk-only migration complete for initial scaffold:\n- Removed Convex providers from root; kept only ClerkProvider with publishable key\n- Gated `/session` with Clerk <SignedIn>/<SignedOut>\n- Dashboard uses `@syntaxia/ui` components and mono/Brutalist theme\n- Stubs for `/session` and `/summary/$id` clickable from dashboard\n- Cleaned invalid href and lints are green\n\nNext: Configure Clerk keys and finalize sign-out button placement in header.\n</info added on 2025-08-08T09:08:48.007Z>",
-            "status": "pending",
-            "testStrategy": "Test frontend authentication flows to ensure they work seamlessly with Clerk."
-          },
-          {
-            "id": 6,
-            "title": "Conduct End-to-End Testing",
-            "description": "Perform comprehensive testing of the entire authentication flow to ensure the migration to Clerk is successful.",
-            "dependencies": [
-              "17.4",
-              "17.5"
-            ],
-            "details": "Develop and execute an end-to-end test plan covering user login, session management, and logout processes. Verify that Clerk sessions are correctly handled and user data is managed appropriately.",
-            "status": "pending",
-            "testStrategy": "Conduct tests across the application and Convex APIs to confirm that all authentication-related functionalities work as expected with Clerk."
-          }
-        ]
-      },
-      {
-        "id": 18,
-        "title": "Implement Logged-in Sidebar Layout with Shadcn",
-        "description": "Develop a sidebar layout using Shadcn's sidebar-07 block, visible only to signed-in users via Clerk, and integrate it into the dashboard route.",
-        "details": "To implement the logged-in sidebar layout, start by integrating Shadcn's sidebar-07 block into the application. Ensure that the sidebar is only displayed when a user is authenticated through Clerk. Utilize or extend primitives in the @syntaxia/ui library to support the sidebar's functionality, ensuring compatibility with the existing UI components. Compose an AppSidebar component that encapsulates the sidebar logic and styling, adhering to the Brutalist mono theme defined in Task 16. Integrate this component into the dashboard route, ensuring seamless navigation and user experience. Pay attention to maintaining a consistent styling across the application, leveraging the theme tokens defined in Task 16.",
-        "testStrategy": "Verify the sidebar is visible only when users are signed in via Clerk by testing with both authenticated and unauthenticated sessions. Ensure the sidebar integrates seamlessly with the dashboard route and adheres to the Brutalist mono theme. Conduct UI tests to confirm the sidebar's appearance and functionality across different devices and screen sizes. Validate that any new primitives added to @syntaxia/ui are functioning correctly and are consistent with the existing design system.",
-        "status": "in-progress",
-        "dependencies": [
-          16,
-          17
-        ],
-        "priority": "medium",
-        "subtasks": [
-          {
-            "id": 1,
-            "title": "Integrate Shadcn's Sidebar-07 Block",
-            "description": "Integrate the Shadcn's sidebar-07 block into the application to serve as the base structure for the sidebar.",
-            "dependencies": [],
-            "details": "Import the sidebar-07 block from Shadcn into the project. Ensure it is correctly added to the component tree and styled according to the default settings. Verify that the block is functional and visible in the development environment.",
-            "status": "done",
-            "testStrategy": "Check that the sidebar-07 block is rendered correctly in the application and matches the expected layout."
-          },
-          {
-            "id": 2,
-            "title": "Extend UI Primitives in @syntaxia/ui",
-            "description": "Extend or utilize existing UI primitives in the @syntaxia/ui library to support the sidebar's functionality.",
-            "dependencies": [
-              "18.1"
-            ],
-            "details": "Review the existing primitives in @syntaxia/ui and determine if any need to be extended or created to support the sidebar's components like container, inset, trigger, separator, and breadcrumb. Implement necessary changes and ensure compatibility with the sidebar-07 block.\n<info added on 2025-08-08T09:23:36.345Z>\nAdded minimal sidebar primitives in @syntaxia/ui: SidebarProvider, SidebarInset, SidebarTrigger, Sidebar. Exposed as \"@syntaxia/ui/sidebar\" in package exports. Matches Brutalist style with borders and mono font via globals.\n</info added on 2025-08-08T09:23:36.345Z>",
-            "status": "done",
-            "testStrategy": "Test each primitive to ensure they function correctly within the sidebar and do not break existing UI components."
-          },
-          {
-            "id": 3,
-            "title": "Create AppSidebar Component",
-            "description": "Develop the AppSidebar component that encapsulates the sidebar logic and styling, adhering to the Brutalist mono theme.",
-            "dependencies": [
-              "18.2"
-            ],
-            "details": "Create a new component named AppSidebar. Use the extended primitives and the sidebar-07 block to build the component. Apply the Brutalist mono theme styles as defined in Task 16. Ensure the component is modular and reusable.",
-            "status": "in-progress",
-            "testStrategy": "Render the AppSidebar component in isolation and verify it adheres to the design specifications and theme."
-          },
-          {
-            "id": 4,
-            "title": "Integrate Sidebar with Dashboard Route",
-            "description": "Integrate the AppSidebar component into the dashboard route, ensuring it is only visible to signed-in users via Clerk.",
-            "dependencies": [
-              "18.3"
-            ],
-            "details": "Modify the dashboard route to include the AppSidebar component. Use Clerk's SignedIn component or similar authentication checks to ensure the sidebar is only rendered for authenticated users. Test the integration to ensure seamless navigation and user experience.",
-            "status": "pending",
-            "testStrategy": "Log in and out of the application to verify that the sidebar appears only when the user is authenticated."
-          },
-          {
-            "id": 5,
-            "title": "Add Navigation Items to Sidebar",
-            "description": "Add minimal navigation items to the sidebar, including Dashboard, Session, and Summaries.",
-            "dependencies": [
-              "18.4"
-            ],
-            "details": "Within the AppSidebar component, add navigation links for Dashboard, Session, and Summaries. Ensure these links are styled consistently with the sidebar and provide smooth navigation to the respective routes.",
-            "status": "pending",
-            "testStrategy": "Click each navigation item to ensure they redirect to the correct routes and maintain the sidebar's styling."
-          },
-          {
-            "id": 6,
-            "title": "Ensure Code Quality and Linting",
-            "description": "Ensure that the code adheres to the project's linting rules and passes all quality checks.",
-            "dependencies": [
-              "18.5"
-            ],
-            "details": "Run the project's linting tools and address any issues that arise. Ensure that the code is clean, well-documented, and follows the project's coding standards.",
-            "status": "pending",
-            "testStrategy": "Execute the linting process and verify that no errors or warnings are present. Conduct a code review to ensure quality."
+            "testStrategy": "Verify that all redundant operations are removed and that the system functions correctly with the new user table. Test data migration by checking that all necessary data is present in the new table and accessible via the updated operations."
           }
         ]
       }
     ],
     "metadata": {
-      "created": "2025-08-07T21:35:51.722Z",
-      "updated": "2025-08-08T09:23:53.134Z",
-      "description": "Tasks for phase-0-phone-screen context"
+      "created": "2025-08-10T19:20:11.457Z",
+      "updated": "2025-08-10T22:38:20.578Z",
+      "description": "Tasks for master context"
     }
   }
 }
