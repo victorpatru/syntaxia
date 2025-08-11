@@ -24,7 +24,8 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss": "catalog:"
+    "tailwindcss": "catalog:",
+    "@syntaxia/backend": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.0.14",
