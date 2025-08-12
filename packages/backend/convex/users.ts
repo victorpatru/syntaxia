@@ -1,132 +1,120 @@
-import { getAuthUserId } from "@convex-dev/auth/server";
-import { type } from "arktype";
+import type { UserJSON } from "@clerk/backend";
 import { v } from "convex/values";
-import { asyncMap } from "convex-helpers";
-import { internal } from "./_generated/api";
-import { action, internalMutation, mutation, query } from "./_generated/server";
-import { polar } from "./subscriptions";
-import { username } from "./utils/validators";
+import type { Doc, Id } from "./_generated/dataModel";
+import {
+  internalMutation,
+  internalQuery,
+  type QueryCtx,
+  query,
+} from "./_generated/server";
 
-export const getUser = query({
-  handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      return;
+/**
+ * Whether the current user is fully logged in, including having their information
+ * synced from Clerk via webhook.
+ *
+ * Like all Convex queries, errors on expired Clerk token.
+ */
+export const userLoginStatus = query(
+  async (
+    ctx,
+  ): Promise<
+    | ["No JWT Token", null]
+    | ["No Clerk User", null]
+    | ["Logged In", Doc<"users">]
+  > => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      // no JWT token, user hasn't completed login flow yet
+      return ["No JWT Token", null];
     }
-    const user = await ctx.db.get(userId);
-    if (!user) {
-      return;
+    const user = await getCurrentUser(ctx);
+    if (user === null) {
+      // If Clerk has not told us about this user we're still waiting for the
+      // webhook notification.
+      return ["No Clerk User", null];
     }
-    const subscription = await polar.getCurrentSubscription(ctx, {
-      userId: user._id,
-    });
-    return {
-      ...user,
-      name: user.username || user.name,
-      subscription,
-      avatarUrl: user.imageId
-        ? await ctx.storage.getUrl(user.imageId)
-        : undefined,
+    return ["Logged In", user];
+  },
+);
+
+/** The current user, containing user preferences and Clerk user info. */
+export const currentUser = query((ctx: QueryCtx) => getCurrentUser(ctx));
+
+/** Get user by Clerk use id (AKA "subject" on auth)  */
+export const getUser = internalQuery({
+  args: { subject: v.string() },
+  async handler(ctx, args) {
+    return await userQuery(ctx, args.subject);
+  },
+});
+
+/** Create a new Clerk user or update existing Clerk user data. */
+export const updateOrCreateUser = internalMutation({
+  args: { clerkUser: v.any() }, // no runtime validation, trust Clerk
+  async handler(ctx, { clerkUser }: { clerkUser: UserJSON }) {
+    const userRecord = await userQuery(ctx, clerkUser.id);
+
+    const userData = {
+      clerkUserId: clerkUser.id,
+      firstName: clerkUser.first_name || undefined,
+      lastName: clerkUser.last_name || undefined,
+      email: clerkUser.email_addresses[0]?.email_address || "",
+      imageUrl: clerkUser.image_url || undefined,
+      createdAt: clerkUser.created_at,
+      lastActiveAt: clerkUser.last_active_at || undefined,
     };
-  },
-});
 
-export const updateUsername = mutation({
-  args: {
-    username: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      return;
-    }
-    const validatedUsername = username(args.username);
-
-    if (validatedUsername instanceof type.errors) {
-      throw new Error(validatedUsername.summary);
-    }
-    await ctx.db.patch(userId, { username: validatedUsername });
-  },
-});
-
-export const generateUploadUrl = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      throw new Error("User not found");
-    }
-    return await ctx.storage.generateUploadUrl();
-  },
-});
-
-export const updateUserImage = mutation({
-  args: {
-    imageId: v.id("_storage"),
-  },
-  handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      return;
-    }
-    ctx.db.patch(userId, { imageId: args.imageId });
-  },
-});
-
-export const removeUserImage = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      return;
-    }
-    ctx.db.patch(userId, { imageId: undefined, image: undefined });
-  },
-});
-
-export const deleteUserAccount = internalMutation({
-  args: {
-    userId: v.id("users"),
-  },
-  handler: async (ctx, args) => {
-    await asyncMap(
-      ["google" /* add other providers as needed */],
-      async (provider) => {
-        const authAccount = await ctx.db
-          .query("authAccounts")
-          .withIndex("userIdAndProvider", (q) =>
-            q.eq("userId", args.userId).eq("provider", provider),
-          )
-          .unique();
-        if (!authAccount) {
-          return;
-        }
-        await ctx.db.delete(authAccount._id);
-      },
-    );
-    await ctx.db.delete(args.userId);
-  },
-});
-
-export const deleteCurrentUserAccount = action({
-  args: {},
-  handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) {
-      return;
-    }
-    const subscription = await polar.getCurrentSubscription(ctx, {
-      userId,
-    });
-    if (!subscription) {
-      console.error("No subscription found");
+    if (userRecord === null) {
+      await ctx.db.insert("users", userData);
     } else {
-      await polar.cancelSubscription(ctx, {
-        revokeImmediately: true,
-      });
+      await ctx.db.patch(userRecord._id, userData);
     }
-    await ctx.runMutation(internal.users.deleteUserAccount, {
-      userId,
-    });
   },
 });
+
+/** Delete a user by clerk user ID. */
+export const deleteUser = internalMutation({
+  args: { id: v.string() },
+  async handler(ctx, { id }) {
+    const userRecord = await userQuery(ctx, id);
+
+    if (userRecord === null) {
+      console.warn("can't delete user, does not exist", id);
+    } else {
+      await ctx.db.delete(userRecord._id);
+    }
+  },
+});
+
+// Helpers
+
+export async function userQuery(
+  ctx: QueryCtx,
+  clerkUserId: string,
+): Promise<Doc<"users"> | null> {
+  return await ctx.db
+    .query("users")
+    .withIndex("by_clerk_id", (q) => q.eq("clerkUserId", clerkUserId))
+    .unique();
+}
+
+export async function userById(
+  ctx: QueryCtx,
+  id: Id<"users">,
+): Promise<Doc<"users"> | null> {
+  return await ctx.db.get(id);
+}
+
+async function getCurrentUser(ctx: QueryCtx): Promise<Doc<"users"> | null> {
+  const identity = await ctx.auth.getUserIdentity();
+  if (identity === null) {
+    return null;
+  }
+  return await userQuery(ctx, identity.subject);
+}
+
+export async function mustGetCurrentUser(ctx: QueryCtx): Promise<Doc<"users">> {
+  const userRecord = await getCurrentUser(ctx);
+  if (!userRecord) throw new Error("Can't get current user");
+  return userRecord;
+}

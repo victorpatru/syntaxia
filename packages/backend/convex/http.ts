@@ -1,13 +1,74 @@
+import type { WebhookEvent } from "@clerk/backend";
 import { httpRouter } from "convex/server";
-import { auth } from "./auth";
-import { polar } from "./subscriptions";
+import { Webhook } from "svix";
+import { internal } from "./_generated/api";
+import { httpAction } from "./_generated/server";
+import { env } from "./env";
+
+const handleClerkWebhook = httpAction(async (ctx, request) => {
+  const event = await validateRequest(request);
+  if (!event) {
+    return new Response("Error occured", {
+      status: 400,
+    });
+  }
+  switch (event.type) {
+    case "user.created": // intentional fallthrough
+    case "user.updated": {
+      const existingUser = await ctx.runQuery(internal.users.getUser, {
+        subject: event.data.id,
+      });
+      if (existingUser && event.type === "user.created") {
+        console.warn("Overwriting user", event.data.id, "with", event.data);
+      }
+      console.log("creating/updating user", event.data.id);
+      await ctx.runMutation(internal.users.updateOrCreateUser, {
+        clerkUser: event.data,
+      });
+      break;
+    }
+    case "user.deleted": {
+      // Clerk docs say this is required, but the types say optional?
+      const id = event.data.id!;
+      await ctx.runMutation(internal.users.deleteUser, { id });
+      break;
+    }
+    default: {
+      console.log("ignored Clerk webhook event", event.type);
+    }
+  }
+  return new Response(null, {
+    status: 200,
+  });
+});
 
 const http = httpRouter();
+http.route({
+  path: "/clerk-users-webhook",
+  method: "POST",
+  handler: handleClerkWebhook,
+});
 
-auth.addHttpRoutes(http);
+async function validateRequest(
+  req: Request,
+): Promise<WebhookEvent | undefined> {
+  const payloadString = await req.text();
 
-// Register the webhook handler at /polar/events
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-polar.registerRoutes(http as any);
+  const svixHeaders = {
+    "svix-id": req.headers.get("svix-id")!,
+    "svix-timestamp": req.headers.get("svix-timestamp")!,
+    "svix-signature": req.headers.get("svix-signature")!,
+  };
+  const wh = new Webhook(env.CLERK_WEBHOOK_SECRET);
+  let evt: Event | null = null;
+  try {
+    evt = wh.verify(payloadString, svixHeaders) as Event;
+  } catch (_) {
+    console.log("error verifying");
+    return;
+  }
+
+  return evt as unknown as WebhookEvent;
+}
 
 export default http;

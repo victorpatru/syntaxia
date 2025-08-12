@@ -7,7 +7,7 @@ export const Route = createFileRoute("/_authed/dashboard")({
 });
 
 function Dashboard() {
-  const who = useQuery(api.users.whoami);
+  const who = useQuery(api.users.currentUser);
   return (
     <div className="p-6 space-y-2">
       <h1 className="text-2xl font-bold">Dashboard</h1>
