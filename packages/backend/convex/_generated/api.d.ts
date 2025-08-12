@@ -11,6 +11,8 @@
 import type * as env from "../env.js";
 import type * as http from "../http.js";
 import type * as users from "../users.js";
+import type * as utils_clerk from "../utils/clerk.js";
+import type * as webhooks from "../webhooks.js";
 
 import type {
   ApiFromModules,
@@ -30,6 +32,8 @@ declare const fullApi: ApiFromModules<{
   env: typeof env;
   http: typeof http;
   users: typeof users;
+  "utils/clerk": typeof utils_clerk;
+  webhooks: typeof webhooks;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 

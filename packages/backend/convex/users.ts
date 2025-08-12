@@ -7,6 +7,7 @@ import {
   type QueryCtx,
   query,
 } from "./_generated/server";
+import { computePrimaryEmail } from "./utils/clerk";
 
 /**
  * Whether the current user is fully logged in, including having their information
@@ -54,11 +55,13 @@ export const updateOrCreateUser = internalMutation({
   async handler(ctx, { clerkUser }: { clerkUser: UserJSON }) {
     const userRecord = await userQuery(ctx, clerkUser.id);
 
+    const computedEmail = computePrimaryEmail(clerkUser);
+
     const userData = {
       clerkUserId: clerkUser.id,
       firstName: clerkUser.first_name || undefined,
       lastName: clerkUser.last_name || undefined,
-      email: clerkUser.email_addresses[0]?.email_address || "",
+      email: computedEmail ?? undefined,
       imageUrl: clerkUser.image_url || undefined,
       createdAt: clerkUser.created_at,
       lastActiveAt: clerkUser.last_active_at || undefined,
