@@ -30,7 +30,7 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
   }
 
   switch (event.type) {
-    case "user.created": // intentional fallthrough
+    case "user.created":
     case "user.updated": {
       const existingUser = await ctx.runQuery(internal.users.getUser, {
         subject: event.data.id,
@@ -43,7 +43,6 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
         clerkUser: event.data,
       });
 
-      // Mark event as processed
       await ctx.runMutation(internal.webhooks.markEventProcessed, {
         eventId: event.data.id as string,
         eventType: event.type,
@@ -52,11 +51,9 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
       break;
     }
     case "user.deleted": {
-      // Clerk docs say this is required, but the types say optional?
-      const id = event.data.id!;
+      const id = event.data.id as string;
       await ctx.runMutation(internal.users.deleteUser, { id });
 
-      // Mark event as processed
       await ctx.runMutation(internal.webhooks.markEventProcessed, {
         eventId: id,
         eventType: event.type,
@@ -66,12 +63,6 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
     }
     default: {
       console.log("ignored Clerk webhook event", event.type);
-      // Mark unknown events as processed too to avoid repeated processing
-      await ctx.runMutation(internal.webhooks.markEventProcessed, {
-        eventId: event.data.id as string,
-        eventType: "unknown",
-        clerkUserId: event.data.id,
-      });
     }
   }
   return new Response(null, {
