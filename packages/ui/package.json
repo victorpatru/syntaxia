@@ -42,7 +42,11 @@
     "./tailwind.config": "./tailwind.config.ts",
     "./postcss": "./postcss.config.js",
     "./sidebar": "./src/components/sidebar.tsx",
-    "./app-sidebar": "./src/components/app-sidebar.tsx"
+    "./app-sidebar": "./src/components/app-sidebar.tsx",
+    "./card": "./src/components/card.tsx",
+    "./badge": "./src/components/badge.tsx",
+    "./textarea": "./src/components/textarea.tsx",
+    "./tabs": "./src/components/tabs.tsx"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
