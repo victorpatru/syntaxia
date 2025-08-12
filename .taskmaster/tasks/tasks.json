@@ -74,8 +74,8 @@
       {
         "id": 2,
         "title": "Implement JD-Conditioned Session Setup",
-        "description": "Enable users to input a job description (JD), select target bar and domain track, and generate a session plan conditioned on JD competencies.",
-        "details": "Create a UI flow for JD input, level/domain selection, and session preview using TanStack Start. Implement backend logic in Convex to parse JD, extract competencies, and generate session sections (A–D) with calibrated prompts/snippets. Use TypeScript for type safety and ensure streaming SSR for responsiveness.",
+        "description": "Enable users to input a job description (JD) and generate a session plan conditioned on senior full-stack engineering competencies.",
+        "details": "Create a UI flow for JD input and senior-level session preview using TanStack Start. Implement backend logic in Convex to parse JD, extract competencies, and generate session sections (A–D) with senior-calibrated prompts/snippets. Use TypeScript for type safety and ensure streaming SSR for responsiveness.",
         "testStrategy": "Test with various JDs to confirm correct competency extraction, session plan generation, and UI updates. Validate backend parsing and session creation logic.",
         "priority": "high",
         "dependencies": [
@@ -85,17 +85,17 @@
         "subtasks": [
           {
             "id": 1,
-            "title": "Design and Implement JD Input and Selection UI Flow",
-            "description": "Create a user interface using TanStack Start that allows users to input a job description (JD), select the target bar, and choose a domain track. Ensure the UI supports previewing the generated session plan.",
+            "title": "Design and Implement JD Input and Session Preview UI Flow",
+            "description": "Create a user interface using TanStack Start that allows users to input a job description (JD) and preview the generated senior-level session plan.",
             "dependencies": [],
-            "details": "Utilize TanStack Start's routing and component system to build a multi-step form for JD input, bar selection, and domain track selection. Integrate real-time validation and preview capabilities for session plans.",
+            "details": "Utilize TanStack Start's routing and component system to build a form for JD input and session preview. Integrate real-time validation and preview capabilities for session plans.",
             "status": "pending",
-            "testStrategy": "Test UI flow with various JDs and selection combinations to confirm correct data capture, navigation, and preview rendering."
+            "testStrategy": "Test UI flow with various JDs to confirm correct data capture, navigation, and preview rendering."
           },
           {
             "id": 2,
             "title": "Implement Backend JD Parsing and Competency Extraction in Convex",
-            "description": "Develop Convex backend logic to parse the submitted JD and extract relevant competencies required for session plan generation.",
+            "description": "Develop Convex backend logic to parse the submitted JD and extract relevant senior full-stack engineering competencies required for session plan generation.",
             "dependencies": [
               "2.1"
             ],
@@ -106,13 +106,13 @@
           {
             "id": 3,
             "title": "Generate Session Plan Sections (A–D) with Calibrated Prompts and Snippets",
-            "description": "Based on extracted competencies, generate session plan sections (A–D) with tailored prompts and code snippets, ensuring alignment with the selected bar and domain track.",
+            "description": "Based on extracted competencies, generate session plan sections (A–D) with tailored prompts and code snippets, ensuring alignment with senior full-stack engineering expectations.",
             "dependencies": [
               "2.2"
             ],
             "details": "Implement logic to map competencies to session sections, calibrate prompts/snippets for each section, and ensure content is dynamically generated per user input.",
             "status": "pending",
-            "testStrategy": "Test session plan generation for completeness, relevance, and calibration across multiple JD/domain/bar combinations."
+            "testStrategy": "Test session plan generation for completeness, relevance, and calibration across multiple JD combinations."
           },
           {
             "id": 4,
@@ -128,7 +128,7 @@
           {
             "id": 5,
             "title": "Integrate and Validate End-to-End Session Setup Flow",
-            "description": "Combine UI, backend, and SSR components into a seamless end-to-end flow, ensuring users can input a JD, select options, and receive a generated session plan preview.",
+            "description": "Combine UI, backend, and SSR components into a seamless end-to-end flow, ensuring users can input a JD and receive a generated senior-level session plan preview.",
             "dependencies": [
               "2.4"
             ],
@@ -141,9 +141,9 @@
       {
         "id": 3,
         "title": "Develop Voice Interview Flow (A–D Sections)",
-        "description": "Build the core voice interview experience with agent-driven turn-taking, barge-in support, and section transitions (Background, Code, Scenario, Wrap-up).",
-        "details": "Integrate ElevenLabs TTS via ConvAI WebSocket and React SDK (@11labs/react). Implement STT streaming with Whisper/Deepgram. Design a state machine to orchestrate interview flow (A–D), handling agent prompts, candidate responses, and UI sync. Ensure agent can trigger UI updates via clientTools (e.g., show_snippet, highlight_lines).",
-        "testStrategy": "Simulate full interview sessions, testing voice input/output, section transitions, barge-in, and agent-driven UI events. Validate STT/TTS accuracy and latency.",
+        "description": "Build the core voice interview experience with agent-driven turn-taking, barge-in support, and section transitions (Background, Code, Scenario, Wrap-up) using the ElevenLabs React SDK.",
+        "details": "Integrate ElevenLabs TTS and ASR via the official React SDK (@elevenlabs/react) using the useConversation() hook. Leverage native ElevenLabs capabilities for turn-taking and barge-in detection. Design a state machine to orchestrate interview flow (A–D), handling agent prompts, candidate responses, and UI sync. Ensure seamless client tools integration with React SDK state management.",
+        "testStrategy": "Simulate full interview sessions, testing voice input/output, section transitions, barge-in, and agent-driven UI events. Validate native ASR/TTS accuracy and latency.",
         "priority": "high",
         "dependencies": [
           2
@@ -152,12 +152,12 @@
         "subtasks": [
           {
             "id": 1,
-            "title": "Integrate ElevenLabs TTS and STT Streaming",
-            "description": "Implement real-time text-to-speech (TTS) using ElevenLabs via ConvAI WebSocket and React SDK, and set up streaming speech-to-text (STT) using Whisper or Deepgram for accurate, low-latency transcription.",
+            "title": "Integrate ElevenLabs TTS and ASR Streaming",
+            "description": "Implement real-time text-to-speech (TTS) and automatic speech recognition (ASR) using ElevenLabs via the official React SDK, ensuring accurate, low-latency transcription and seamless integration.",
             "dependencies": [],
-            "details": "Establish bidirectional audio streaming between the client and backend, ensuring seamless TTS output and STT input. Optimize for minimal latency and high transcription accuracy.",
+            "details": "Use the useConversation() hook for bidirectional audio streaming, leveraging built-in handlers for status, isSpeaking, and onMessage. Optimize for minimal latency and high transcription accuracy.",
             "status": "pending",
-            "testStrategy": "Simulate voice input/output in various network conditions. Measure TTS/STT latency and transcription accuracy across all interview sections."
+            "testStrategy": "Simulate voice input/output in various network conditions. Measure TTS/ASR latency and transcription accuracy across all interview sections."
           },
           {
             "id": 2,
@@ -177,7 +177,7 @@
             "dependencies": [
               "3.2"
             ],
-            "details": "Integrate logic for detecting user interruptions during agent prompts. Allow the agent to pause, resume, or adjust its responses based on barge-in events.",
+            "details": "Utilize ElevenLabs' native turn-taking and barge-in detection capabilities. Allow the agent to pause, resume, or adjust its responses based on barge-in events.",
             "status": "pending",
             "testStrategy": "Test with users interrupting agent prompts at various points. Validate that the system gracefully handles interruptions and maintains conversational coherence."
           },
@@ -209,7 +209,7 @@
       {
         "id": 4,
         "title": "On-Screen Content Rendering and Voice-Only Fallback",
-        "description": "Render code snippets, diffs, and logs in the UI during the interview, with voice-only fallback for semantic summaries and on-demand readouts.",
+        "description": "Render curated full-stack code snippets, diffs, and logs in the UI during the interview, with voice-only fallback for semantic summaries and on-demand readouts.",
         "details": "Implement UI components for displaying code/logs/diffs using TanStack Start. Enable agent to reference line ranges/blocks and trigger highlights/zoom via clientTools. For voice-only mode, provide structured summaries and readouts of ≤25-line blocks. Ensure accessibility and responsive design.",
         "testStrategy": "Test rendering of various content types during sessions. Validate agent-triggered UI updates and fallback summaries/readouts in voice-only mode.",
         "priority": "high",
@@ -414,9 +414,9 @@
       {
         "id": 7,
         "title": "Integrate Content Packs and Scenario Seeds",
-        "description": "Provide a library of code snippets and scenario seeds with metadata for domain-specific practice and JD conditioning.",
-        "details": "Implement content service to manage snippet library (8–12 baseline snippets, 15–20 scenario seeds) with metadata (domain, risks, testability hooks). Enable retrieval based on JD/domain selection. Ensure extensibility for future specialized packs.",
-        "testStrategy": "Test snippet/scenario retrieval for various domains and JDs. Validate metadata integrity and correct matching to session requirements.",
+        "description": "Provide a library of curated full-stack code snippets and scenario seeds with metadata for senior-level practice and JD conditioning.",
+        "details": "Implement content service to manage snippet library (8–12 curated full-stack snippets, 15–20 scenario seeds) with metadata (risks, testability hooks). Enable retrieval based on JD input. Ensure extensibility for future specialized packs.",
+        "testStrategy": "Test snippet/scenario retrieval for various JDs. Validate metadata integrity and correct matching to session requirements.",
         "priority": "medium",
         "dependencies": [
           2
@@ -426,7 +426,7 @@
           {
             "id": 1,
             "title": "Design Metadata Schema for Snippets and Scenario Seeds",
-            "description": "Define a comprehensive metadata schema for code snippets and scenario seeds, including fields for domain, risks, testability hooks, and extensibility for future specialized packs.",
+            "description": "Define a comprehensive metadata schema for code snippets and scenario seeds, including fields for risks, testability hooks, and extensibility for future specialized packs.",
             "dependencies": [],
             "details": "Specify required and optional metadata attributes, ensuring compatibility with retrieval and filtering mechanisms. Document schema for developer reference.",
             "status": "pending",
@@ -435,7 +435,7 @@
           {
             "id": 2,
             "title": "Implement Content Service for Library Management",
-            "description": "Develop a backend service to manage the library of code snippets (8–12 baseline) and scenario seeds (15–20), supporting CRUD operations and metadata association.",
+            "description": "Develop a backend service to manage the library of code snippets (8–12 curated full-stack) and scenario seeds (15–20), supporting CRUD operations and metadata association.",
             "dependencies": [
               "7.1"
             ],
@@ -445,14 +445,14 @@
           },
           {
             "id": 3,
-            "title": "Enable JD/Domain-Based Retrieval and Matching",
-            "description": "Implement logic to retrieve relevant snippets and scenario seeds based on job description (JD) and domain selection, leveraging metadata for accurate matching.",
+            "title": "Enable JD-Based Retrieval and Matching",
+            "description": "Implement logic to retrieve relevant snippets and scenario seeds based on job description (JD) input, leveraging metadata for accurate matching.",
             "dependencies": [
               "7.2"
             ],
             "details": "Develop filtering and ranking algorithms to select content items that best fit session requirements. Integrate with session setup flow.",
             "status": "pending",
-            "testStrategy": "Simulate retrieval for various JDs and domains, confirming correct matching and relevance of returned items."
+            "testStrategy": "Simulate retrieval for various JDs, confirming correct matching and relevance of returned items."
           },
           {
             "id": 4,
@@ -473,7 +473,7 @@
               "7.3",
               "7.4"
             ],
-            "details": "Develop test cases covering various domains, JDs, and pack extensions. Ensure all functionalities meet requirements and edge cases are handled.",
+            "details": "Develop test cases covering various JDs and pack extensions. Ensure all functionalities meet requirements and edge cases are handled.",
             "status": "pending",
             "testStrategy": "Run automated and manual tests for retrieval, metadata validation, and extensibility. Review results and address any issues found."
           }

@@ -6,8 +6,8 @@ The product serves candidates who want targeted practice aligned to real job des
 
 # Core Features  
 - **JD-conditioned session setup**  
-  - Paste a JD, select target bar (Senior default | Mid coaching), choose domain track (web/DX, infra/workflows, analytics, edge).  
-  - The agent conditions sections, snippets, and follow-ups to the JD’s competencies.
+  - Paste a JD, generate session conditioned to senior-level expectations and the JD's competencies.  
+  - All content calibrated to senior full-stack engineer bar by default.
 
 - **Voice technical phone screen (30–40 minutes)**  
   - A: Background depth warm-up (≈5m).  
@@ -28,18 +28,20 @@ The product serves candidates who want targeted practice aligned to real job des
   - Full transcript with highlighted moments, rubric scores, and a prioritized action plan.  
   - 3 tailored follow-up practice prompts.
 
- - **Content packs**  
-   - MVP: Web/Full-Stack Baseline snippets (8–12) across auth/session & RBAC, API errors/pagination, caching, rate limiting, queues/retries, SQL correctness/transactions, logging/metrics/tracing, feature flags, and background jobs.  
-   - Phase 1+: Add specialized packs (GraphQL/Temporal workflows, analytics pipelines, edge/worker patterns) based on usage telemetry and explicit customer demand.  
-   - All snippets are 60–120 LOC with metadata (domain, risks, testability hooks).
+ - **Full-Stack Content Focus (MVP)**  
+  - Targeted at senior full-stack engineers: 8–12 curated snippets covering core full-stack competencies.  
+  - Areas: auth/session & RBAC, API errors/pagination, caching strategies, rate limiting, async queues/retries, SQL correctness/transactions, logging/metrics/observability, feature flags, and background jobs.  
+  - All snippets are 60–120 LOC with metadata (common risks, debugging hints, testability considerations).  
+  - Future expansion: specialized packs based on user feedback and demand validation.
 
 # User Experience  
-- **Personas**  
-  - Senior individual contributors preparing for technical screens; mid ICs leveling up to the senior bar.  
+- **Primary Persona**  
+  - Senior engineers and ambitious mid-level engineers preparing for senior-level technical screens.  
+  - All content assumes senior-level expectations - no dumbing down.  
   - Secondary (future): hiring teams calibrating interviewers.
 
 - **Key Flows**  
-  1) JD input → level/domain selection → session preview.  
+  1) JD input → senior-level session preview.  
   2) Voice interview with turn-taking, interruptions (barge-in) supported.  
   3) Post-session report with scores, transcript, improvement bullets, and next practice prompts.  
   4) Optional: save JD profile and preferred domain tracks for repeat practice.
@@ -70,9 +72,10 @@ The product serves candidates who want targeted practice aligned to real job des
 
 - **APIs & Integrations**  
   - ElevenLabs ConvAI WebSocket: low-latency voice; text events for UI; signed URLs for private agents.  
-  - ElevenLabs React SDK (`@11labs/react`): `useConversation` for connect, transcripts, speaking state.  
-  - Agent-driven UI via tools: `clientTools` (e.g., `show_snippet`, `highlight_lines`) and ConvAI Tools API to invoke backend endpoints.  
-  - STT: Whisper/Deepgram streaming for robust recognition.  
+  - ElevenLabs JS SDK (`@elevenlabs/elevenlabs-js`): official SDK with conversation management, agent APIs, and client tools integration.  
+  - ElevenLabs React SDK (`@elevenlabs/react`): official React hooks including `useConversation` for WebSocket/WebRTC connections, transcripts, and speaking state.  
+  - Agent-driven UI via tools: `clientTools` (e.g., `show_snippet`, `highlight_lines`) using ConvAI Tools API to trigger UI updates.  
+  - STT: ElevenLabs native ASR engine with streaming partials and confirmation prompts.  
   - LLM: deterministic, rubric-driven prompts; minimal variance.  
   - Optional analytics: product analytics + feature flagging.
 
@@ -84,9 +87,9 @@ The product serves candidates who want targeted practice aligned to real job des
 # Development Roadmap  
 ## MVP Requirements (ship this first)
 - **Session Setup**  
-  - JD ingestion: extract competencies (e.g., GraphQL, Temporal, Edge Workers) and target bar (Senior default | Mid coaching).  
-  - Domain track selection: pick one of {web/DX, infra/workflows, analytics, edge}.  
-  - Generate session plan (A–D) with calibrated prompts/snippets.
+  - JD ingestion: extract full-stack competencies and calibrate to senior-level expectations.  
+  - Generate session plan (A–D) with senior-calibrated prompts/snippets focused on full-stack engineering skills.  
+  - Match snippets to JD requirements within full-stack scope, maintaining senior-level difficulty.
 
 - **A. Background Depth Warm-up (≈5m)**  
   - Prompts: ownership, scale, metrics, constraints.  
@@ -103,12 +106,9 @@ The product serves candidates who want targeted practice aligned to real job des
   - Output: identified issues, proposed minimal fix, test plan bullets.
 
 - **C. Scenario Q&A (Design-lite) (≈10–15m)**  
-  - One domain track:  
-    - Web/DX: auth flows, rate limiting, perf budgets, rollout.  
-    - Infra/Workflows: Temporal idempotency, retries/backoff, DLQ.  
-    - Analytics: event schema, backfills, experimentation guardrails, privacy.  
-    - Edge: rate limiting at edge, caching policy, latency vs. cost.  
+  - Full-stack scenarios: auth flows, API design, database choices, caching strategies, monitoring/observability, deployment patterns.  
   - Agent pattern: start broad → constraint-based follow-ups → rollout/observability plan.  
+  - Focus on practical trade-offs senior full-stack engineers face daily.  
   - Scoring (Breadth & trade-offs; Operationalization; Communication).  
   - Output: structured design outline with explicit trade-offs.
 
@@ -124,13 +124,13 @@ The product serves candidates who want targeted practice aligned to real job des
   - Export: Markdown/PDF; JSON for programmatic review.
 
 - **Voice UX**  
-  - Barge-in enabled; concise prompts; section handoffs.  
-  - STT confirmation for critical terms; medium TTS speed.
-  - Agent→UI control via `clientTools` (e.g., `show_snippet({id})`, `highlight_lines({from,to})`).
+  - Barge-in enabled via ElevenLabs turn-taking and interrupt detection; concise prompts; section handoffs.  
+  - STT confirmation for critical terms; medium TTS speed with streaming partials.  
+  - Agent→UI control via `clientTools` (e.g., `show_snippet({id})`, `highlight_lines({from,to})`) using ConvAI Tools API.
 
-- **Content Packs (MVP scope)**  
-  - 8–12 snippets across 2–3 domains with metadata (risks, testing hooks).  
-  - 15–20 scenario seeds with parameterizable constraints.
+- **Full-Stack Content Library (MVP scope)**  
+  - 8–12 curated full-stack snippets with metadata (common risks, debugging hints, testability).  
+  - 15–20 full-stack scenario seeds covering auth, APIs, databases, caching, monitoring.
 
 ## Future Enhancements
 - Optional in-browser code runner with unit tests for a light coding task.  
@@ -140,19 +140,20 @@ The product serves candidates who want targeted practice aligned to real job des
 - Rich analytics on question difficulty and improvement deltas.
 
 # Logical Dependency Chain  
-1. Foundations: TanStack Start app shell; Convex schema; session model; JD parser; domain selection.  
-2. Content: snippet library + scenario seeds with metadata.  
-3. Voice agent: flow state machine (A–D), ConvAI WebSocket, streaming TTS/STT, turn-taking.  
+1. Foundations: TanStack Start app shell; Convex schema; session model; JD parser; senior-level calibration.  
+2. Content: full-stack snippet library + scenario seeds with metadata.  
+3. Voice agent: flow state machine (A–D), ConvAI WebSocket, streaming TTS/STT with native ASR, turn-taking and interrupt detection.  
 4. Scoring: rubric engine + anchor comments.  
 5. Reporting: transcript highlights, scores, action plan, export.  
-6. JD conditioning: competency extraction → domain packs → difficulty calibration.
+6. JD conditioning: competency extraction → full-stack content matching → senior-level calibration.
 
 # Risks and Mitigations  
-- **STT accuracy**: use streaming partials and confirmation prompts for critical details; allow candidate repetition.  
-- **Generic feel**: JD conditioning + domain packs; dynamic follow-ups keyed to answers.  
+- **STT accuracy**: use ElevenLabs native ASR with streaming partials and confirmation prompts for critical details; allow candidate repetition.  
+- **Generic feel**: JD conditioning + full-stack focus; dynamic follow-ups keyed to answers.  
 - **Voice monotony**: rotate snippets/scenarios; vary prompts; add brief summaries.  
-- **Expectation mismatch (no live coding)**: set expectations upfront; later add optional code runner.
- - **UI sync & connectivity**: keep ConvAI/WebSocket alive (ping/pong); deterministic UI events via `clientTools` with idempotent Convex handlers.
+- **Expectation mismatch (no live coding)**: set expectations upfront; later add optional code runner.  
+- **UI sync & connectivity**: keep ConvAI/WebSocket alive (ping/pong); deterministic UI events via `clientTools` with idempotent Convex handlers.  
+- **React/Client tools integration**: ensure client tools (UI control) work seamlessly with React SDK state management and `useConversation` hook.
 
 # Appendix  
 **Rubric Anchors (1–4)**  
