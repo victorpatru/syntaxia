@@ -9,7 +9,7 @@ import {
 } from "@syntaxia/ui/card";
 import { Textarea } from "@syntaxia/ui/textarea";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, BarChart3, Code, MessageSquare } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/_authed/new-session")({
@@ -20,7 +20,7 @@ function NewSession() {
   const [jobDescription, setJobDescription] = useState("");
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen">
       {/* Hero Section */}
       <section className="max-w-6xl mx-auto px-4 py-16">
         <div className="text-center mb-12">
@@ -28,38 +28,6 @@ function NewSession() {
             Voice-first practice sessions tailored to real job descriptions. Get
             actionable feedback on debugging, system design, and communication.
           </p>
-        </div>
-
-        {/* Features */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          <Card>
-            <CardHeader>
-              <Code className="w-8 h-8 text-blue-600 mb-2" />
-              <CardTitle>Code Comprehension</CardTitle>
-              <CardDescription>
-                Debug real-world snippets with voice guidance and visual
-                highlights
-              </CardDescription>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <MessageSquare className="w-8 h-8 text-green-600 mb-2" />
-              <CardTitle>Design Scenarios</CardTitle>
-              <CardDescription>
-                Practice system design discussions tailored to your target role
-              </CardDescription>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader>
-              <BarChart3 className="w-8 h-8 text-purple-600 mb-2" />
-              <CardTitle>Detailed Feedback</CardTitle>
-              <CardDescription>
-                Get rubric-based scores and actionable improvement plans
-              </CardDescription>
-            </CardHeader>
-          </Card>
         </div>
 
         {/* Session Setup */}
