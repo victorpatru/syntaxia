@@ -1,8 +1,9 @@
 import { Badge } from "@syntaxia/ui/badge";
 import { Button } from "@syntaxia/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@syntaxia/ui/card";
+import { VoiceOrb } from "@syntaxia/ui/voice-orb";
 import { createFileRoute } from "@tanstack/react-router";
-import { Eye, MessageCircle, Mic, RotateCcw, Volume2 } from "lucide-react";
+import { Eye, MessageCircle, RotateCcw } from "lucide-react";
 
 export const Route = createFileRoute("/_authed/interview")({
   component: Interview,
@@ -119,33 +120,15 @@ function Interview() {
 
         {/* Voice Controls & Status */}
         <div className="space-y-6">
-          {/* Voice Status */}
+          {/* Audio Waveform */}
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                Voice Active
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-center gap-4">
-                <Button size="lg" className="bg-red-600 hover:bg-red-700">
-                  <Mic className="w-5 h-5" />
-                </Button>
-                <Button variant="outline" size="lg">
-                  <Volume2 className="w-5 h-5" />
-                </Button>
-              </div>
-
-              <div className="text-center">
-                <div className="text-sm text-slate-600 mb-2">
-                  You're speaking...
-                </div>
-                <div className="bg-slate-100 rounded-lg p-3 text-sm">
-                  "I can see a few issues here. First, the token extraction
-                  doesn't handle the Bearer prefix..."
-                </div>
-              </div>
+            <CardContent className="p-6 flex justify-center items-center">
+              <VoiceOrb
+                conversation={{
+                  status: "connected",
+                  isSpeaking: true,
+                }}
+              />
             </CardContent>
           </Card>
 
