@@ -1,0 +1,101 @@
+---
+globs: **/apps/**/*.jsx, **/apps/**/*.tsx
+alwaysApply: false
+---
+# React: Prefer Derivation and Event Handlers over Effects
+
+## Goal
+
+To write idiomatic React code by avoiding unnecessary `useEffect` hooks. This rule guides the AI to use `useEffect` only for its intended purpose—synchronizing with external systems—and to prefer direct computation, derivation, and event handlers for component logic.
+
+## Rules
+
+### 1. For calculations and data transformation
+
+When you need to transform props or state for rendering, **DO NOT** use `useEffect` to store the result in a new state variable.
+
+**Instead:** Calculate the derived value directly during the component's render. If the calculation is computationally expensive, wrap it in a `useMemo` hook to cache the result.
+
+**Example Trigger:** "Filter this list of products based on the search query and store the result."
+
+#### ❌ Bad Code (to avoid):
+```javascript
+const [filteredProducts, setFilteredProducts] = useState([]);
+useEffect(() => {
+  setFilteredProducts(products.filter(p => p.name.includes(query)));
+}, [products, query]);
+```
+
+#### ✅ Good Code (to generate):
+```javascript
+const filteredProducts = useMemo(() => {
+  return products.filter(p => p.name.includes(query));
+}, [products, query]);
+```
+
+### 2. For handling user events
+
+When logic needs to run in response to a specific, one-time user interaction (like a button click or form submission), place that logic directly inside the event handler function.
+
+**DO NOT** create a state variable just to trigger an Effect.
+
+**Example Trigger:** "When the user clicks the 'Add to Cart' button, show a notification."
+
+#### ❌ Bad Code (to avoid):
+```javascript
+const [itemAdded, setItemAdded] = useState(false);
+useEffect(() => {
+  if (itemAdded) {
+    showNotification('Item added!');
+    setItemAdded(false); // Reset the trigger
+  }
+}, [itemAdded]);
+
+function handleClick() {
+  addToCart(product);
+  setItemAdded(true);
+}
+```
+
+#### ✅ Good Code (to generate):
+```javascript
+function handleClick() {
+  addToCart(product);
+  showNotification('Item added!');
+}
+```
+
+### 3. For resetting state
+
+- To reset the state of an entire component or a tree of components, prefer passing a changing `key` prop to the root of that tree. This is the most idiomatic way to unmount and remount a component.
+- To reset a specific state variable based on a prop change, perform the reset logic directly during render.
+
+#### ❌ Bad Code (to avoid):
+```javascript
+useEffect(() => {
+  setFormState(initialState);
+}, [userId]); // Reset form when user changes
+```
+
+#### ✅ Good Code (to generate):
+```javascript
+// In the parent component
+<ProfilePage key={userId} userId={userId} />
+
+// Or, for partial resets inside a component
+if (user.id !== prevUser.id) {
+  // Reset some state during render
+  setComment('');
+}
+```
+
+### 4. Limit `useEffect` to its primary purpose
+
+The only valid use case for `useEffect` is to synchronize your component with an **external system** that is outside of React's control.
+
+#### Acceptable Uses:
+
+- **Data Fetching:** Encapsulating data fetching logic (ideally within a custom hook like Tanstack `useQuery` to handle race conditions, loading, and error states).
+- **Browser APIs:** Interacting with browser APIs like `document.title`, `IntersectionObserver`, or setting up and cleaning up event listeners on `window`.
+- **Third-Party Libraries:** Controlling a non-React widget or library (e.g., a map library, a chart library).
+- **Logging & Analytics:** Sending analytics events when a component mounts or a specific event occurs.
