@@ -10,8 +10,7 @@
       "!**/dist/**",
       "!**/routeTree.gen.ts",
       "!**/_generated/**",
-      "!bun.lock",
-      "!**/web/**"
+      "!bun.lock"
     ]
   },
   "linter": {
@@ -30,7 +29,8 @@
       "complexity": {
         "noForEach": "off"
       }
-    }
+    },
+    "includes": ["!**/web/**"]
   },
   "formatter": {
     "indentStyle": "space"
