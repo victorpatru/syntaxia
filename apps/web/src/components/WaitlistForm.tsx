@@ -11,18 +11,14 @@ export function WaitlistForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleTechStackChange = (stack: string) => {
-    setTechStack(prev => 
-      prev.includes(stack) 
-        ? prev.filter(s => s !== stack)
-        : [...prev, stack]
+    setTechStack((prev) =>
+      prev.includes(stack) ? prev.filter((s) => s !== stack) : [...prev, stack],
     );
   };
 
   const handleCompanyStageChange = (stage: string) => {
-    setCompanyStage(prev => 
-      prev.includes(stage) 
-        ? prev.filter(s => s !== stage)
-        : [...prev, stage]
+    setCompanyStage((prev) =>
+      prev.includes(stage) ? prev.filter((s) => s !== stage) : [...prev, stage],
     );
   };
 
@@ -49,12 +45,12 @@ export function WaitlistForm() {
           {`$ ./add-to-waitlist \\
     --email="${email}" \\
     --experience="${experience}" \\
-    --tech-stack="${techStack.join(',')}" \\
+    --tech-stack="${techStack.join(",")}" \\
     --job-status="${jobSearchStatus}" \\
-    --company-stage="${companyStage.join(',')}"
+    --company-stage="${companyStage.join(",")}"
 
 [SUCCESS] Profile added to waitlist
-[INFO] Tailoring experience for ${experience} ${techStack.join('/')} engineer
+[INFO] Tailoring experience for ${experience} ${techStack.join("/")} engineer
 [INFO] We'll be in touch soon with relevant opportunities
 
 > Thank you for joining! 🚀`}
@@ -64,26 +60,29 @@ export function WaitlistForm() {
   }
 
   const techStackOptions = [
-    "Frontend (React/Vue/Angular)", 
-    "Backend (Node/Python/Go/Java)", 
-    "Full Stack", 
-    "DevOps/Infrastructure", 
-    "Mobile", 
-    "Data/ML"
+    "Frontend (React/Vue/Angular)",
+    "Backend (Node/Python/Go/Java)",
+    "Full Stack",
+    "DevOps/Infrastructure",
+    "Mobile",
+    "Data/ML",
   ];
 
   const companyStageOptions = [
     "Early startup (10-50 employees)",
-    "Growth startup (50-200 employees)", 
+    "Growth startup (50-200 employees)",
     "Mid-size (200-500 employees)",
-    "Enterprise (500+ employees)"
+    "Enterprise (500+ employees)",
   ];
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6">
       {/* Email Field */}
       <div>
-        <label htmlFor="email-input" className="block text-terminal-green font-mono text-sm mb-2">
+        <label
+          htmlFor="email-input"
+          className="block text-terminal-green font-mono text-sm mb-2"
+        >
           $ email --required
         </label>
         <div className="relative">
@@ -104,7 +103,10 @@ export function WaitlistForm() {
 
       {/* Experience Level */}
       <div>
-        <label htmlFor="experience-select" className="block text-terminal-green font-mono text-sm mb-2">
+        <label
+          htmlFor="experience-select"
+          className="block text-terminal-green font-mono text-sm mb-2"
+        >
           $ experience --years --required
         </label>
         <div className="relative">
@@ -115,15 +117,27 @@ export function WaitlistForm() {
             className="w-full pl-3 pr-8 sm:pr-10 py-2 bg-background border border-terminal-green/30 text-terminal-green font-mono focus:outline-none focus:border-terminal-green/50 appearance-none"
             required
           >
-            <option value="" className="text-terminal-green/50">Select years of experience</option>
+            <option value="" className="text-terminal-green/50">
+              Select years of experience
+            </option>
             <option value="0-2">0-3 years</option>
             <option value="3-5">3-5 years</option>
             <option value="6-10">6-10 years</option>
             <option value="10+">10+ years</option>
           </select>
           <div className="absolute inset-y-0 right-2 sm:right-3 flex items-center pointer-events-none">
-            <svg className="w-4 h-4 text-terminal-green/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            <svg
+              className="w-4 h-4 text-terminal-green/50"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </div>
         </div>
@@ -136,19 +150,30 @@ export function WaitlistForm() {
         </legend>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {techStackOptions.map((stack) => (
-            <label key={stack} className="flex items-center space-x-3 cursor-pointer py-1">
+            <label
+              key={stack}
+              className="flex items-center space-x-3 cursor-pointer py-1"
+            >
               <input
                 type="checkbox"
                 checked={techStack.includes(stack)}
                 onChange={() => handleTechStackChange(stack)}
                 className="sr-only"
               />
-              <div className={`w-4 h-4 border border-terminal-green/30 flex items-center justify-center flex-shrink-0 ${
-                techStack.includes(stack) ? 'bg-terminal-green text-black' : 'bg-background'
-              }`}>
-                {techStack.includes(stack) && <span className="text-xs">✓</span>}
+              <div
+                className={`w-4 h-4 border border-terminal-green/30 flex items-center justify-center flex-shrink-0 ${
+                  techStack.includes(stack)
+                    ? "bg-terminal-green text-black"
+                    : "bg-background"
+                }`}
+              >
+                {techStack.includes(stack) && (
+                  <span className="text-xs">✓</span>
+                )}
               </div>
-              <span className="text-terminal-green font-mono text-sm">{stack}</span>
+              <span className="text-terminal-green font-mono text-sm">
+                {stack}
+              </span>
             </label>
           ))}
         </div>
@@ -162,11 +187,14 @@ export function WaitlistForm() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {[
             "Actively searching",
-            "Passively looking", 
+            "Passively looking",
             "Just exploring",
-            "Planning to search soon"
+            "Planning to search soon",
           ].map((status) => (
-            <label key={status} className="flex items-center space-x-3 cursor-pointer py-1">
+            <label
+              key={status}
+              className="flex items-center space-x-3 cursor-pointer py-1"
+            >
               <input
                 type="radio"
                 name="jobSearchStatus"
@@ -175,12 +203,20 @@ export function WaitlistForm() {
                 onChange={(e) => setJobSearchStatus(e.target.value)}
                 className="sr-only"
               />
-              <div className={`w-4 h-4 border border-terminal-green/30 flex items-center justify-center flex-shrink-0 ${
-                jobSearchStatus === status ? 'bg-terminal-green' : 'bg-background'
-              }`}>
-                {jobSearchStatus === status && <div className="w-2 h-2 bg-black"></div>}
+              <div
+                className={`w-4 h-4 border border-terminal-green/30 flex items-center justify-center flex-shrink-0 ${
+                  jobSearchStatus === status
+                    ? "bg-terminal-green"
+                    : "bg-background"
+                }`}
+              >
+                {jobSearchStatus === status && (
+                  <div className="w-2 h-2 bg-black"></div>
+                )}
               </div>
-              <span className="text-terminal-green font-mono text-sm">{status}</span>
+              <span className="text-terminal-green font-mono text-sm">
+                {status}
+              </span>
             </label>
           ))}
         </div>
@@ -193,19 +229,30 @@ export function WaitlistForm() {
         </legend>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {companyStageOptions.map((stage) => (
-            <label key={stage} className="flex items-center space-x-3 cursor-pointer py-1">
+            <label
+              key={stage}
+              className="flex items-center space-x-3 cursor-pointer py-1"
+            >
               <input
                 type="checkbox"
                 checked={companyStage.includes(stage)}
                 onChange={() => handleCompanyStageChange(stage)}
                 className="sr-only"
               />
-              <div className={`w-4 h-4 border border-terminal-green/30 flex items-center justify-center flex-shrink-0 ${
-                companyStage.includes(stage) ? 'bg-terminal-green text-black' : 'bg-background'
-              }`}>
-                {companyStage.includes(stage) && <span className="text-xs">✓</span>}
+              <div
+                className={`w-4 h-4 border border-terminal-green/30 flex items-center justify-center flex-shrink-0 ${
+                  companyStage.includes(stage)
+                    ? "bg-terminal-green text-black"
+                    : "bg-background"
+                }`}
+              >
+                {companyStage.includes(stage) && (
+                  <span className="text-xs">✓</span>
+                )}
               </div>
-              <span className="text-terminal-green font-mono text-sm">{stage}</span>
+              <span className="text-terminal-green font-mono text-sm">
+                {stage}
+              </span>
             </label>
           ))}
         </div>
