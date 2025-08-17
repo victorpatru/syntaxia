@@ -16,13 +16,13 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "catalog:",
-    "autoprefixer": "catalog:",
-    "postcss": "catalog:",
-    "react": "catalog:",
-    "react-dom": "catalog:",
-    "tailwindcss": "catalog:",
-    "typescript": "catalog:"
+    "@tailwindcss/postcss": "catalog:frontend",
+    "autoprefixer": "catalog:frontend",
+    "postcss": "catalog:frontend",
+    "react": "catalog:frontend",
+    "react-dom": "catalog:frontend",
+    "tailwindcss": "catalog:frontend",
+    "typescript": "catalog:shared"
   },
   "exports": {
     "./globals.css": "./src/globals.css",
