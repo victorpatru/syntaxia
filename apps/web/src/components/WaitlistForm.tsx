@@ -83,7 +83,7 @@ export default function WaitlistForm() {
     <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6">
       {/* Email Field */}
       <div>
-        <label className="block text-terminal-green font-mono text-sm mb-2">
+        <label htmlFor="email-input" className="block text-terminal-green font-mono text-sm mb-2">
           $ email --required
         </label>
         <div className="relative">
@@ -91,6 +91,7 @@ export default function WaitlistForm() {
             user@
           </span>
           <input
+            id="email-input"
             type="email"
             placeholder="your-email.com"
             value={email}
@@ -103,11 +104,12 @@ export default function WaitlistForm() {
 
       {/* Experience Level */}
       <div>
-        <label className="block text-terminal-green font-mono text-sm mb-2">
+        <label htmlFor="experience-select" className="block text-terminal-green font-mono text-sm mb-2">
           $ experience --years --required
         </label>
         <div className="relative">
           <select
+            id="experience-select"
             value={experience}
             onChange={(e) => setExperience(e.target.value)}
             className="w-full pl-3 pr-8 sm:pr-10 py-2 bg-background border border-terminal-green/30 text-terminal-green font-mono focus:outline-none focus:border-terminal-green/50 appearance-none"
@@ -128,10 +130,10 @@ export default function WaitlistForm() {
       </div>
 
       {/* Tech Stack */}
-      <div>
-        <label className="block text-terminal-green font-mono text-sm mb-2">
+      <fieldset>
+        <legend className="block text-terminal-green font-mono text-sm mb-2">
           $ tech-stack --select-multiple
-        </label>
+        </legend>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {techStackOptions.map((stack) => (
             <label key={stack} className="flex items-center space-x-3 cursor-pointer py-1">
@@ -150,13 +152,13 @@ export default function WaitlistForm() {
             </label>
           ))}
         </div>
-      </div>
+      </fieldset>
 
       {/* Job Search Status */}
-      <div>
-        <label className="block text-terminal-green font-mono text-sm mb-2">
+      <fieldset>
+        <legend className="block text-terminal-green font-mono text-sm mb-2">
           $ job-search --status --required
-        </label>
+        </legend>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {[
             "Actively searching",
@@ -182,13 +184,13 @@ export default function WaitlistForm() {
             </label>
           ))}
         </div>
-      </div>
+      </fieldset>
 
       {/* Company Stage */}
-      <div>
-        <label className="block text-terminal-green font-mono text-sm mb-2">
+      <fieldset>
+        <legend className="block text-terminal-green font-mono text-sm mb-2">
           $ company-stage --target --optional
-        </label>
+        </legend>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {companyStageOptions.map((stage) => (
             <label key={stage} className="flex items-center space-x-3 cursor-pointer py-1">
@@ -207,7 +209,7 @@ export default function WaitlistForm() {
             </label>
           ))}
         </div>
-      </div>
+      </fieldset>
 
       {/* Submit Button */}
       <div className="flex justify-center pt-4">
