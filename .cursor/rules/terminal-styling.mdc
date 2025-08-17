@@ -1,0 +1,160 @@
+---
+description: Enforce terminal aesthetic with sharp corners, monospace fonts, and consistent sizing
+globs: apps/**/*.tsx, apps/**/*.astro, packages/ui/**/*.tsx
+alwaysApply: true
+---
+
+# Terminal Styling Rules
+
+Syntaxia applications must maintain a consistent terminal aesthetic with sharp, monospace styling.
+
+- **Sharp Corners Only**
+  - Never use `rounded`, `rounded-*` classes or CSS `border-radius`
+  - All borders must have sharp edges for terminal aesthetic
+  - Applies to buttons, inputs, containers, and all UI elements
+
+- **Monospace Fonts Required**
+  - Always use `font-mono` class on all text elements
+  - Maintains terminal/code editor consistency
+  - Essential for the technical brand identity
+
+- **Consistent Button Sizing**
+  - Standard height: `h-8` (32px)
+  - Standard padding: `px-3 py-1`
+  - Minimum width: `min-w-20` for consistency
+  - Font size: `text-xs` for compact appearance
+
+## Border Radius Rules
+
+### ❌ DON'T: Use any border radius
+```tsx
+// WRONG - Never use these classes or styles
+className="rounded"
+className="rounded-md" 
+className="rounded-lg"
+style={{ borderRadius: '4px' }}
+```
+
+### ✅ DO: Keep all borders sharp
+```tsx
+// CORRECT - Sharp terminal-style borders
+className="border border-terminal-green/30"
+className="border border-terminal-green/30 px-3 py-1" // No rounded class
+```
+
+## Button Consistency Rules
+
+### ❌ DON'T: Inconsistent button styling
+```tsx
+// WRONG - Mixing button styles
+<button className="px-4 py-2 rounded-lg">Button 1</button>
+<button className="px-2 py-1 rounded">Button 2</button>
+```
+
+### ✅ DO: Consistent terminal button pattern
+```tsx
+// CORRECT - Standard terminal button pattern
+<button className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20">
+  ./action
+</button>
+```
+
+## Form Element Rules
+
+### ❌ DON'T: Rounded form inputs
+```tsx
+// WRONG - Rounded form elements
+<input className="rounded-md border" />
+<select className="rounded border" />
+<textarea className="rounded-lg border" />
+```
+
+### ✅ DO: Sharp terminal-style inputs
+```tsx
+// CORRECT - Terminal-style form elements
+<input className="border border-terminal-green/30 bg-background text-terminal-green font-mono px-3 py-2 focus:outline-none focus:border-terminal-green/50" />
+```
+
+## Component Consistency Requirements
+
+### Button Standards
+- **Height**: `h-8` (32px) for standard buttons
+- **Padding**: `px-3 py-1` for horizontal/vertical spacing
+- **Min-width**: `min-w-20` for consistency
+- **Font**: `font-mono text-xs` for terminal aesthetic
+- **Border**: `border border-terminal-green/30` with no radius
+
+### Input Standards  
+- **Font**: `font-mono` for monospace consistency
+- **Colors**: `bg-background border-terminal-green/30 text-terminal-green`
+- **Focus**: `focus:outline-none focus:border-terminal-green/50`
+- **Padding**: `px-3 py-2` for proper spacing
+- **No border radius**: Sharp edges only
+
+### Color Palette
+```tsx
+// Terminal color variables (defined in global CSS)
+--color-terminal-green    // Primary text and borders
+--color-terminal-amber    // Hover states and accents  
+--color-terminal-dark     // Background elements
+```
+
+## Examples of Correct Implementation
+
+### Theme Toggle Button Pattern
+```tsx
+<button className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20">
+  theme
+</button>
+```
+
+### Login Button Pattern
+```tsx
+<button className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20">
+  ./login
+</button>
+```
+
+### Join Button Pattern
+```tsx
+<button className="bg-terminal-amber text-black hover:bg-terminal-amber/80 font-mono px-6 py-2 transition-colors disabled:opacity-50">
+  Join
+</button>
+```
+
+### Email Input Pattern
+```tsx
+<input 
+  type="email"
+  className="w-full pl-16 pr-3 py-2 bg-background border border-terminal-green/30 text-terminal-green placeholder:text-terminal-green/40 font-mono focus:outline-none focus:border-terminal-green/50"
+  placeholder="your-email.com"
+/>
+```
+
+## Common Violations to Avoid
+
+1. **Adding border radius anywhere** - Breaks terminal aesthetic
+2. **Inconsistent button sizing** - Use standard h-8 height
+3. **Missing monospace fonts** - All text should use font-mono
+4. **Wrong color usage** - Stick to terminal color palette
+5. **Inconsistent hover states** - Use standard terminal-green/amber pattern
+
+## Validation Checklist
+
+Before committing UI components, verify:
+
+- [ ] No `rounded`, `rounded-*` classes used
+- [ ] All interactive elements use `font-mono`
+- [ ] Buttons follow standard sizing (`h-8`, `px-3 py-1`)
+- [ ] Terminal color palette is used consistently
+- [ ] Hover states use terminal-green/amber pattern
+- [ ] All borders are sharp (no border-radius in CSS)
+
+
+## Related Files
+
+- [global.css](mdc:apps/web/src/styles/global.css) - Terminal color definitions
+- [ThemeToggle.tsx](mdc:apps/web/src/components/ThemeToggle.tsx) - Reference button implementation  
+- [WaitlistForm.tsx](mdc:apps/web/src/components/WaitlistForm.tsx) - Reference form implementation
+
+Follow [cursor_rules.mdc](mdc:.cursor/rules/cursor_rules.mdc) for proper rule formatting and structure.
