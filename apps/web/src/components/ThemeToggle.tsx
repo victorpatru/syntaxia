@@ -50,7 +50,6 @@ export function ThemeToggle() {
     localStorage.setItem('theme', newTheme)
     applyTheme(newTheme)
     setIsOpen(false) // Close dropdown after selection
-    console.log(`[ThemeToggle] Setting theme to ${newTheme}`)
   }
 
   if (!mounted) {
@@ -63,14 +62,13 @@ export function ThemeToggle() {
         id="theme-toggle"
         type="button"
         aria-label="Toggle theme"
-        className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors inline-flex items-center gap-1 relative h-8 min-w-20"
+        className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-2 sm:px-3 py-1 transition-colors inline-flex items-center gap-1 relative h-8 w-8 sm:min-w-20"
         onClick={() => {
           setIsOpen(!isOpen)
-          console.log(`[ThemeToggle] Theme toggle clicked, current theme: ${theme}`)
         }}
       >
         <Sun className="h-3 w-3 rotate-0 scale-0 transition-all light:rotate-0 light:scale-100" />
-        <Moon className="absolute h-3 w-3 rotate-0 scale-100 transition-all light:rotate-90 light:scale-0 left-3" />
+        <Moon className="absolute h-3 w-3 rotate-0 scale-100 transition-all light:rotate-90 light:scale-0 left-2 sm:left-3" />
         <span className="sr-only">Toggle theme</span>
         <span className="ml-1 hidden sm:inline">theme</span>
       </button>
