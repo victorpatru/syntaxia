@@ -28,9 +28,7 @@ export default function WaitlistForm() {
         <pre className="text-terminal-green text-sm">
           {`$ ./add-to-waitlist --email="${email}"
 [SUCCESS] Email added to waitlist
-[INFO] Position: #1,337 in queue
-[INFO] Expected access: 2-3 weeks
-[INFO] Check your inbox for confirmation
+[INFO] We'll be in touch soon
 
 > Thank you for joining! 🚀`}
         </pre>
@@ -39,7 +37,7 @@ export default function WaitlistForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md mx-auto">
+    <form onSubmit={handleSubmit} className="max-w-xl mx-auto">
       <div className="flex gap-2 mb-4">
         <div className="flex-1 relative">
           <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-terminal-green/50 text-sm">
@@ -59,7 +57,7 @@ export default function WaitlistForm() {
           disabled={isSubmitting}
           className="bg-terminal-amber text-black hover:bg-terminal-amber/80 font-mono px-6 py-2 transition-colors disabled:opacity-50"
         >
-          {isSubmitting ? "Adding..." : "Join"}
+          {isSubmitting ? "Adding..." : "Get Early Access"}
         </button>
       </div>
       <p className="text-xs text-terminal-green/50">
