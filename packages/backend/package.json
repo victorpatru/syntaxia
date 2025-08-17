@@ -18,12 +18,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@auth/core": "catalog:",
+    "@auth/core": "catalog:shared",
     "@clerk/backend": "^2.7.0",
     "@convex-dev/polar": "^0.6.1",
     "@polar-sh/sdk": "^0.34.9",
-    "@t3-oss/env-core": "catalog:",
-    "arktype": "catalog:",
+    "@t3-oss/env-core": "catalog:shared",
+    "arktype": "catalog:shared",
     "convex": "^1.25.4",
     "convex-helpers": "^0.1.101",
     "svix": "^1.71.0"

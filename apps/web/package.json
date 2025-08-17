@@ -1,0 +1,24 @@
+{
+  "name": "@syntaxia/web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/react": "^4.3.0",
+    "@tailwindcss/vite": "catalog:frontend",
+    "astro": "^5.13.2",
+    "lucide-react": "^0.539.0",
+    "react": "catalog:frontend",
+    "react-dom": "catalog:frontend",
+    "tailwindcss": "catalog:frontend"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:frontend",
+    "@types/react-dom": "catalog:frontend"
+  }
+}
