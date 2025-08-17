@@ -1,7 +1,7 @@
 import type React from "react";
 import { useState } from "react";
 
-export default function WaitlistForm() {
+export function WaitlistForm() {
   const [email, setEmail] = useState("");
   const [experience, setExperience] = useState("");
   const [techStack, setTechStack] = useState<string[]>([]);
