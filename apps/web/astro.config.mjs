@@ -2,12 +2,24 @@
 
 import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
-import { defineConfig } from "astro/config";
+import { defineConfig, envField } from "astro/config";
 
 // https://astro.build/config
 export default defineConfig({
   integrations: [react()],
 
+  env: {
+    schema: {
+      PUBLIC_CONVEX_URL: envField.string({
+        context: "client",
+        access: "public",
+      }),
+      PUBLIC_TURNSTILE_SITE_KEY: envField.string({
+        context: "client",
+        access: "public",
+      }),
+    },
+  },
   vite: {
     // @ts-expect-error - Tailwind CSS Vite plugin type compatibility issue with Astro
     plugins: [tailwindcss()],
