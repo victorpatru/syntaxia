@@ -6,6 +6,8 @@
       "**",
       "!**/node_modules/**",
       "!**/.vite/**",
+      "!**/.output/**",
+      "!**/.tanstack/**",
       "!**/packages/tsconfig",
       "!**/dist/**",
       "!**/routeTree.gen.ts",
