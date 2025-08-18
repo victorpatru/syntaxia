@@ -10,7 +10,8 @@
       "!**/dist/**",
       "!**/routeTree.gen.ts",
       "!**/_generated/**",
-      "!bun.lock"
+      "!bun.lock",
+      "!**/app.css"
     ]
   },
   "linter": {
