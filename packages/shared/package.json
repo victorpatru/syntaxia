@@ -1,0 +1,21 @@
+{
+  "name": "@syntaxia/shared",
+  "main": "./src/index.ts",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "dev": "tsc",
+    "format": "biome format --write ./src",
+    "lint": "biome lint ./src",
+    "typecheck": "tsgo --noEmit --emitDeclarationOnly false"
+  },
+  "devDependencies": {}
+}
