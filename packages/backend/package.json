@@ -21,6 +21,7 @@
     "@auth/core": "catalog:shared",
     "@clerk/backend": "^2.7.0",
     "@convex-dev/polar": "^0.6.1",
+    "@notionhq/client": "^4.0.2",
     "@polar-sh/sdk": "^0.34.9",
     "@syntaxia/shared": "workspace:*",
     "@t3-oss/env-core": "catalog:shared",
