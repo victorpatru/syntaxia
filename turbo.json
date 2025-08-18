@@ -39,5 +39,6 @@
       "dependsOn": ["^topo"],
       "outputs": ["node_modules/.cache/tsbuildinfo.json"]
     }
-  }
+  },
+  "globalEnv": ["PUBLIC_CONVEX_URL", "PUBLIC_TURNSTILE_SITE_KEY"]
 }
