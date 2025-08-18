@@ -1,9 +1,134 @@
 import type { WebhookEvent } from "@clerk/backend";
+import { type } from "arktype";
 import { httpRouter } from "convex/server";
 import { Webhook } from "svix";
 import { internal } from "./_generated/api";
 import { httpAction } from "./_generated/server";
 import { env } from "./env";
+import { waitlistSchema } from "./validation";
+
+// HTTP endpoint for waitlist submissions
+const handleWaitlistSubmission = httpAction(async (ctx, request) => {
+  // CORS headers
+  const corsHeaders = {
+    "Access-Control-Allow-Origin": env.WEB_URL,
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  };
+
+  // Handle preflight request
+  if (request.method === "OPTIONS") {
+    return new Response(null, {
+      status: 200,
+      headers: corsHeaders,
+    });
+  }
+
+  // Only allow POST requests
+  if (request.method !== "POST") {
+    return new Response("Method not allowed", {
+      status: 405,
+      headers: corsHeaders,
+    });
+  }
+
+  try {
+    const body = await request.json();
+
+    // Validate the data
+    const result = waitlistSchema(body);
+    if (result instanceof type.errors) {
+      return new Response(
+        JSON.stringify({
+          error: "Validation failed",
+          details: result.summary,
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+            ...corsHeaders,
+          },
+        },
+      );
+    }
+
+    // Verify Turnstile token
+    const turnstileResponse = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          secret: env.TURNSTILE_SECRET_KEY || "",
+          response: result.turnstileToken,
+        }),
+      },
+    );
+
+    const turnstileResult = await turnstileResponse.json();
+    if (!turnstileResult.success) {
+      return new Response(
+        JSON.stringify({ error: "Turnstile verification failed" }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+            ...corsHeaders,
+          },
+        },
+      );
+    }
+
+    // Submit to waitlist (call the internal version directly)
+    const data = result;
+    const email = data.email.trim().toLowerCase();
+
+    // Check for duplicate submission by email
+    const existing = await ctx.runQuery(
+      internal.waitlist.getSubmissionByEmail,
+      {
+        email,
+      },
+    );
+
+    if (!existing) {
+      // Create new submission
+      const id = await ctx.runMutation(internal.waitlist.createSubmission, {
+        email,
+        experience: data.experience,
+        techStack: data.techStack,
+        jobSearchStatus: data.jobSearchStatus,
+        companyStage: data.companyStage,
+      });
+
+      // Schedule Notion sync
+      await ctx.scheduler.runAfter(0, internal.notion.syncToNotion, { id });
+    }
+
+    const submissionResult = {
+      success: true,
+      message: "Thank you for joining our waitlist!",
+    };
+
+    return new Response(JSON.stringify(submissionResult), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        ...corsHeaders,
+      },
+    });
+  } catch (error) {
+    console.error("Waitlist submission error:", error);
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: {
+        "Content-Type": "application/json",
+        ...corsHeaders,
+      },
+    });
+  }
+});
 
 const handleClerkWebhook = httpAction(async (ctx, request) => {
   const event = await validateRequest(request);
@@ -71,6 +196,22 @@ const handleClerkWebhook = httpAction(async (ctx, request) => {
 });
 
 const http = httpRouter();
+
+// Waitlist submission endpoint
+http.route({
+  path: "/waitlist",
+  method: "POST",
+  handler: handleWaitlistSubmission,
+});
+
+// Handle OPTIONS for CORS preflight
+http.route({
+  path: "/waitlist",
+  method: "OPTIONS",
+  handler: handleWaitlistSubmission,
+});
+
+// Clerk webhook endpoint
 http.route({
   path: "/clerk-users-webhook",
   method: "POST",
