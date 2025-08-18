@@ -10,8 +10,11 @@
 
 import type * as env from "../env.js";
 import type * as http from "../http.js";
+import type * as notion from "../notion.js";
 import type * as users from "../users.js";
 import type * as utils_clerk from "../utils/clerk.js";
+import type * as validation from "../validation.js";
+import type * as waitlist from "../waitlist.js";
 import type * as webhooks from "../webhooks.js";
 
 import type {
@@ -31,8 +34,11 @@ import type {
 declare const fullApi: ApiFromModules<{
   env: typeof env;
   http: typeof http;
+  notion: typeof notion;
   users: typeof users;
   "utils/clerk": typeof utils_clerk;
+  validation: typeof validation;
+  waitlist: typeof waitlist;
   webhooks: typeof webhooks;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
