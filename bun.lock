@@ -51,6 +51,8 @@
       "name": "@syntaxia/web",
       "dependencies": {
         "@astrojs/react": "^4.3.0",
+        "@marsidev/react-turnstile": "^1.3.0",
+        "@syntaxia/shared": "workspace:*",
         "@tailwindcss/vite": "catalog:frontend",
         "astro": "^5.13.2",
         "lucide-react": "^0.539.0",
@@ -71,6 +73,7 @@
         "@clerk/backend": "^2.7.0",
         "@convex-dev/polar": "^0.6.1",
         "@polar-sh/sdk": "^0.34.9",
+        "@syntaxia/shared": "workspace:*",
         "@t3-oss/env-core": "catalog:shared",
         "arktype": "catalog:shared",
         "convex": "^1.25.4",
@@ -84,6 +87,10 @@
       "dependencies": {
         "pino": "^9.7.0",
       },
+    },
+    "packages/shared": {
+      "name": "@syntaxia/shared",
+      "version": "0.1.0",
     },
     "packages/ui": {
       "name": "@syntaxia/ui",
@@ -414,6 +421,8 @@
 
     "@mapbox/node-pre-gyp": ["@mapbox/node-pre-gyp@2.0.0", "", { "dependencies": { "consola": "^3.2.3", "detect-libc": "^2.0.0", "https-proxy-agent": "^7.0.5", "node-fetch": "^2.6.7", "nopt": "^8.0.0", "semver": "^7.5.3", "tar": "^7.4.0" }, "bin": { "node-pre-gyp": "bin/node-pre-gyp" } }, "sha512-llMXd39jtP0HpQLVI37Bf1m2ADlEb35GYSh1SDSLsBhR+5iCxiNGlT31yqbNtVHygHAtMy6dWFERpU2JgufhPg=="],
 
+    "@marsidev/react-turnstile": ["@marsidev/react-turnstile@1.3.0", "", { "peerDependencies": { "react": "^17.0.2 || ^18.0.0 || ^19.0", "react-dom": "^17.0.2 || ^18.0.0 || ^19.0" } }, "sha512-VO99Nynt+j4ETfMImQCj5LgbUKZ9mWPpy3RjP/3e/3vZu+FIphjEdU6g+cq4FeDoNshSxLlRzBTKcH5JMeM1GQ=="],
+
     "@netlify/binary-info": ["@netlify/binary-info@1.0.0", "", {}, "sha512-4wMPu9iN3/HL97QblBsBay3E1etIciR84izI3U+4iALY+JHCrI+a2jO0qbAZ/nxKoegypYEaiiqWXylm+/zfrw=="],
 
     "@netlify/blobs": ["@netlify/blobs@9.1.2", "", { "dependencies": { "@netlify/dev-utils": "2.2.0", "@netlify/runtime-utils": "1.3.1" } }, "sha512-7dMjExSH4zj4ShvLem49mE3mf0K171Tx2pV4WDWhJbRUWW3SJIR2qntz0LvUGS97N5HO1SmnzrgWUhEXCsApiw=="],
@@ -705,6 +714,8 @@
     "@syntaxia/backend": ["@syntaxia/backend@workspace:packages/backend"],
 
     "@syntaxia/logger": ["@syntaxia/logger@workspace:packages/logger"],
+
+    "@syntaxia/shared": ["@syntaxia/shared@workspace:packages/shared"],
 
     "@syntaxia/typescript": ["@syntaxia/typescript@workspace:tooling/typescript"],
 
