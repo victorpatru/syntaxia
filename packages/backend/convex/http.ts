@@ -80,31 +80,20 @@ const handleWaitlistSubmission = httpAction(async (ctx, request) => {
       );
     }
 
-    // Submit to waitlist (call the internal version directly)
+    // Submit to waitlist with atomic duplicate checking
     const data = result;
-    const email = data.email.trim().toLowerCase();
 
-    // Check for duplicate submission by email
-    const existing = await ctx.runQuery(
-      internal.waitlist.getSubmissionByEmail,
-      {
-        email,
-      },
-    );
+    // Create submission (handles duplicate check atomically)
+    const id = await ctx.runMutation(internal.waitlist.createSubmission, {
+      email: data.email, // Will be normalized in the mutation
+      experience: data.experience,
+      techStack: data.techStack,
+      jobSearchStatus: data.jobSearchStatus,
+      companyStage: data.companyStage,
+    });
 
-    if (!existing) {
-      // Create new submission
-      const id = await ctx.runMutation(internal.waitlist.createSubmission, {
-        email,
-        experience: data.experience,
-        techStack: data.techStack,
-        jobSearchStatus: data.jobSearchStatus,
-        companyStage: data.companyStage,
-      });
-
-      // Schedule Notion sync
-      await ctx.scheduler.runAfter(0, internal.notion.syncToNotion, { id });
-    }
+    // Schedule Notion sync (will handle both new and existing submissions)
+    await ctx.scheduler.runAfter(0, internal.notion.syncToNotion, { id });
 
     const submissionResult = {
       success: true,

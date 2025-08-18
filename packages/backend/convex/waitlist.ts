@@ -21,14 +21,16 @@ export const markSynced = internalMutation({
 export const getSubmissionByEmail = internalQuery({
   args: { email: v.string() },
   handler: async (ctx, { email }) => {
+    // Normalize email for consistent querying
+    const normalizedEmail = email.toLowerCase().trim();
     return await ctx.db
       .query("waitlist")
-      .withIndex("by_email", (q) => q.eq("email", email))
+      .withIndex("by_email", (q) => q.eq("email", normalizedEmail))
       .first();
   },
 });
 
-// Internal mutation to create submission
+// Internal mutation to create submission with duplicate check
 export const createSubmission = internalMutation({
   args: {
     email: v.string(),
@@ -38,8 +40,23 @@ export const createSubmission = internalMutation({
     companyStage: v.array(v.string()),
   },
   handler: async (ctx, args) => {
+    // Normalize email - this handles the race condition atomically
+    const email = args.email.toLowerCase().trim();
+
+    // Check for existing submission in the same transaction
+    const existing = await ctx.db
+      .query("waitlist")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .unique();
+
+    if (existing !== null) {
+      // Return the existing submission ID instead of creating a duplicate
+      return existing._id;
+    }
+
+    // Insert new submission with normalized email
     return await ctx.db.insert("waitlist", {
-      email: args.email,
+      email, // Already normalized
       experience: args.experience,
       techStack: args.techStack,
       jobSearchStatus: args.jobSearchStatus,
