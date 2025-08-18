@@ -1,3 +1,11 @@
+import { PUBLIC_CONVEX_URL, PUBLIC_TURNSTILE_SITE_KEY } from "astro:env/client";
+import { Turnstile } from "@marsidev/react-turnstile";
+import {
+  COMPANY_STAGE_OPTIONS,
+  EXPERIENCE_OPTIONS,
+  JOB_SEARCH_STATUS_OPTIONS,
+  TECH_STACK_OPTIONS,
+} from "@syntaxia/shared";
 import type React from "react";
 import { useState } from "react";
 
@@ -9,6 +17,8 @@ export function WaitlistForm() {
   const [companyStage, setCompanyStage] = useState<string[]>([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [error, setError] = useState<string>("");
 
   const handleTechStackChange = (stack: string) => {
     setTechStack((prev) =>
@@ -24,18 +34,39 @@ export function WaitlistForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !experience || !jobSearchStatus) return;
+    if (!email || !experience || !jobSearchStatus || !turnstileToken) return;
 
     setIsSubmitting(true);
+    setError("");
 
-    // TODO: Replace with actual waitlist API call
-    // await addToWaitlist({ email, experience, techStack, jobSearchStatus, companyStage })
+    try {
+      const response = await fetch(`${PUBLIC_CONVEX_URL}/waitlist`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          experience,
+          techStack,
+          jobSearchStatus,
+          companyStage,
+          turnstileToken,
+        }),
+      });
 
-    // Mock submission delay
-    setTimeout(() => {
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Submission failed");
+      }
+
       setIsSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
       setIsSubmitting(false);
-    }, 2000);
+    }
   };
 
   if (isSubmitted) {
@@ -43,37 +74,19 @@ export function WaitlistForm() {
       <div className="border border-terminal-green/30 p-6 bg-background">
         <pre className="text-terminal-green text-sm">
           {`$ ./add-to-waitlist \\
-    --email="${email}" \\
-    --experience="${experience}" \\
-    --tech-stack="${techStack.join(",")}" \\
-    --job-status="${jobSearchStatus}" \\
-    --company-stage="${companyStage.join(",")}"
+          --email="${email}" \\
+          --experience="${experience}" \\
+          --tech-stack="${techStack.join(",")}" \\
+          --job-status="${jobSearchStatus}" \\
+          --company-stage="${companyStage.join(",")}"
 
-[SUCCESS] Profile added to waitlist
-[INFO] Tailoring experience for ${experience} ${techStack.join("/")} engineer
-[INFO] We'll be in touch soon with relevant opportunities
+          [SUCCESS] Profile added to waitlist
 
-> Thank you for joining! 🚀`}
+          > Thank you for joining! 🚀`}
         </pre>
       </div>
     );
   }
-
-  const techStackOptions = [
-    "Frontend (React/Vue/Angular)",
-    "Backend (Node/Python/Go/Java)",
-    "Full Stack",
-    "DevOps/Infrastructure",
-    "Mobile",
-    "Data/ML",
-  ];
-
-  const companyStageOptions = [
-    "Early startup (10-50 employees)",
-    "Growth startup (50-200 employees)",
-    "Mid-size (200-500 employees)",
-    "Enterprise (500+ employees)",
-  ];
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6">
@@ -120,10 +133,11 @@ export function WaitlistForm() {
             <option value="" className="text-terminal-green/50">
               Select years of experience
             </option>
-            <option value="0-2">0-3 years</option>
-            <option value="3-5">3-5 years</option>
-            <option value="6-10">6-10 years</option>
-            <option value="10+">10+ years</option>
+            {EXPERIENCE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
           <div className="absolute inset-y-0 right-2 sm:right-3 flex items-center pointer-events-none">
             <svg
@@ -149,7 +163,7 @@ export function WaitlistForm() {
           $ tech-stack --select-multiple
         </legend>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {techStackOptions.map((stack) => (
+          {TECH_STACK_OPTIONS.map((stack) => (
             <label
               key={stack}
               className="flex items-center space-x-3 cursor-pointer py-1"
@@ -185,12 +199,7 @@ export function WaitlistForm() {
           $ job-search --status --required
         </legend>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {[
-            "Actively searching",
-            "Passively looking",
-            "Just exploring",
-            "Planning to search soon",
-          ].map((status) => (
+          {JOB_SEARCH_STATUS_OPTIONS.map((status) => (
             <label
               key={status}
               className="flex items-center space-x-3 cursor-pointer py-1"
@@ -228,7 +237,7 @@ export function WaitlistForm() {
           $ company-stage --target --optional
         </legend>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {companyStageOptions.map((stage) => (
+          {COMPANY_STAGE_OPTIONS.map((stage) => (
             <label
               key={stage}
               className="flex items-center space-x-3 cursor-pointer py-1"
@@ -258,11 +267,34 @@ export function WaitlistForm() {
         </div>
       </fieldset>
 
+      {/* Turnstile */}
+      <div className="flex justify-center">
+        <Turnstile
+          siteKey={PUBLIC_TURNSTILE_SITE_KEY}
+          onSuccess={setTurnstileToken}
+          onError={() => setTurnstileToken(null)}
+          onExpire={() => setTurnstileToken(null)}
+        />
+      </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="border border-red-500/30 p-3 bg-red-500/10">
+          <p className="text-red-400 font-mono text-sm">Error: {error}</p>
+        </div>
+      )}
+
       {/* Submit Button */}
       <div className="flex justify-center pt-4">
         <button
           type="submit"
-          disabled={isSubmitting || !email || !experience || !jobSearchStatus}
+          disabled={
+            isSubmitting ||
+            !email ||
+            !experience ||
+            !jobSearchStatus ||
+            !turnstileToken
+          }
           className="bg-terminal-amber text-black hover:bg-terminal-amber/80 font-mono px-8 py-3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? "./adding-to-waitlist..." : "./join-waitlist"}
