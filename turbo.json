@@ -10,7 +10,13 @@
       "env": [],
       "inputs": ["$TURBO_DEFAULT$", ".env"],
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "next-env.d.ts", ".expo/**"]
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "!.next/cache/**",
+        "next-env.d.ts",
+        ".expo/**"
+      ]
     },
     "start": {
       "cache": false
