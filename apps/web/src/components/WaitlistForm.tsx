@@ -270,7 +270,7 @@ export function WaitlistForm() {
       {/* Turnstile */}
       <div className="flex justify-center">
         <Turnstile
-          siteKey={PUBLIC_TURNSTILE_SITE_KEY || ""}
+          siteKey={PUBLIC_TURNSTILE_SITE_KEY}
           onSuccess={setTurnstileToken}
           onError={() => setTurnstileToken(null)}
           onExpire={() => setTurnstileToken(null)}
