@@ -11,22 +11,17 @@ function LoginPage() {
 
   if (!signIn) return null;
 
-  const signInWith = (strategy: OAuthStrategy) => {
+  const signInWith = async (strategy: OAuthStrategy) => {
     setIsLoading(true);
-    return signIn
-      .authenticateWithRedirect({
+    try {
+      await signIn.authenticateWithRedirect({
         strategy,
         redirectUrl: "/sso-callback",
         redirectUrlComplete: "/",
-      })
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err: any) => {
-        console.log(err.errors);
-        console.error(err, null, 2);
-        setIsLoading(false);
       });
+    } catch (err: any) {
+      setIsLoading(false);
+    }
   };
 
   return (
