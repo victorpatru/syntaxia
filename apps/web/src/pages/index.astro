@@ -40,12 +40,12 @@ import "../styles/global.css";
 	<body class="min-h-screen bg-background text-foreground font-mono">
 		<header class="border-b border-terminal-green/30 bg-terminal-dark px-4 md:px-6 font-mono">
 			<div class="flex h-16 items-center justify-between">
-				<div class="flex items-center gap-1">
+				<a href="/" class="flex items-center gap-1 hover:opacity-80 transition-opacity">
 					<span class="text-terminal-amber">$</span>
 					<span class="font-mono font-bold text-terminal-green">syntaxia</span>
 					<span class="text-terminal-green animate-pulse">_</span>
-				</div>
-									<div class="flex items-center gap-3">
+				</a>
+				<div class="flex items-center gap-3">
 						<ThemeToggle client:idle />
 						<button
 						class="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20"
