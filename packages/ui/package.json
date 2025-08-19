@@ -45,7 +45,7 @@
     "./badge": "./src/components/badge.tsx",
     "./textarea": "./src/components/textarea.tsx",
     "./tabs": "./src/components/tabs.tsx",
-    "./comp-581": "./src/components/comp-581.tsx",
+    "./dashboard-header": "./src/components/dashboard-header.tsx",
     "./voice-orb": "./src/components/voice-orb.tsx"
   },
   "dependencies": {

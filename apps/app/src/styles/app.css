@@ -1,4 +1,5 @@
-@import "tailwindcss";
+@import "tailwindcss" source("../../../../");
+@import "../../../../packages/ui/src/globals.css";
 
 @custom-variant light (&:is(.light *));
 
