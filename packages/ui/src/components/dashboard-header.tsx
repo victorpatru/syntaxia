@@ -9,12 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { TerminalUserMenu } from "./terminal-user-menu";
 import { ThemeToggle } from "./theme-toggle";
 
-const navigationLinks = [
-  { href: "/", label: "~/practice" },
-  { href: "/landing-page", label: "~/about" },
-  { href: "/reports", label: "~/reports" },
-  { href: "/docs", label: "~/docs" },
-];
+const navigationLinks = [{ href: "/interview", label: "~/start-interview" }];
 
 export function DashboardHeader() {
   return (
