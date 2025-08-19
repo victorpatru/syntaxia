@@ -1,4 +1,4 @@
-import Component from "@syntaxia/ui/comp-581";
+import { DashboardHeader } from "@syntaxia/ui/dashboard-header";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { Authenticated, Unauthenticated } from "convex/react";
 
@@ -7,7 +7,7 @@ function AuthedLayout() {
     <>
       <Authenticated>
         <div className="min-h-screen">
-          <Component />
+          <DashboardHeader />
           <div className="flex flex-1 flex-col gap-4 p-4">
             <Outlet />
           </div>

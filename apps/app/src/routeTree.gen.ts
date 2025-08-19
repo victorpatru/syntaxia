@@ -13,9 +13,6 @@ import { Route as SsoCallbackRouteImport } from './routes/sso-callback'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthedReportsRouteImport } from './routes/_authed/reports'
-import { Route as AuthedNewSessionRouteImport } from './routes/_authed/new-session'
-import { Route as AuthedInterviewRouteImport } from './routes/_authed/interview'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
 
 const SsoCallbackRoute = SsoCallbackRouteImport.update({
@@ -37,21 +34,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthedReportsRoute = AuthedReportsRouteImport.update({
-  id: '/reports',
-  path: '/reports',
-  getParentRoute: () => AuthedRouteRoute,
-} as any)
-const AuthedNewSessionRoute = AuthedNewSessionRouteImport.update({
-  id: '/new-session',
-  path: '/new-session',
-  getParentRoute: () => AuthedRouteRoute,
-} as any)
-const AuthedInterviewRoute = AuthedInterviewRouteImport.update({
-  id: '/interview',
-  path: '/interview',
-  getParentRoute: () => AuthedRouteRoute,
-} as any)
 const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -63,18 +45,12 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/sso-callback': typeof SsoCallbackRoute
   '/dashboard': typeof AuthedDashboardRoute
-  '/interview': typeof AuthedInterviewRoute
-  '/new-session': typeof AuthedNewSessionRoute
-  '/reports': typeof AuthedReportsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/sso-callback': typeof SsoCallbackRoute
   '/dashboard': typeof AuthedDashboardRoute
-  '/interview': typeof AuthedInterviewRoute
-  '/new-session': typeof AuthedNewSessionRoute
-  '/reports': typeof AuthedReportsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -83,29 +59,12 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/sso-callback': typeof SsoCallbackRoute
   '/_authed/dashboard': typeof AuthedDashboardRoute
-  '/_authed/interview': typeof AuthedInterviewRoute
-  '/_authed/new-session': typeof AuthedNewSessionRoute
-  '/_authed/reports': typeof AuthedReportsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/login'
-    | '/sso-callback'
-    | '/dashboard'
-    | '/interview'
-    | '/new-session'
-    | '/reports'
+  fullPaths: '/' | '/login' | '/sso-callback' | '/dashboard'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/login'
-    | '/sso-callback'
-    | '/dashboard'
-    | '/interview'
-    | '/new-session'
-    | '/reports'
+  to: '/' | '/login' | '/sso-callback' | '/dashboard'
   id:
     | '__root__'
     | '/'
@@ -113,9 +72,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/sso-callback'
     | '/_authed/dashboard'
-    | '/_authed/interview'
-    | '/_authed/new-session'
-    | '/_authed/reports'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -155,27 +111,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authed/reports': {
-      id: '/_authed/reports'
-      path: '/reports'
-      fullPath: '/reports'
-      preLoaderRoute: typeof AuthedReportsRouteImport
-      parentRoute: typeof AuthedRouteRoute
-    }
-    '/_authed/new-session': {
-      id: '/_authed/new-session'
-      path: '/new-session'
-      fullPath: '/new-session'
-      preLoaderRoute: typeof AuthedNewSessionRouteImport
-      parentRoute: typeof AuthedRouteRoute
-    }
-    '/_authed/interview': {
-      id: '/_authed/interview'
-      path: '/interview'
-      fullPath: '/interview'
-      preLoaderRoute: typeof AuthedInterviewRouteImport
-      parentRoute: typeof AuthedRouteRoute
-    }
     '/_authed/dashboard': {
       id: '/_authed/dashboard'
       path: '/dashboard'
@@ -188,16 +123,10 @@ declare module '@tanstack/react-router' {
 
 interface AuthedRouteRouteChildren {
   AuthedDashboardRoute: typeof AuthedDashboardRoute
-  AuthedInterviewRoute: typeof AuthedInterviewRoute
-  AuthedNewSessionRoute: typeof AuthedNewSessionRoute
-  AuthedReportsRoute: typeof AuthedReportsRoute
 }
 
 const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
   AuthedDashboardRoute: AuthedDashboardRoute,
-  AuthedInterviewRoute: AuthedInterviewRoute,
-  AuthedNewSessionRoute: AuthedNewSessionRoute,
-  AuthedReportsRoute: AuthedReportsRoute,
 }
 
 const AuthedRouteRouteWithChildren = AuthedRouteRoute._addFileChildren(
