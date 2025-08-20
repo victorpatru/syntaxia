@@ -1,10 +1,11 @@
 import type { OAuthStrategy } from "@clerk/types";
 import { Button } from "@syntaxia/ui/button";
+import { ReactNode } from "react";
 
 interface OAuthButtonProps {
   provider: OAuthStrategy;
   label: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   isLoading: boolean;
   onSignIn: (provider: OAuthStrategy) => Promise<void>;
 }

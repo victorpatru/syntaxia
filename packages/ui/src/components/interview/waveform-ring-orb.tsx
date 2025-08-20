@@ -1,5 +1,5 @@
+import { WaveformOrbProps } from "@syntaxia/shared/types";
 import { useEffect, useState } from "react";
-import { WaveformOrbProps } from "../../../../../apps/app/src/types/interview";
 
 export function WaveformRingOrb({
   isActive,

@@ -5,7 +5,7 @@ import {
   EXPERIENCE_OPTIONS,
   JOB_SEARCH_STATUS_OPTIONS,
   TECH_STACK_OPTIONS,
-} from "@syntaxia/shared";
+} from "@syntaxia/shared/types";
 import type React from "react";
 import { useState } from "react";
 

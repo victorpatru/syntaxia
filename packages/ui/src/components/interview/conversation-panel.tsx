@@ -1,6 +1,6 @@
+import { ConversationPanelProps } from "@syntaxia/shared/types";
 import { Button } from "@syntaxia/ui/button";
 import { AlertCircle, Mic, MicOff, Wifi, WifiOff } from "lucide-react";
-import { ConversationPanelProps } from "../../../../../apps/app/src/types/interview";
 
 export function ConversationPanel({
   transcript,
