@@ -13,10 +13,12 @@ import { Route as SsoCallbackRouteImport } from './routes/sso-callback'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthedReportsRouteImport } from './routes/_authed/reports'
-import { Route as AuthedNewSessionRouteImport } from './routes/_authed/new-session'
-import { Route as AuthedInterviewRouteImport } from './routes/_authed/interview'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
+import { Route as AuthedInterviewIndexRouteImport } from './routes/_authed/interview/index'
+import { Route as AuthedInterviewSetupRouteImport } from './routes/_authed/interview/setup'
+import { Route as AuthedInterviewSessionSessionIdRouteImport } from './routes/_authed/interview/session/$sessionId'
+import { Route as AuthedInterviewReportSessionIdRouteImport } from './routes/_authed/interview/report/$sessionId'
+import { Route as AuthedInterviewAnalysisSessionIdRouteImport } from './routes/_authed/interview/analysis/$sessionId'
 
 const SsoCallbackRoute = SsoCallbackRouteImport.update({
   id: '/sso-callback',
@@ -37,44 +39,61 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthedReportsRoute = AuthedReportsRouteImport.update({
-  id: '/reports',
-  path: '/reports',
-  getParentRoute: () => AuthedRouteRoute,
-} as any)
-const AuthedNewSessionRoute = AuthedNewSessionRouteImport.update({
-  id: '/new-session',
-  path: '/new-session',
-  getParentRoute: () => AuthedRouteRoute,
-} as any)
-const AuthedInterviewRoute = AuthedInterviewRouteImport.update({
-  id: '/interview',
-  path: '/interview',
-  getParentRoute: () => AuthedRouteRoute,
-} as any)
 const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AuthedRouteRoute,
 } as any)
+const AuthedInterviewIndexRoute = AuthedInterviewIndexRouteImport.update({
+  id: '/interview/',
+  path: '/interview/',
+  getParentRoute: () => AuthedRouteRoute,
+} as any)
+const AuthedInterviewSetupRoute = AuthedInterviewSetupRouteImport.update({
+  id: '/interview/setup',
+  path: '/interview/setup',
+  getParentRoute: () => AuthedRouteRoute,
+} as any)
+const AuthedInterviewSessionSessionIdRoute =
+  AuthedInterviewSessionSessionIdRouteImport.update({
+    id: '/interview/session/$sessionId',
+    path: '/interview/session/$sessionId',
+    getParentRoute: () => AuthedRouteRoute,
+  } as any)
+const AuthedInterviewReportSessionIdRoute =
+  AuthedInterviewReportSessionIdRouteImport.update({
+    id: '/interview/report/$sessionId',
+    path: '/interview/report/$sessionId',
+    getParentRoute: () => AuthedRouteRoute,
+  } as any)
+const AuthedInterviewAnalysisSessionIdRoute =
+  AuthedInterviewAnalysisSessionIdRouteImport.update({
+    id: '/interview/analysis/$sessionId',
+    path: '/interview/analysis/$sessionId',
+    getParentRoute: () => AuthedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/sso-callback': typeof SsoCallbackRoute
   '/dashboard': typeof AuthedDashboardRoute
-  '/interview': typeof AuthedInterviewRoute
-  '/new-session': typeof AuthedNewSessionRoute
-  '/reports': typeof AuthedReportsRoute
+  '/interview/setup': typeof AuthedInterviewSetupRoute
+  '/interview': typeof AuthedInterviewIndexRoute
+  '/interview/analysis/$sessionId': typeof AuthedInterviewAnalysisSessionIdRoute
+  '/interview/report/$sessionId': typeof AuthedInterviewReportSessionIdRoute
+  '/interview/session/$sessionId': typeof AuthedInterviewSessionSessionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/sso-callback': typeof SsoCallbackRoute
   '/dashboard': typeof AuthedDashboardRoute
-  '/interview': typeof AuthedInterviewRoute
-  '/new-session': typeof AuthedNewSessionRoute
-  '/reports': typeof AuthedReportsRoute
+  '/interview/setup': typeof AuthedInterviewSetupRoute
+  '/interview': typeof AuthedInterviewIndexRoute
+  '/interview/analysis/$sessionId': typeof AuthedInterviewAnalysisSessionIdRoute
+  '/interview/report/$sessionId': typeof AuthedInterviewReportSessionIdRoute
+  '/interview/session/$sessionId': typeof AuthedInterviewSessionSessionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -83,9 +102,11 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/sso-callback': typeof SsoCallbackRoute
   '/_authed/dashboard': typeof AuthedDashboardRoute
-  '/_authed/interview': typeof AuthedInterviewRoute
-  '/_authed/new-session': typeof AuthedNewSessionRoute
-  '/_authed/reports': typeof AuthedReportsRoute
+  '/_authed/interview/setup': typeof AuthedInterviewSetupRoute
+  '/_authed/interview/': typeof AuthedInterviewIndexRoute
+  '/_authed/interview/analysis/$sessionId': typeof AuthedInterviewAnalysisSessionIdRoute
+  '/_authed/interview/report/$sessionId': typeof AuthedInterviewReportSessionIdRoute
+  '/_authed/interview/session/$sessionId': typeof AuthedInterviewSessionSessionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -94,18 +115,22 @@ export interface FileRouteTypes {
     | '/login'
     | '/sso-callback'
     | '/dashboard'
+    | '/interview/setup'
     | '/interview'
-    | '/new-session'
-    | '/reports'
+    | '/interview/analysis/$sessionId'
+    | '/interview/report/$sessionId'
+    | '/interview/session/$sessionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/sso-callback'
     | '/dashboard'
+    | '/interview/setup'
     | '/interview'
-    | '/new-session'
-    | '/reports'
+    | '/interview/analysis/$sessionId'
+    | '/interview/report/$sessionId'
+    | '/interview/session/$sessionId'
   id:
     | '__root__'
     | '/'
@@ -113,9 +138,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/sso-callback'
     | '/_authed/dashboard'
-    | '/_authed/interview'
-    | '/_authed/new-session'
-    | '/_authed/reports'
+    | '/_authed/interview/setup'
+    | '/_authed/interview/'
+    | '/_authed/interview/analysis/$sessionId'
+    | '/_authed/interview/report/$sessionId'
+    | '/_authed/interview/session/$sessionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -155,27 +182,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authed/reports': {
-      id: '/_authed/reports'
-      path: '/reports'
-      fullPath: '/reports'
-      preLoaderRoute: typeof AuthedReportsRouteImport
-      parentRoute: typeof AuthedRouteRoute
-    }
-    '/_authed/new-session': {
-      id: '/_authed/new-session'
-      path: '/new-session'
-      fullPath: '/new-session'
-      preLoaderRoute: typeof AuthedNewSessionRouteImport
-      parentRoute: typeof AuthedRouteRoute
-    }
-    '/_authed/interview': {
-      id: '/_authed/interview'
-      path: '/interview'
-      fullPath: '/interview'
-      preLoaderRoute: typeof AuthedInterviewRouteImport
-      parentRoute: typeof AuthedRouteRoute
-    }
     '/_authed/dashboard': {
       id: '/_authed/dashboard'
       path: '/dashboard'
@@ -183,21 +189,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedDashboardRouteImport
       parentRoute: typeof AuthedRouteRoute
     }
+    '/_authed/interview/': {
+      id: '/_authed/interview/'
+      path: '/interview'
+      fullPath: '/interview'
+      preLoaderRoute: typeof AuthedInterviewIndexRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
+    '/_authed/interview/setup': {
+      id: '/_authed/interview/setup'
+      path: '/interview/setup'
+      fullPath: '/interview/setup'
+      preLoaderRoute: typeof AuthedInterviewSetupRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
+    '/_authed/interview/session/$sessionId': {
+      id: '/_authed/interview/session/$sessionId'
+      path: '/interview/session/$sessionId'
+      fullPath: '/interview/session/$sessionId'
+      preLoaderRoute: typeof AuthedInterviewSessionSessionIdRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
+    '/_authed/interview/report/$sessionId': {
+      id: '/_authed/interview/report/$sessionId'
+      path: '/interview/report/$sessionId'
+      fullPath: '/interview/report/$sessionId'
+      preLoaderRoute: typeof AuthedInterviewReportSessionIdRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
+    '/_authed/interview/analysis/$sessionId': {
+      id: '/_authed/interview/analysis/$sessionId'
+      path: '/interview/analysis/$sessionId'
+      fullPath: '/interview/analysis/$sessionId'
+      preLoaderRoute: typeof AuthedInterviewAnalysisSessionIdRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
   }
 }
 
 interface AuthedRouteRouteChildren {
   AuthedDashboardRoute: typeof AuthedDashboardRoute
-  AuthedInterviewRoute: typeof AuthedInterviewRoute
-  AuthedNewSessionRoute: typeof AuthedNewSessionRoute
-  AuthedReportsRoute: typeof AuthedReportsRoute
+  AuthedInterviewSetupRoute: typeof AuthedInterviewSetupRoute
+  AuthedInterviewIndexRoute: typeof AuthedInterviewIndexRoute
+  AuthedInterviewAnalysisSessionIdRoute: typeof AuthedInterviewAnalysisSessionIdRoute
+  AuthedInterviewReportSessionIdRoute: typeof AuthedInterviewReportSessionIdRoute
+  AuthedInterviewSessionSessionIdRoute: typeof AuthedInterviewSessionSessionIdRoute
 }
 
 const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
   AuthedDashboardRoute: AuthedDashboardRoute,
-  AuthedInterviewRoute: AuthedInterviewRoute,
-  AuthedNewSessionRoute: AuthedNewSessionRoute,
-  AuthedReportsRoute: AuthedReportsRoute,
+  AuthedInterviewSetupRoute: AuthedInterviewSetupRoute,
+  AuthedInterviewIndexRoute: AuthedInterviewIndexRoute,
+  AuthedInterviewAnalysisSessionIdRoute: AuthedInterviewAnalysisSessionIdRoute,
+  AuthedInterviewReportSessionIdRoute: AuthedInterviewReportSessionIdRoute,
+  AuthedInterviewSessionSessionIdRoute: AuthedInterviewSessionSessionIdRoute,
 }
 
 const AuthedRouteRouteWithChildren = AuthedRouteRoute._addFileChildren(

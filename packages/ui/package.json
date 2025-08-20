@@ -36,7 +36,6 @@
     "./tooltip": "./src/components/tooltip.tsx",
     "./switch": "./src/components/switch.tsx",
     "./dialog": "./src/components/dialog.tsx",
-    "./icons": "./src/components/icons.tsx",
     "./scroll-area": "./src/components/scroll-area.tsx",
     "./upload-input": "./src/components/upload-input.tsx",
     "./tailwind.config": "./tailwind.config.ts",
@@ -45,8 +44,11 @@
     "./badge": "./src/components/badge.tsx",
     "./textarea": "./src/components/textarea.tsx",
     "./tabs": "./src/components/tabs.tsx",
-    "./comp-581": "./src/components/comp-581.tsx",
-    "./voice-orb": "./src/components/voice-orb.tsx"
+    "./dashboard-header": "./src/components/dashboard-header.tsx",
+    "./voice-orb": "./src/components/voice-orb.tsx",
+    "./icons": "./src/components/icons/index.ts",
+    "./auth": "./src/components/auth/index.ts",
+    "./interview": "./src/components/interview/index.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

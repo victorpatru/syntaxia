@@ -1,14 +1,22 @@
-import Component from "@syntaxia/ui/comp-581";
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { DashboardHeader } from "@syntaxia/ui/dashboard-header";
+import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 import { Authenticated, Unauthenticated } from "convex/react";
 
 function AuthedLayout() {
+  const location = useLocation();
+  const isInterviewFlow =
+    location.pathname.includes("/interview/setup") ||
+    location.pathname.includes("/interview/session/") ||
+    location.pathname.includes("/interview/analysis/");
+
   return (
     <>
       <Authenticated>
         <div className="min-h-screen">
-          <Component />
-          <div className="flex flex-1 flex-col gap-4 p-4">
+          {!isInterviewFlow && <DashboardHeader />}
+          <div
+            className={`flex flex-1 flex-col ${isInterviewFlow ? "" : "gap-4 p-4"}`}
+          >
             <Outlet />
           </div>
         </div>
