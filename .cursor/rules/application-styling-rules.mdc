@@ -1,10 +1,7 @@
 ---
-description: Enforce terminal aesthetic with sharp corners, monospace fonts, and consistent sizing
-globs: apps/**/*.tsx, apps/**/*.astro, packages/ui/**/*.tsx
-alwaysApply: true
+alwaysApply: false
 ---
-
-# Terminal Styling Rules
+# How to make sure that Syntaxia main application has a consistent theme
 
 Syntaxia applications must maintain a consistent terminal aesthetic with sharp, monospace styling.
 

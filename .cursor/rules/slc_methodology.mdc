@@ -1,0 +1,142 @@
+---
+alwaysApply: false
+---
+- **SLC Over MVP Philosophy**
+  - Reject "Minimum Viable Product" thinking that creates embarrassing, incomplete features
+  - Build Simple, Lovable, and Complete features that users actually want to use
+  - Prioritize user delight and completeness within a narrow scope over breadth of incomplete features
+
+- **Simple: Focus and Constraints**
+  - Choose the smallest possible scope that delivers real value
+  - Build features that can be shipped quickly and learned from rapidly
+  - Avoid feature creep during initial implementation
+  - Example: Build a complete search feature for one entity type rather than partial search across all entities
+
+- **Lovable: User Experience First**
+  - Design for delight, not just functionality
+  - Consider emotional impact and user satisfaction
+  - Invest in polish, smooth interactions, and intuitive design
+  - Make users genuinely want to use the feature as-is
+  - Examples of lovability:
+    - Smooth animations and micro-interactions
+    - Thoughtful error messages and empty states
+    - Elegant, terminal-style UI that matches brand identity
+    - Responsive feedback and loading states
+
+- **Complete: Functional Within Scope**
+  - Feature must accomplish its intended job fully
+  - Users should feel satisfied with v1.0, not waiting for v0.2
+  - No broken promises or half-implemented workflows
+  - Complete means "finished" within the chosen scope, not "comprehensive"
+
+## Implementation Guidelines
+
+- **✅ DO: SLC Feature Development**
+  ```typescript
+  // Simple: Single responsibility, clear purpose
+  function useInterviewSearch() {
+    // Complete: Handles all search states properly
+    const [query, setQuery] = useState('')
+    const [results, setResults] = useState([])
+    const [isLoading, setIsLoading] = useState(false)
+    
+    // Lovable: Smooth UX with proper feedback
+    const debouncedSearch = useDebouncedCallback(
+      async (searchQuery: string) => {
+        if (!searchQuery.trim()) {
+          setResults([])
+          return
+        }
+        
+        setIsLoading(true)
+        try {
+          const data = await searchInterviews(searchQuery)
+          setResults(data)
+        } catch (error) {
+          // Lovable: Helpful error handling
+          toast.error('Search temporarily unavailable')
+        } finally {
+          setIsLoading(false)
+        }
+      },
+      300
+    )
+    
+    return { query, setQuery, results, isLoading, search: debouncedSearch }
+  }
+  ```
+
+- **❌ DON'T: MVP Approach**
+  ```typescript
+  // Don't build incomplete, embarrassing features
+  function BrokenSearch() {
+    const [query, setQuery] = useState('')
+    // Missing: Loading states, error handling, debouncing
+    // Result: Users frustrated with broken experience
+    
+    return (
+      <div>
+        <input 
+          value={query} 
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search (barely works)"
+        />
+        {/* TODO: Make this actually work */}
+      </div>
+    )
+  }
+  ```
+
+## Feature Scoping Strategy
+
+- **Start with the Smallest Complete Experience**
+  - Interview creation: Just title, description, and basic settings
+  - User dashboard: Show only essential metrics, but show them beautifully
+  - File upload: Support one file type perfectly, not all types poorly
+
+- **Evolution Path**
+  - SLC v1: Simple search with perfect UX for basic queries
+  - v2: Add filters while maintaining simplicity
+  - v3: Advanced search options if needed
+  - Each version is complete and lovable on its own
+
+- **Hierarchy of User Needs (SLC Pyramid)**
+  - **Meaningful**: Does this connect to user's higher purpose?
+  - **Delightful**: Does this create positive emotion and surprise?
+  - **Easy to use**: Is this effortless and intuitive?
+  - **Reliable**: Does this always work as promised?
+  - **Useful**: Does this solve a real problem?
+
+## Decision Framework
+
+When building any feature, ask:
+
+1. **Simple**: Can this be shipped and validated quickly?
+2. **Lovable**: Will users genuinely enjoy using this as-is?
+3. **Complete**: Does this fully accomplish its intended job?
+
+If any answer is "no," reduce scope until all three are "yes."
+
+## Anti-Patterns to Avoid
+
+- **❌ Feature creep during development**
+  - Adding "just one more option" that breaks simplicity
+  
+- **❌ Shipping broken or half-working features**
+  - "We'll fix it in the next sprint" mentality
+  
+- **❌ Ignoring user experience for speed**
+  - No loading states, poor error handling, confusing UI
+  
+- **❌ Building for future complexity**
+  - Over-engineering simple features with unnecessary abstractions
+
+## Success Metrics
+
+- Users choose to use the feature without being asked
+- Minimal support requests or confusion
+- Positive user feedback about the experience
+- Feature adoption grows organically
+- Users request extensions, not fixes
+
+Remember: SLC features can evolve into complex products later, but they start as complete, delightful experiences that users love immediately.
