@@ -13,17 +13,19 @@ const navigationLinks = [{ href: "/interview", label: "~/start-interview" }];
 
 export function DashboardHeader() {
   return (
-    <header className="border-b border-terminal-green/30 bg-terminal-dark px-4 md:px-6 font-mono">
-      <div className="flex h-16 items-center justify-between gap-4">
+    <header className="border-b border-terminal-green/30 bg-terminal-dark font-mono">
+      <div className="mx-auto max-w-6xl px-6 flex h-14 md:h-16 items-center justify-between gap-4">
         {/* Left side */}
         <div className="flex items-center gap-2">
           {/* Mobile menu trigger */}
           <Popover>
             <PopoverTrigger asChild>
               <Button
-                className="group size-8 md:hidden bg-transparent hover:bg-terminal-green/10 border border-terminal-green/30"
+                className="group size-8 md:hidden bg-transparent hover:bg-terminal-green/10 border border-terminal-green/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terminal-amber/60"
                 variant="ghost"
                 size="icon"
+                aria-label="Toggle menu"
+                title="Toggle menu"
               >
                 <svg
                   className="pointer-events-none text-terminal-green"
@@ -50,11 +52,12 @@ export function DashboardHeader() {
                     className="origin-center translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.1)] group-aria-expanded:translate-y-0 group-aria-expanded:rotate-[135deg]"
                   />
                 </svg>
+                <span className="sr-only">Toggle navigation</span>
               </Button>
             </PopoverTrigger>
             <PopoverContent
               align="start"
-              className="w-48 p-1 md:hidden bg-terminal-dark border-terminal-green/30"
+              className="w-48 p-1 md:hidden bg-terminal-dark border-terminal-green/30 rounded-sm shadow-lg"
             >
               <NavigationMenu className="max-w-none *:w-full">
                 <NavigationMenuList className="flex-col items-start gap-0 md:gap-2">
@@ -62,7 +65,7 @@ export function DashboardHeader() {
                     <NavigationMenuItem key={link.href} className="w-full">
                       <NavigationMenuLink
                         href={link.href}
-                        className="py-1.5 text-terminal-green/90 hover:text-terminal-amber hover:bg-terminal-green/5 font-mono text-sm px-2 rounded block w-full transition-colors"
+                        className="py-1.5 text-terminal-green/90 hover:text-terminal-amber hover:bg-terminal-green/5 font-mono text-sm px-2 rounded block w-full transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-terminal-amber/60"
                       >
                         {link.label}
                       </NavigationMenuLink>
@@ -78,7 +81,8 @@ export function DashboardHeader() {
             {/* Terminal-style logo */}
             <a
               href="/"
-              className="text-terminal-green hover:text-terminal-amber transition-colors"
+              className="text-terminal-green hover:text-terminal-amber transition-colors rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-terminal-amber/60"
+              aria-label="Home"
             >
               <div className="flex items-center gap-1">
                 <span className="text-terminal-amber">$</span>
@@ -94,7 +98,7 @@ export function DashboardHeader() {
                   <NavigationMenuItem key={link.href}>
                     <NavigationMenuLink
                       href={link.href}
-                      className="text-terminal-green/90 hover:text-terminal-amber py-1.5 font-mono text-sm transition-colors hover:bg-terminal-green/5 px-2 rounded"
+                      className="text-terminal-green/90 hover:text-terminal-amber py-1.5 font-mono text-sm transition-colors hover:bg-terminal-green/5 px-2 rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-terminal-amber/60"
                     >
                       {link.label}
                     </NavigationMenuLink>
