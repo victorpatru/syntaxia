@@ -25,14 +25,4 @@ export default defineSchema({
     processedAt: v.number(),
     clerkUserId: v.optional(v.string()),
   }).index("by_event_id", ["eventId"]),
-
-  waitlist: defineTable({
-    email: v.string(),
-    experience: v.string(),
-    techStack: v.array(v.string()),
-    jobSearchStatus: v.string(),
-    companyStage: v.array(v.string()),
-    submittedAt: v.number(),
-    notionSynced: v.boolean(),
-  }).index("by_email", ["email"]),
 });

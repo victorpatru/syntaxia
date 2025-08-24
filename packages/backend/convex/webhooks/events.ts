@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { internalMutation, internalQuery } from "./_generated/server";
+import { internalMutation, internalQuery } from "../_generated/server";
 
 /** Supported webhook event types */
 export const webhookEventTypes = v.union(
@@ -28,6 +28,7 @@ export const markEventProcessed = internalMutation({
     eventId: v.string(),
     eventType: webhookEventTypes,
     clerkUserId: v.optional(v.string()),
+    source: v.optional(v.union(v.literal("clerk"))),
   },
   returns: v.null(),
   async handler(ctx, { eventId, eventType, clerkUserId }) {

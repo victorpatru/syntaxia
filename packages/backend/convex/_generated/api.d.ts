@@ -9,13 +9,14 @@
  */
 
 import type * as env from "../env.js";
+import type * as http_clerk from "../http/clerk.js";
 import type * as http from "../http.js";
-import type * as notion from "../notion.js";
+import type * as index from "../index.js";
 import type * as users from "../users.js";
 import type * as utils_clerk from "../utils/clerk.js";
-import type * as validation from "../validation.js";
-import type * as waitlist from "../waitlist.js";
-import type * as webhooks from "../webhooks.js";
+import type * as utils_webhooks from "../utils/webhooks.js";
+import type * as webhooks_clerk from "../webhooks/clerk.js";
+import type * as webhooks_events from "../webhooks/events.js";
 
 import type {
   ApiFromModules,
@@ -33,13 +34,14 @@ import type {
  */
 declare const fullApi: ApiFromModules<{
   env: typeof env;
+  "http/clerk": typeof http_clerk;
   http: typeof http;
-  notion: typeof notion;
+  index: typeof index;
   users: typeof users;
   "utils/clerk": typeof utils_clerk;
-  validation: typeof validation;
-  waitlist: typeof waitlist;
-  webhooks: typeof webhooks;
+  "utils/webhooks": typeof utils_webhooks;
+  "webhooks/clerk": typeof webhooks_clerk;
+  "webhooks/events": typeof webhooks_events;
 }>;
 declare const fullApiWithMounts: typeof fullApi;
 
