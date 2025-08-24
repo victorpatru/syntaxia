@@ -13,7 +13,6 @@ import { Route as SsoCallbackRouteImport } from './routes/sso-callback'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
 import { Route as AuthedCreditsRouteImport } from './routes/_authed/credits'
 import { Route as AuthedInterviewIndexRouteImport } from './routes/_authed/interview/index'
 import { Route as AuthedInterviewSetupRouteImport } from './routes/_authed/interview/setup'
@@ -40,11 +39,6 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AuthedRouteRoute,
 } as any)
 const AuthedCreditsRoute = AuthedCreditsRouteImport.update({
   id: '/credits',
@@ -90,7 +84,6 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/sso-callback': typeof SsoCallbackRoute
   '/credits': typeof AuthedCreditsRouteWithChildren
-  '/dashboard': typeof AuthedDashboardRoute
   '/credits/success': typeof AuthedCreditsSuccessRoute
   '/interview/setup': typeof AuthedInterviewSetupRoute
   '/interview': typeof AuthedInterviewIndexRoute
@@ -103,7 +96,6 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/sso-callback': typeof SsoCallbackRoute
   '/credits': typeof AuthedCreditsRouteWithChildren
-  '/dashboard': typeof AuthedDashboardRoute
   '/credits/success': typeof AuthedCreditsSuccessRoute
   '/interview/setup': typeof AuthedInterviewSetupRoute
   '/interview': typeof AuthedInterviewIndexRoute
@@ -118,7 +110,6 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/sso-callback': typeof SsoCallbackRoute
   '/_authed/credits': typeof AuthedCreditsRouteWithChildren
-  '/_authed/dashboard': typeof AuthedDashboardRoute
   '/_authed/credits/success': typeof AuthedCreditsSuccessRoute
   '/_authed/interview/setup': typeof AuthedInterviewSetupRoute
   '/_authed/interview/': typeof AuthedInterviewIndexRoute
@@ -133,7 +124,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/sso-callback'
     | '/credits'
-    | '/dashboard'
     | '/credits/success'
     | '/interview/setup'
     | '/interview'
@@ -146,7 +136,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/sso-callback'
     | '/credits'
-    | '/dashboard'
     | '/credits/success'
     | '/interview/setup'
     | '/interview'
@@ -160,7 +149,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/sso-callback'
     | '/_authed/credits'
-    | '/_authed/dashboard'
     | '/_authed/credits/success'
     | '/_authed/interview/setup'
     | '/_authed/interview/'
@@ -205,13 +193,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/_authed/dashboard': {
-      id: '/_authed/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthedDashboardRouteImport
-      parentRoute: typeof AuthedRouteRoute
     }
     '/_authed/credits': {
       id: '/_authed/credits'
@@ -279,7 +260,6 @@ const AuthedCreditsRouteWithChildren = AuthedCreditsRoute._addFileChildren(
 
 interface AuthedRouteRouteChildren {
   AuthedCreditsRoute: typeof AuthedCreditsRouteWithChildren
-  AuthedDashboardRoute: typeof AuthedDashboardRoute
   AuthedInterviewSetupRoute: typeof AuthedInterviewSetupRoute
   AuthedInterviewIndexRoute: typeof AuthedInterviewIndexRoute
   AuthedInterviewAnalysisSessionIdRoute: typeof AuthedInterviewAnalysisSessionIdRoute
@@ -289,7 +269,6 @@ interface AuthedRouteRouteChildren {
 
 const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
   AuthedCreditsRoute: AuthedCreditsRouteWithChildren,
-  AuthedDashboardRoute: AuthedDashboardRoute,
   AuthedInterviewSetupRoute: AuthedInterviewSetupRoute,
   AuthedInterviewIndexRoute: AuthedInterviewIndexRoute,
   AuthedInterviewAnalysisSessionIdRoute: AuthedInterviewAnalysisSessionIdRoute,
