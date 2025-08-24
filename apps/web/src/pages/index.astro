@@ -1,6 +1,5 @@
 ---
 import { ThemeToggle } from "../components/ThemeToggle.tsx";
-import { WaitlistForm } from "../components/WaitlistForm.tsx";
 import "../styles/global.css";
 ---
 
@@ -107,18 +106,6 @@ import "../styles/global.css";
 						Get personalized action items after each session. Track your progress until you're ready.
 					</p>
 				</div>
-			</div>
-
-			<!-- Waitlist Section -->
-			<div class="border border-terminal-amber/50 p-8 bg-card/50 text-center">
-				<div class="mb-6">
-					<h2 class="text-xl font-bold text-terminal-amber mb-2">$ ./join-waitlist --early-access</h2>
-					<p class="text-terminal-green/70">
-						Join the waitlist. If selected, you'll get free sessions to test our beta.
-					</p>
-				</div>
-
-				<WaitlistForm client:visible />
 			</div>
 
 			<!-- Footer -->
