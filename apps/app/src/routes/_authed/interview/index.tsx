@@ -84,19 +84,19 @@ function InterviewStart() {
                 <div className="flex items-center space-x-2">
                   <span className="text-terminal-green/40">#</span>
                   <span className="text-terminal-green/70">
-                    Interview requires 15 credits (15-minute duration)
+                    You'll need 15 credits for a 15-minute interview
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="text-terminal-green/40">#</span>
                   <span className="text-terminal-green/70">
-                    Technical phone screening format
+                    This is a technical phone screen
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <span className="text-terminal-green/40">#</span>
                   <span className="text-terminal-green/70">
-                    Full payment processed after 2-minute commitment threshold
+                    15 credits get charged once you hit the 2-minute mark
                   </span>
                 </div>
               </div>
