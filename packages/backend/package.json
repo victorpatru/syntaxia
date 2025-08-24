@@ -19,7 +19,6 @@
   "license": "ISC",
   "dependencies": {
     "@clerk/backend": "^2.7.0",
-    "@convex-dev/polar": "^0.6.3",
     "@notionhq/client": "^4.0.2",
     "@polar-sh/sdk": "^0.34.12",
     "@syntaxia/shared": "workspace:*",
