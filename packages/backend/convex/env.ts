@@ -1,18 +1,18 @@
 import { createEnv } from "@t3-oss/env-core";
-import { type } from "arktype";
+import { z } from "zod";
 
 export const env = createEnv({
   server: {
-    CONVEX_SITE_URL: type("string.url"),
-    POLAR_ORGANIZATION_TOKEN: type("string>=1"),
-    POLAR_WEBHOOK_SECRET: type("string>=1"),
-    APP_URL: type("string.url"),
-    WEB_URL: type("string.url"),
-    CLERK_WEBHOOK_SECRET: type("string>=1"),
-    CLERK_JWT_ISSUER_DOMAIN: type("string>=1"),
-    NOTION_API_KEY: type("string>=1"),
-    NOTION_DATABASE_ID: type("string>=1"),
-    TURNSTILE_SECRET_KEY: type("string>=1"),
+    CONVEX_SITE_URL: z.url(),
+    POLAR_ORGANIZATION_TOKEN: z.string().min(1),
+    POLAR_WEBHOOK_SECRET: z.string().min(1),
+    APP_URL: z.url(),
+    WEB_URL: z.url(),
+    CLERK_WEBHOOK_SECRET: z.string().min(1),
+    CLERK_JWT_ISSUER_DOMAIN: z.string().min(1),
+    NOTION_API_KEY: z.string().min(1),
+    NOTION_DATABASE_ID: z.string().min(1),
+    TURNSTILE_SECRET_KEY: z.string().min(1),
   },
   runtimeEnv: {
     CONVEX_SITE_URL: process.env.CONVEX_SITE_URL,

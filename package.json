@@ -11,7 +11,7 @@
       "shared": {
         "typescript": "^5.9.2",
         "@auth/core": "^0.40.0",
-        "arktype": "^2.1.20",
+        "zod": "^4.1.0",
         "@t3-oss/env-core": "^0.13.8"
       },
       "frontend": {

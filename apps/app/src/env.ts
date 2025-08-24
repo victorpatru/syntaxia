@@ -1,5 +1,5 @@
 import { createEnv } from "@t3-oss/env-core";
-import { type } from "arktype";
+import { z } from "zod";
 
 export const env = createEnv({
   server: {},
@@ -11,7 +11,7 @@ export const env = createEnv({
   clientPrefix: "VITE_",
 
   client: {
-    VITE_CONVEX_URL: type("string.url"),
+    VITE_CONVEX_URL: z.url(),
   },
 
   /**
