@@ -1,3 +1,4 @@
+import { Sparkles } from "lucide-react";
 import { Button } from "./button";
 import {
   NavigationMenu,
@@ -9,9 +10,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { TerminalUserMenu } from "./terminal-user-menu";
 import { ThemeToggle } from "./theme-toggle";
 
-const navigationLinks = [{ href: "/interview", label: "~/start-interview" }];
+// const navigationLinks = [{ href: "/interview", label: "~/start-interview" }];
 
-export function DashboardHeader() {
+interface DashboardHeaderProps {
+  credits?: number;
+}
+
+export function DashboardHeader({ credits }: DashboardHeaderProps) {
   return (
     <header className="border-b border-terminal-green/30 bg-terminal-dark font-mono">
       <div className="mx-auto max-w-6xl px-6 flex h-14 md:h-16 items-center justify-between gap-4">
@@ -55,7 +60,7 @@ export function DashboardHeader() {
                 <span className="sr-only">Toggle navigation</span>
               </Button>
             </PopoverTrigger>
-            <PopoverContent
+            {/* <PopoverContent
               align="start"
               className="w-48 p-1 md:hidden bg-terminal-dark border-terminal-green/30 rounded-sm shadow-lg"
             >
@@ -73,7 +78,7 @@ export function DashboardHeader() {
                   ))}
                 </NavigationMenuList>
               </NavigationMenu>
-            </PopoverContent>
+            </PopoverContent> */}
           </Popover>
 
           {/* Main nav */}
@@ -92,7 +97,7 @@ export function DashboardHeader() {
             </a>
 
             {/* Navigation menu */}
-            <NavigationMenu className="max-md:hidden">
+            {/* <NavigationMenu className="max-md:hidden">
               <NavigationMenuList className="gap-2">
                 {navigationLinks.map((link) => (
                   <NavigationMenuItem key={link.href}>
@@ -105,7 +110,7 @@ export function DashboardHeader() {
                   </NavigationMenuItem>
                 ))}
               </NavigationMenuList>
-            </NavigationMenu>
+            </NavigationMenu> */}
           </div>
         </div>
 
@@ -113,6 +118,22 @@ export function DashboardHeader() {
         <div className="flex items-center gap-4">
           {/* Theme toggle */}
           <ThemeToggle />
+
+          {/* Credits indicator */}
+          {typeof credits === "number" ? (
+            <a
+              href="/credits"
+              className="group inline-flex items-center gap-2 bg-transparent border border-terminal-green/30 text-terminal-green px-3 py-2 hover:bg-terminal-green/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terminal-amber/60"
+              aria-label="View credits"
+              title="View credits"
+            >
+              <Sparkles className="w-3 h-3 text-terminal-green" />
+              <span className="font-mono text-sm leading-none">{credits}</span>
+              <span className="text-terminal-green font-mono text-xs">
+                credits
+              </span>
+            </a>
+          ) : null}
 
           {/* Custom Terminal User Menu */}
           <TerminalUserMenu />
