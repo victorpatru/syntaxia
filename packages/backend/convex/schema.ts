@@ -11,6 +11,7 @@ export default defineSchema({
     imageUrl: v.optional(v.string()),
     createdAt: v.number(),
     lastActiveAt: v.optional(v.number()),
+    credits: v.optional(v.number()),
   })
     .index("by_clerk_id", ["clerkUserId"])
     .index("by_email", ["email"]),
@@ -22,4 +23,13 @@ export default defineSchema({
     clerkUserId: v.optional(v.string()),
     source: v.optional(webhookSources),
   }).index("by_event_id", ["eventId"]),
+
+  credits_log: defineTable({
+    userId: v.id("users"),
+    amount: v.number(),
+    reason: v.string(),
+    orderId: v.optional(v.string()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_order_id", ["orderId"]),
 });
