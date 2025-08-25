@@ -1,4 +1,4 @@
-import { ConversationPanelProps } from "@syntaxia/shared/types";
+import { ConversationPanelProps } from "@syntaxia/shared";
 import { Button } from "@syntaxia/ui/button";
 import { AlertCircle, Mic, MicOff, Wifi, WifiOff } from "lucide-react";
 

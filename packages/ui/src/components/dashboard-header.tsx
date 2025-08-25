@@ -123,15 +123,13 @@ export function DashboardHeader({ credits }: DashboardHeaderProps) {
           {typeof credits === "number" ? (
             <a
               href="/credits"
-              className="group inline-flex items-center gap-2 bg-transparent border border-terminal-green/30 text-terminal-green px-3 py-2 hover:bg-terminal-green/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terminal-amber/60"
+              className="group inline-flex items-center gap-2 bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terminal-amber/60"
               aria-label="View credits"
               title="View credits"
             >
-              <Sparkles className="w-3 h-3 text-terminal-green" />
+              <Sparkles className="w-3 h-3 text-terminal-green group-hover:text-terminal-amber transition-colors" />
               <span className="font-mono text-sm leading-none">{credits}</span>
-              <span className="text-terminal-green font-mono text-xs">
-                credits
-              </span>
+              <span className="font-mono text-xs">credits</span>
             </a>
           ) : null}
 
