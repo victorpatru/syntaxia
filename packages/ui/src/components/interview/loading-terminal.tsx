@@ -1,4 +1,4 @@
-import { LoadingTerminalProps } from "@syntaxia/shared/types";
+import { LoadingTerminalProps } from "@syntaxia/shared";
 
 export function LoadingTerminal({
   progress,

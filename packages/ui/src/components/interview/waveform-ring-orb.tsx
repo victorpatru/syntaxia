@@ -1,4 +1,4 @@
-import { WaveformOrbProps } from "@syntaxia/shared/types";
+import { WaveformOrbProps } from "@syntaxia/shared";
 import { useEffect, useState } from "react";
 
 export function WaveformRingOrb({
