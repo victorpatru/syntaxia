@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { webhookEventTypes, webhookSources } from "./webhooks/events";
 
 export default defineSchema({
   users: defineTable({
@@ -16,13 +17,9 @@ export default defineSchema({
 
   webhook_events: defineTable({
     eventId: v.string(),
-    eventType: v.union(
-      v.literal("user.created"),
-      v.literal("user.updated"),
-      v.literal("user.deleted"),
-      v.literal("unknown"),
-    ),
+    eventType: webhookEventTypes,
     processedAt: v.number(),
     clerkUserId: v.optional(v.string()),
+    source: v.optional(webhookSources),
   }).index("by_event_id", ["eventId"]),
 });
