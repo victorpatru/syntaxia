@@ -10,7 +10,7 @@ export const handleClerkWebhook = httpAction(async (ctx, request) => {
     return new Response("Error occured", { status: 400 });
   }
 
-  await ctx.runMutation(internal.webhooks.clerk.ingestEvent, { event });
+  await ctx.runMutation(internal.webhooks.clerk.handleWebhook, { event });
 
   return new Response(null, { status: 200 });
 });

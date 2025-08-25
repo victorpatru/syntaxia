@@ -3,7 +3,7 @@ import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { internalMutation } from "../_generated/server";
 
-export const ingestEvent = internalMutation({
+export const handleWebhook = internalMutation({
   args: { event: v.any() },
   returns: v.null(),
   async handler(ctx, { event }: { event: WebhookEvent }) {
@@ -37,6 +37,7 @@ export const ingestEvent = internalMutation({
           eventId: subject,
           eventType: event.type,
           clerkUserId: subject,
+          source: "clerk",
         });
         break;
       }
@@ -48,6 +49,7 @@ export const ingestEvent = internalMutation({
           eventId: subject,
           eventType: event.type,
           clerkUserId: subject,
+          source: "clerk",
         });
         break;
       }
