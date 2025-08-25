@@ -35,7 +35,7 @@ export function TerminalUserMenu() {
         <Button
           variant="outline"
           size="sm"
-          className="font-mono text-xs bg-transparent border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 h-8 gap-2"
+          className="font-mono text-xs bg-transparent border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 h-8 gap-2 cursor-pointer"
         >
           {user.imageUrl && (
             <img
