@@ -1,6 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { webhookEventTypes, webhookSources } from "./webhooks/events";
+import { webhookEventTypes, webhookSources } from "./types/webhooks";
 
 export default defineSchema({
   users: defineTable({
