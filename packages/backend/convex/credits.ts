@@ -48,7 +48,7 @@ export const createCheckout = action({
 
     const polar = new Polar({
       accessToken: env.POLAR_ORGANIZATION_TOKEN,
-      server: "sandbox",
+      server: env.POLAR_ENVIRONMENT,
     });
 
     const checkout = await polar.checkouts.create({

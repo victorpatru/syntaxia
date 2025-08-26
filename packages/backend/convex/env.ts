@@ -10,6 +10,7 @@ export const env = createEnv({
     APP_URL: z.url(),
     CLERK_WEBHOOK_SECRET: z.string().min(1),
     CLERK_JWT_ISSUER_DOMAIN: z.string().min(1),
+    POLAR_ENVIRONMENT: z.enum(["sandbox", "production"]).default("sandbox"),
   },
   runtimeEnv: {
     CONVEX_SITE_URL: process.env.CONVEX_SITE_URL,
@@ -19,6 +20,7 @@ export const env = createEnv({
     APP_URL: process.env.APP_URL,
     CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET,
     CLERK_JWT_ISSUER_DOMAIN: process.env.CLERK_JWT_ISSUER_DOMAIN,
+    POLAR_ENVIRONMENT: process.env.POLAR_ENVIRONMENT,
   },
   skipValidation: !process.env.VALIDATE_ENV,
 });
