@@ -40,7 +40,7 @@ alwaysApply: false
 - **Turbo 2.5.5** - Monorepo build orchestration
 
 ### Validation & Environment
-- **ArkType 2.1.20** - Runtime type validation
+- **Zod 4.1.0** - Runtime type validation and schema validation
 - **@t3-oss/env-core 0.13.8** - Environment variable validation
 
 ## Version Guidelines & Best Practices
@@ -106,19 +106,19 @@ export const createUser = mutation({
 - May require compatibility checks with UI libraries
 - Leverage new CSS functions and improved performance
 
-### ArkType Validation
+### Zod Validation
 ```typescript
-import { type } from 'arktype';
+import { z } from 'zod';
 
-// Define runtime-validated types
-const User = type({
-  id: 'string',
-  email: 'email',
-  age: 'number>=18'
+// Define runtime-validated schemas
+const User = z.object({
+  id: z.string(),
+  email: z.string().email(),
+  age: z.number().min(18)
 });
 
 // Use for form validation and API contracts
-type UserType = typeof User.infer;
+type UserType = z.infer<typeof User>;
 ```
 
 ## Dependency Update Strategy
@@ -144,13 +144,14 @@ type UserType = typeof User.infer;
 ```typescript
 // Use @t3-oss/env-core for type-safe environment variables
 import { createEnv } from '@t3-oss/env-core';
+import { z } from 'zod';
 
 export const env = createEnv({
   server: {
-    DATABASE_URL: z.string().url(),
+    DATABASE_URL: z.url(),
   },
   client: {
-    NEXT_PUBLIC_APP_URL: z.string().url(),
+    NEXT_PUBLIC_APP_URL: z.url(),
   },
   runtimeEnv: process.env,
 });

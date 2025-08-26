@@ -1,13 +1,6 @@
 import { v } from "convex/values";
-import { internalMutation, internalQuery } from "./_generated/server";
-
-/** Supported webhook event types */
-export const webhookEventTypes = v.union(
-  v.literal("user.created"),
-  v.literal("user.updated"),
-  v.literal("user.deleted"),
-  v.literal("unknown"),
-);
+import { internalMutation, internalQuery } from "../_generated/server";
+import { webhookEventTypes, webhookSources } from "../types/webhooks";
 
 /** Check if a webhook event has already been processed. */
 export const isEventProcessed = internalQuery({
@@ -28,14 +21,16 @@ export const markEventProcessed = internalMutation({
     eventId: v.string(),
     eventType: webhookEventTypes,
     clerkUserId: v.optional(v.string()),
+    source: v.optional(webhookSources),
   },
   returns: v.null(),
-  async handler(ctx, { eventId, eventType, clerkUserId }) {
+  async handler(ctx, { eventId, eventType, clerkUserId, source }) {
     await ctx.db.insert("webhook_events", {
       eventId,
       eventType,
       processedAt: Date.now(),
       clerkUserId,
+      source,
     });
     return null;
   },

@@ -62,7 +62,7 @@ export function ThemeToggle() {
         id="theme-toggle"
         type="button"
         aria-label="Toggle theme"
-        className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-2 sm:px-3 py-1 transition-colors inline-flex items-center gap-1 relative h-8 w-8 sm:min-w-20"
+        className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-2 sm:px-3 py-1 transition-colors inline-flex items-center gap-1 relative h-8 w-8 sm:min-w-20 cursor-pointer"
         onClick={() => {
           setIsOpen(!isOpen);
         }}

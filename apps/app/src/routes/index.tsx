@@ -9,7 +9,7 @@ function Home() {
   return (
     <div className="p-6">
       <SignedIn>
-        <Navigate to="/dashboard" />
+        <Navigate to="/interview" />
       </SignedIn>
       <SignedOut>
         <Navigate to="/login" />

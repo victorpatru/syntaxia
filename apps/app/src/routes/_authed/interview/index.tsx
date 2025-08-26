@@ -35,9 +35,6 @@ function InterviewStart() {
               <span className="text-primary">--mode=technical</span>{" "}
               <span className="text-accent">--feel=real</span>
             </h1>
-            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              &gt; Ready to start your interview practice session
-            </p>
           </div>
 
           <div className="max-w-3xl mx-auto">
@@ -76,6 +73,36 @@ function InterviewStart() {
                   </Button>
                 </div>
               </div>
+            </div>
+            <div className="mt-6 border border-terminal-green/30 bg-background/50 backdrop-blur-sm p-6 relative overflow-hidden">
+              <div className="absolute top-2 left-2 w-3 h-3 border-l border-t border-terminal-green/30"></div>
+              <div className="absolute top-2 right-2 w-3 h-3 border-r border-t border-terminal-green/30"></div>
+              <div className="absolute bottom-2 left-2 w-3 h-3 border-l border-b border-terminal-green/30"></div>
+              <div className="absolute bottom-2 right-2 w-3 h-3 border-r border-b border-terminal-green/30"></div>
+
+              <div className="space-y-2 font-mono text-sm relative">
+                <div className="flex items-center space-x-2">
+                  <span className="text-terminal-green/40">#</span>
+                  <span className="text-terminal-green/70">
+                    You'll need 15 credits for a 15-minute interview
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-terminal-green/40">#</span>
+                  <span className="text-terminal-green/70">
+                    This is a technical phone screen
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-terminal-green/40">#</span>
+                  <span className="text-terminal-green/70">
+                    15 credits get charged once you hit the 2-minute mark
+                  </span>
+                </div>
+              </div>
+
+              {/* Subtle bottom accent line */}
+              <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-terminal-green/20 to-transparent"></div>
             </div>
           </div>
         </div>
