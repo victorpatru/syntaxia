@@ -14,6 +14,7 @@ import type * as http_clerk from "../http/clerk.js";
 import type * as http_polar from "../http/polar.js";
 import type * as http from "../http.js";
 import type * as index from "../index.js";
+import type * as sessions from "../sessions.js";
 import type * as types_webhooks from "../types/webhooks.js";
 import type * as users from "../users.js";
 import type * as utils_clerk from "../utils/clerk.js";
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   "http/polar": typeof http_polar;
   http: typeof http;
   index: typeof index;
+  sessions: typeof sessions;
   "types/webhooks": typeof types_webhooks;
   users: typeof users;
   "utils/clerk": typeof utils_clerk;

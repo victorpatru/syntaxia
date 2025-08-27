@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthedCreditsRouteImport } from './routes/_authed/credits'
 import { Route as AuthedInterviewIndexRouteImport } from './routes/_authed/interview/index'
 import { Route as AuthedInterviewSetupRouteImport } from './routes/_authed/interview/setup'
+import { Route as AuthedInterviewReportsRouteImport } from './routes/_authed/interview/reports'
 import { Route as AuthedInterviewSessionSessionIdRouteImport } from './routes/_authed/interview/session/$sessionId'
 import { Route as AuthedInterviewReportSessionIdRouteImport } from './routes/_authed/interview/report/$sessionId'
 import { Route as AuthedInterviewAnalysisSessionIdRouteImport } from './routes/_authed/interview/analysis/$sessionId'
@@ -54,6 +55,11 @@ const AuthedInterviewSetupRoute = AuthedInterviewSetupRouteImport.update({
   path: '/interview/setup',
   getParentRoute: () => AuthedRouteRoute,
 } as any)
+const AuthedInterviewReportsRoute = AuthedInterviewReportsRouteImport.update({
+  id: '/interview/reports',
+  path: '/interview/reports',
+  getParentRoute: () => AuthedRouteRoute,
+} as any)
 const AuthedInterviewSessionSessionIdRoute =
   AuthedInterviewSessionSessionIdRouteImport.update({
     id: '/interview/session/$sessionId',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/sso-callback': typeof SsoCallbackRoute
   '/credits': typeof AuthedCreditsRoute
+  '/interview/reports': typeof AuthedInterviewReportsRoute
   '/interview/setup': typeof AuthedInterviewSetupRoute
   '/interview': typeof AuthedInterviewIndexRoute
   '/interview/analysis/$sessionId': typeof AuthedInterviewAnalysisSessionIdRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/sso-callback': typeof SsoCallbackRoute
   '/credits': typeof AuthedCreditsRoute
+  '/interview/reports': typeof AuthedInterviewReportsRoute
   '/interview/setup': typeof AuthedInterviewSetupRoute
   '/interview': typeof AuthedInterviewIndexRoute
   '/interview/analysis/$sessionId': typeof AuthedInterviewAnalysisSessionIdRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/sso-callback': typeof SsoCallbackRoute
   '/_authed/credits': typeof AuthedCreditsRoute
+  '/_authed/interview/reports': typeof AuthedInterviewReportsRoute
   '/_authed/interview/setup': typeof AuthedInterviewSetupRoute
   '/_authed/interview/': typeof AuthedInterviewIndexRoute
   '/_authed/interview/analysis/$sessionId': typeof AuthedInterviewAnalysisSessionIdRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/sso-callback'
     | '/credits'
+    | '/interview/reports'
     | '/interview/setup'
     | '/interview'
     | '/interview/analysis/$sessionId'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/sso-callback'
     | '/credits'
+    | '/interview/reports'
     | '/interview/setup'
     | '/interview'
     | '/interview/analysis/$sessionId'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/sso-callback'
     | '/_authed/credits'
+    | '/_authed/interview/reports'
     | '/_authed/interview/setup'
     | '/_authed/interview/'
     | '/_authed/interview/analysis/$sessionId'
@@ -203,6 +215,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedInterviewSetupRouteImport
       parentRoute: typeof AuthedRouteRoute
     }
+    '/_authed/interview/reports': {
+      id: '/_authed/interview/reports'
+      path: '/interview/reports'
+      fullPath: '/interview/reports'
+      preLoaderRoute: typeof AuthedInterviewReportsRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
     '/_authed/interview/session/$sessionId': {
       id: '/_authed/interview/session/$sessionId'
       path: '/interview/session/$sessionId'
@@ -229,6 +248,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthedRouteRouteChildren {
   AuthedCreditsRoute: typeof AuthedCreditsRoute
+  AuthedInterviewReportsRoute: typeof AuthedInterviewReportsRoute
   AuthedInterviewSetupRoute: typeof AuthedInterviewSetupRoute
   AuthedInterviewIndexRoute: typeof AuthedInterviewIndexRoute
   AuthedInterviewAnalysisSessionIdRoute: typeof AuthedInterviewAnalysisSessionIdRoute
@@ -238,6 +258,7 @@ interface AuthedRouteRouteChildren {
 
 const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
   AuthedCreditsRoute: AuthedCreditsRoute,
+  AuthedInterviewReportsRoute: AuthedInterviewReportsRoute,
   AuthedInterviewSetupRoute: AuthedInterviewSetupRoute,
   AuthedInterviewIndexRoute: AuthedInterviewIndexRoute,
   AuthedInterviewAnalysisSessionIdRoute: AuthedInterviewAnalysisSessionIdRoute,
