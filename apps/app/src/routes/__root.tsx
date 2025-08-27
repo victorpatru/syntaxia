@@ -3,9 +3,9 @@
 import { ClerkProvider, useAuth } from "@clerk/tanstack-react-start";
 import { getAuth } from "@clerk/tanstack-react-start/server";
 import { ConvexQueryClient } from "@convex-dev/react-query";
+import { Toaster } from "@syntaxia/ui/sonner";
 import { QueryClient } from "@tanstack/react-query";
 import {
-  createRootRoute,
   createRootRouteWithContext,
   HeadContent,
   Outlet,
@@ -113,6 +113,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
+        <Toaster />
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />
       </body>
