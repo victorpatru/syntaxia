@@ -153,9 +153,7 @@ export const getSession = query({
     // Verify user owns this session
     const user = await ctx.db
       .query("users")
-      .withIndex("by_clerk_id", (q: any) =>
-        q.eq("clerkUserId", identity.subject),
-      )
+      .withIndex("by_clerk_id", (q) => q.eq("clerkUserId", identity.subject))
       .unique();
     if (!user || session.userId !== user._id) {
       throw new Error("Unauthorized");
@@ -175,26 +173,35 @@ export const getCurrentSession = query({
 
     const user = await ctx.db
       .query("users")
-      .withIndex("by_clerk_id", (q: any) =>
-        q.eq("clerkUserId", identity.subject),
-      )
+      .withIndex("by_clerk_id", (q) => q.eq("clerkUserId", identity.subject))
       .unique();
     if (!user) return null;
 
-    // Find any non-complete session
-    const activeSession = await ctx.db
+    // Find any non-complete session (prefer active, then analyzing, then setup)
+    const active = await ctx.db
       .query("interview_sessions")
-      .withIndex("by_user_status", (q: any) => q.eq("userId", user._id))
-      .filter((q: any) =>
-        q.or(
-          q.eq(q.field("status"), "setup"),
-          q.eq(q.field("status"), "active"),
-          q.eq(q.field("status"), "analyzing"),
-        ),
+      .withIndex("by_user_status", (q) =>
+        q.eq("userId", user._id).eq("status", "active"),
+      )
+      .first();
+    if (active) return active;
+
+    const analyzing = await ctx.db
+      .query("interview_sessions")
+      .withIndex("by_user_status", (q) =>
+        q.eq("userId", user._id).eq("status", "analyzing"),
+      )
+      .first();
+    if (analyzing) return analyzing;
+
+    const setup = await ctx.db
+      .query("interview_sessions")
+      .withIndex("by_user_status", (q) =>
+        q.eq("userId", user._id).eq("status", "setup"),
       )
       .first();
 
-    return activeSession;
+    return setup;
   },
 });
 
@@ -215,19 +222,33 @@ export const createSession = mutation({
     }
 
     // Check for existing non-complete session
-    const existingSession = await ctx.db
+    const existingActive = await ctx.db
       .query("interview_sessions")
-      .withIndex("by_user_status", (q: any) => q.eq("userId", user._id))
-      .filter((q: any) =>
-        q.or(
-          q.eq(q.field("status"), "setup"),
-          q.eq(q.field("status"), "active"),
-          q.eq(q.field("status"), "analyzing"),
-        ),
+      .withIndex("by_user_status", (q) =>
+        q.eq("userId", user._id).eq("status", "active"),
       )
       .first();
 
-    if (existingSession) {
+    const existingAnalyzing = existingActive
+      ? null
+      : await ctx.db
+          .query("interview_sessions")
+          .withIndex("by_user_status", (q) =>
+            q.eq("userId", user._id).eq("status", "analyzing"),
+          )
+          .first();
+
+    const existingSetup =
+      existingActive || existingAnalyzing
+        ? null
+        : await ctx.db
+            .query("interview_sessions")
+            .withIndex("by_user_status", (q) =>
+              q.eq("userId", user._id).eq("status", "setup"),
+            )
+            .first();
+
+    if (existingActive || existingAnalyzing || existingSetup) {
       throw new Error("You already have an active interview session");
     }
 
@@ -674,16 +695,14 @@ export const getCompletedSessions = query({
 
     const user = await ctx.db
       .query("users")
-      .withIndex("by_clerk_id", (q: any) =>
-        q.eq("clerkUserId", identity.subject),
-      )
+      .withIndex("by_clerk_id", (q) => q.eq("clerkUserId", identity.subject))
       .unique();
     if (!user) throw new Error("User not found");
 
     // Query completed sessions with pagination
     return await ctx.db
       .query("interview_sessions")
-      .withIndex("by_user_status", (q: any) =>
+      .withIndex("by_user_status", (q) =>
         q.eq("userId", user._id).eq("status", "complete"),
       )
       .order("desc")
