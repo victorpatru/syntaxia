@@ -1,5 +1,5 @@
 import { convexQuery } from "@convex-dev/react-query";
-import { api } from "@syntaxia/backend";
+import { api } from "@syntaxia/backend/convex/_generated/api";
 import { Button } from "@syntaxia/ui/button";
 import { Card } from "@syntaxia/ui/card";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
@@ -21,10 +21,10 @@ export const Route = createFileRoute("/_authed/credits")({
 
 function Credits() {
   const { data: balance } = useSuspenseQuery(
-    convexQuery(api.credits.balance, {}),
+    convexQuery(api.credits.getBalance, {}),
   );
   const { data: availablePackages } = useSuspenseQuery(
-    convexQuery(api.credits.availablePackages, {}),
+    convexQuery(api.credits.getAvailablePackages, {}),
   );
 
   const convexCreateCheckout = useAction(api.credits.createCheckout);
