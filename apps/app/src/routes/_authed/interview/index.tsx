@@ -3,11 +3,12 @@ import { api } from "@syntaxia/backend/convex/_generated/api";
 import { Button } from "@syntaxia/ui/button";
 import { Textarea } from "@syntaxia/ui/textarea";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useMutation as useConvexMutation } from "convex/react";
 import { Play } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
+import { getSessionRoute } from "../../../utils/route-guards";
 
 export const Route = createFileRoute("/_authed/interview/")({
   loader: async (opts) => {
@@ -20,6 +21,15 @@ export const Route = createFileRoute("/_authed/interview/")({
         convexQuery(api.sessions.getCurrentSession, {}),
       ),
     ]);
+
+    // Check for existing session and redirect if found
+    const currentSession = await opts.context.queryClient.ensureQueryData(
+      convexQuery(api.sessions.getCurrentSession, {}),
+    );
+
+    if (currentSession) {
+      throw redirect({ to: getSessionRoute(currentSession) });
+    }
   },
   component: InterviewStart,
 });
@@ -72,34 +82,7 @@ function InterviewStart() {
     },
   });
 
-  // Redirect to existing session if one exists
-  useEffect(() => {
-    if (currentSession) {
-      const sessionId = currentSession._id;
-      // Small delay to show the redirect message
-      const timer = setTimeout(() => {
-        switch (currentSession.status) {
-          case "setup":
-            navigate({ to: "/interview/setup", search: { sessionId } });
-            break;
-          case "active":
-            navigate({
-              to: "/interview/session/$sessionId",
-              params: { sessionId },
-            });
-            break;
-          case "analyzing":
-            navigate({
-              to: "/interview/analysis/$sessionId",
-              params: { sessionId },
-            });
-            break;
-        }
-      }, 1500);
-
-      return () => clearTimeout(timer);
-    }
-  }, [currentSession, navigate]);
+  // Note: Session redirect logic moved to route loader for better performance
 
   const startInterview = () => {
     if (!jobDescription.trim()) return;
@@ -116,31 +99,7 @@ function InterviewStart() {
     createSessionMutation.mutate(jobDescription.trim());
   };
 
-  // Show redirect message if existing session
-  if (currentSession) {
-    const statusMessages: Record<string, string> = {
-      setup: "setting up your interview",
-      active: "your active interview",
-      analyzing: "analyzing your results",
-    };
-    const statusText =
-      statusMessages[currentSession.status] || "your interview";
-
-    return (
-      <div className="min-h-screen bg-background font-mono flex items-center justify-center">
-        <div className="text-center max-w-md">
-          <div className="border border-terminal-green/30 bg-background p-8">
-            <div className="text-terminal-green font-mono mb-4">
-              Redirecting to {statusText}...
-            </div>
-            <div className="flex justify-center">
-              <div className="w-2 h-2 bg-terminal-green animate-pulse"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Note: Redirect logic moved to loader - this component only renders when no active session exists
 
   return (
     <div className="min-h-screen bg-background font-mono">

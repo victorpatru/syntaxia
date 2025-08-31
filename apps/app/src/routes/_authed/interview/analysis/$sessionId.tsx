@@ -2,8 +2,9 @@ import { api } from "@syntaxia/backend/convex/_generated/api";
 import { LoadingTerminal } from "@syntaxia/ui/interview";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useAction as useConvexAction, useQuery } from "convex/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { validateAnalysisRoute } from "../../../../utils/route-guards";
 
 export const Route = createFileRoute("/_authed/interview/analysis/$sessionId")({
   component: InterviewAnalysis,
@@ -14,72 +15,72 @@ function InterviewAnalysis() {
   const { sessionId } = Route.useParams();
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [analysisStep, setAnalysisStep] = useState("Preparing analysis...");
-  const [hasTriggeredAnalysis, setHasTriggeredAnalysis] = useState(false);
+  const hasTriggeredAnalysisRef = useRef(false);
   const [retryCount, setRetryCount] = useState(0);
 
   // Convex hooks
   const session = useQuery(api.sessions.getSession, { sessionId });
   const analyzeAction = useConvexAction(api.sessions.analyzeSession);
 
-  // Trigger analysis once when session is ready
-  useEffect(() => {
-    if (!session || hasTriggeredAnalysis) return;
+  // Handle session validation and trigger analysis - moved from useEffect
+  const triggerAnalysis = async () => {
+    if (hasTriggeredAnalysisRef.current) return;
 
-    // Only proceed if session is in analyzing status
-    if (session.status !== "analyzing") {
-      // Redirect based on status
-      if (session.status === "setup") {
-        navigate({ to: "/interview/setup", search: { sessionId } });
-      } else if (session.status === "active") {
-        navigate({
-          to: "/interview/session/$sessionId",
-          params: { sessionId },
-        });
-      } else if (session.status === "complete") {
-        navigate({ to: "/interview/report/$sessionId", params: { sessionId } });
-      } else {
-        navigate({ to: "/interview" });
-      }
-      return;
-    }
-
-    // Trigger analysis
-    setHasTriggeredAnalysis(true);
+    hasTriggeredAnalysisRef.current = true;
     setAnalysisStep("Processing audio transcript...");
 
-    analyzeAction({ sessionId }).catch((error: any) => {
+    try {
+      await analyzeAction({ sessionId });
+    } catch (error: any) {
       console.error("Failed to analyze session:", error);
+      hasTriggeredAnalysisRef.current = false; // Reset for retry
+
       if (retryCount < 1) {
         toast.error("Failed to analyze interview", {
           action: {
             label: "Retry",
             onClick: () => {
               setRetryCount((prev) => prev + 1);
-              setHasTriggeredAnalysis(false); // Reset to allow retry
+              triggerAnalysis();
             },
           },
         });
-        setHasTriggeredAnalysis(false); // Reset to allow retry
       } else {
         toast.error("Failed to analyze interview. Returning to start page.");
         setTimeout(() => navigate({ to: "/interview" }), 2000);
       }
-    });
-  }, [
-    session,
-    hasTriggeredAnalysis,
-    sessionId,
-    analyzeAction,
-    navigate,
-    retryCount,
-  ]);
+    }
+  };
 
-  // Monitor session status and update progress
+  // Use useEffect for session validation and navigation to prevent infinite renders
   useEffect(() => {
     if (!session) return;
 
-    if (session.status === "analyzing") {
-      // Show progress animation while analyzing
+    const validation = validateAnalysisRoute(session);
+    if (!validation.isValid && validation.redirectTo) {
+      navigate({ to: validation.redirectTo });
+      return;
+    }
+
+    // Trigger analysis if session is ready and not already triggered
+    if (session.status === "analyzing" && !hasTriggeredAnalysisRef.current) {
+      triggerAnalysis();
+    }
+
+    // Navigate when analysis is complete
+    if (session.status === "complete") {
+      navigate({
+        to: "/interview/report/$sessionId",
+        params: { sessionId },
+      });
+    }
+  }, [session, navigate, sessionId]);
+
+  // Use useEffect for progress animation to prevent infinite renders
+  useEffect(() => {
+    if (!session || session.status !== "analyzing") return;
+
+    const interval = setInterval(() => {
       const analysisSteps = [
         "Processing audio transcript...",
         "Analyzing response quality...",
@@ -88,22 +89,13 @@ function InterviewAnalysis() {
         "Generating personalized feedback...",
       ];
 
-      // Cycle through steps for visual feedback
       const stepIndex = Math.floor(Date.now() / 2000) % analysisSteps.length;
       setAnalysisStep(analysisSteps[stepIndex]);
-      setAnalysisProgress(Math.min(analysisProgress + 1, 90)); // Keep progress moving but not complete
-    } else if (session.status === "complete") {
-      // Analysis complete, navigate to report
-      setAnalysisStep("Analysis complete!");
-      setAnalysisProgress(100);
-      setTimeout(() => {
-        navigate({
-          to: "/interview/report/$sessionId",
-          params: { sessionId },
-        });
-      }, 500);
-    }
-  }, [session, navigate, sessionId, analysisProgress]);
+      setAnalysisProgress((prev) => Math.min(prev + 3, 100));
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [session?.status]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
