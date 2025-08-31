@@ -13,7 +13,6 @@ export const env = createEnv({
     POLAR_ENVIRONMENT: z.enum(["sandbox", "production"]).default("sandbox"),
     AI_GATEWAY_API_KEY: z.string().min(1).optional(),
     ELEVENLABS_API_KEY: z.string().min(1),
-    ELEVENLABS_VOICE_ID: z.string().min(1),
     ELEVENLABS_AGENT_ID: z.string().min(1),
   },
   runtimeEnv: {
@@ -27,7 +26,6 @@ export const env = createEnv({
     POLAR_ENVIRONMENT: process.env.POLAR_ENVIRONMENT,
     AI_GATEWAY_API_KEY: process.env.AI_GATEWAY_API_KEY,
     ELEVENLABS_API_KEY: process.env.ELEVENLABS_API_KEY,
-    ELEVENLABS_VOICE_ID: process.env.ELEVENLABS_VOICE_ID,
     ELEVENLABS_AGENT_ID: process.env.ELEVENLABS_AGENT_ID,
   },
   skipValidation: !process.env.VALIDATE_ENV,
