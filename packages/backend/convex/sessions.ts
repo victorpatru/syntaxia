@@ -8,6 +8,7 @@ import {
   action,
   internalAction,
   internalMutation,
+  internalQuery,
   mutation,
   query,
 } from "./_generated/server";
@@ -268,6 +269,9 @@ export const startSetup = action({
     const balance = await ctx.runQuery(internal.sessions.getUserBalance, {
       sessionId,
     });
+    if (balance === undefined || balance === null) {
+      throw new Error("Unable to retrieve user balance");
+    }
     if (balance < 15) {
       throw new Error(
         "Insufficient credits. Need at least 15 credits to start an interview.",
@@ -335,7 +339,7 @@ export const getUserBalance = query({
 });
 
 // Internal query to get session without auth check
-export const getInternal = query({
+export const getInternal = internalQuery({
   args: { sessionId: v.id("interview_sessions") },
   returns: v.union(v.null(), SessionValidator),
   handler: async (ctx, { sessionId }) => {
