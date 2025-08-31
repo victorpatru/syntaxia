@@ -10,15 +10,26 @@ import {
 import { env } from "./env";
 import { requireUser } from "./users";
 
-export const getBalance = query(async (ctx: QueryCtx): Promise<number> => {
-  const user = await requireUser(ctx);
-  return user.credits ?? 0;
+export const getBalance = query({
+  args: {},
+  returns: v.number(),
+  handler: async (ctx) => {
+    const user = await requireUser(ctx);
+    return user.credits ?? 0;
+  },
 });
 
-export const getAvailablePackages = query(
-  async (): Promise<
-    Array<{ id: string; credits: number; price: string; description: string }>
-  > => {
+export const getAvailablePackages = query({
+  args: {},
+  returns: v.array(
+    v.object({
+      id: v.string(),
+      credits: v.number(),
+      price: v.string(),
+      description: v.string(),
+    }),
+  ),
+  handler: async () => {
     const packages: Array<{
       id: string;
       credits: number;
@@ -37,7 +48,7 @@ export const getAvailablePackages = query(
 
     return packages;
   },
-);
+});
 
 export const createCheckout = action({
   args: { packageId: v.string() },
