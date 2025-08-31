@@ -1,152 +1,75 @@
 ---
-description: Guidelines and best practices for building Convex projects, including database schema design, queries, mutations, and real-world examples
+description: Enforces consistent naming conventions for Convex queries, mutations, and actions
 globs: **/convex/**/*.ts,**/convex/**/*.tsx,**/convex/**/*.js,**/convex/**/*.jsx
+alwaysApply: true
 ---
 
-## Naming Rules
+- **Query Function Naming**
+  - Pattern: `get{Resource}` or `get{Resource}{Qualifier}`
+  - Purpose: Read operations that don't modify data
+  - Examples from [credits.ts](mdc:packages/backend/convex/credits.ts):
+    ```typescript
+    // ✅ DO: Use 'get' prefix for queries
+    export const getBalance = query({ ... });
+    export const getAvailablePackages = query({ ... });
+    export const getUserById = query({ ... });
+    
+    // ❌ DON'T: Omit 'get' prefix
+    export const balance = query({ ... });
+    export const userById = query({ ... });
+    ```
 
-### Query Functions
-- **Pattern**: `get{Resource}` or `get{Resource}{Qualifier}`
-- **Purpose**: Read operations that don't modify data
-- **Examples**:
-  ```typescript
-  export const getBalance = query({ ... });
-  export const getAvailablePackages = query({ ... });
-  export const getUserById = query({ ... });
-  export const getActiveSubscriptions = query({ ... });
-  ```
+- **Mutation Function Naming**
+  - Pattern: `{verb}{Resource}` using domain-specific verbs
+  - Purpose: Operations that modify data
+  - Financial operations use `credit`/`debit` terminology:
+    ```typescript
+    // ✅ DO: Use domain-specific verbs
+    export const creditAccount = internalMutation({ ... });
+    export const debitAccount = internalMutation({ ... });
+    export const createUser = mutation({ ... });
+    export const updateProfile = mutation({ ... });
+    
+    // ❌ DON'T: Use inconsistent or generic verbs
+    export const addCredits = mutation({ ... });     // Inconsistent with 'debit'
+    export const debit = mutation({ ... });          // Missing 'Account' suffix
+    ```
 
-### Mutation Functions
-- **Pattern**: `{verb}{Resource}` using domain-specific verbs
-- **Purpose**: Operations that modify data
-- **Financial Operations**:
-  ```typescript
-  export const creditAccount = internalMutation({ ... });
-  export const debitAccount = internalMutation({ ... });
-  ```
-- **CRUD Operations**:
-  ```typescript
-  export const createUser = mutation({ ... });
-  export const updateProfile = mutation({ ... });
-  export const deleteSession = mutation({ ... });
-  ```
+- **Action Function Naming**
+  - Pattern: `{verb}{Resource}` using descriptive action verbs
+  - Purpose: Side effects, external API calls, complex operations
+  - Examples:
+    ```typescript
+    // ✅ DO: Use descriptive action verbs
+    export const createCheckout = action({ ... });
+    export const sendNotification = action({ ... });
+    export const processWebhook = action({ ... });
+    
+    // ❌ DON'T: Use vague or unclear verbs
+    export const handleCheckout = action({ ... });
+    export const doNotification = action({ ... });
+    ```
 
-### Action Functions
-- **Pattern**: `{verb}{Resource}` using descriptive action verbs
-- **Purpose**: Side effects, external API calls, complex operations
-- **Examples**:
-  ```typescript
-  export const createCheckout = action({ ... });
-  export const sendNotification = action({ ... });
-  export const processWebhook = action({ ... });
-  ```
+- **Internal Function Conventions**
+  - Pattern: Same naming as above but use internal function types
+  - Maintain consistency with public equivalents:
+    ```typescript
+    // ✅ DO: Consistent naming across internal/public functions
+    export const creditAccount = internalMutation({ ... });
+    export const processPayment = internalAction({ ... });
+    export const getUserStats = internalQuery({ ... });
+    ```
 
-### Internal Functions
-- **Pattern**: Same as above but prefixed with function type
-- **Examples**:
-  ```typescript
-  export const creditAccount = internalMutation({ ... });
-  export const processPayment = internalAction({ ... });
-  export const getUserStats = internalQuery({ ... });
-  ```
+- **Variable and Parameter Naming**
+  - Use full descriptive names: `packages` not `packs`
+  - Use camelCase for consistency with TypeScript conventions
+  - Avoid abbreviations unless domain-standard (e.g., `id`, `url`)
 
-## Variable Naming
-- Use full descriptive names: `packages` not `packs`
-- Use camelCase for consistency
-- Avoid abbreviations unless domain-standard
+- **File-Level Consistency Requirements**
+  - All functions in a file must follow the same naming pattern
+  - Use domain-specific terminology consistently (e.g., financial operations)
+  - Maintain parallel structure for related operations within the same file
 
-## Consistency Requirements
-- All functions in a file should follow the same naming pattern
-- Use domain-specific terminology (e.g., `credit`/`debit` for financial operations)
-- Maintain parallel structure for related operations
-
-## Examples to Avoid
-```typescript
-// ❌ Inconsistent naming
-export const balance = query({ ... });           // Missing 'get' prefix
-export const addCredits = mutation({ ... });     // Inconsistent with 'debit'
-export const debit = mutation({ ... });          // Missing 'Account' suffix
-
-// ✅ Consistent naming
-export const getBalance = query({ ... });
-export const creditAccount = mutation({ ... });
-export const debitAccount = mutation({ ... });
-```
-
-## Enforcement
-This rule applies automatically to all TypeScript files in the `packages/backend/convex/` directory to ensure consistent API design across the Convex backend.# Convex Function Naming Conventions
-
-**Applies to**: All files in this convex backend directory
-
-## Naming Rules
-
-### Query Functions
-- **Pattern**: `get{Resource}` or `get{Resource}{Qualifier}`
-- **Purpose**: Read operations that don't modify data
-- **Examples**:
-  ```typescript
-  export const getBalance = query({ ... });
-  export const getAvailablePackages = query({ ... });
-  export const getUserById = query({ ... });
-  export const getActiveSubscriptions = query({ ... });
-  ```
-
-### Mutation Functions
-- **Pattern**: `{verb}{Resource}` using domain-specific verbs
-- **Purpose**: Operations that modify data
-- **Financial Operations**:
-  ```typescript
-  export const creditAccount = internalMutation({ ... });
-  export const debitAccount = internalMutation({ ... });
-  ```
-- **CRUD Operations**:
-  ```typescript
-  export const createUser = mutation({ ... });
-  export const updateProfile = mutation({ ... });
-  export const deleteSession = mutation({ ... });
-  ```
-
-### Action Functions
-- **Pattern**: `{verb}{Resource}` using descriptive action verbs
-- **Purpose**: Side effects, external API calls, complex operations
-- **Examples**:
-  ```typescript
-  export const createCheckout = action({ ... });
-  export const sendNotification = action({ ... });
-  export const processWebhook = action({ ... });
-  ```
-
-### Internal Functions
-- **Pattern**: Same as above but prefixed with function type
-- **Examples**:
-  ```typescript
-  export const creditAccount = internalMutation({ ... });
-  export const processPayment = internalAction({ ... });
-  export const getUserStats = internalQuery({ ... });
-  ```
-
-## Variable Naming
-- Use full descriptive names: `packages` not `packs`
-- Use camelCase for consistency
-- Avoid abbreviations unless domain-standard
-
-## Consistency Requirements
-- All functions in a file should follow the same naming pattern
-- Use domain-specific terminology (e.g., `credit`/`debit` for financial operations)
-- Maintain parallel structure for related operations
-
-## Examples to Avoid
-```typescript
-// ❌ Inconsistent naming
-export const balance = query({ ... });           // Missing 'get' prefix
-export const addCredits = mutation({ ... });     // Inconsistent with 'debit'
-export const debit = mutation({ ... });          // Missing 'Account' suffix
-
-// ✅ Consistent naming
-export const getBalance = query({ ... });
-export const creditAccount = mutation({ ... });
-export const debitAccount = mutation({ ... });
-```
-
-## Enforcement
-This rule applies automatically to all TypeScript files in the `packages/backend/convex/` directory to ensure consistent API design across the Convex backend.
+- **Cross-Reference**
+  - See [convex_rules.mdc](mdc:.cursor/rules/convex_rules.mdc) for broader Convex development guidelines
+  - This rule enforces API consistency across the backend in [packages/backend/convex/](mdc:packages/backend/convex/)
