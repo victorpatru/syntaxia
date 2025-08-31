@@ -139,7 +139,7 @@ const AnalysisResponseSchema = z.object({
 });
 
 // Query to get a session by ID
-export const get = query({
+export const getSession = query({
   args: { sessionId: v.id("interview_sessions") },
   returns: v.union(v.null(), SessionValidator),
   handler: async (ctx, { sessionId }) => {
@@ -198,7 +198,7 @@ export const getCurrentSession = query({
 });
 
 // Mutation to create a new session
-export const create = mutation({
+export const createSession = mutation({
   args: { jobDescription: v.string() },
   returns: v.id("interview_sessions"),
   handler: async (ctx, { jobDescription }) => {
@@ -265,7 +265,7 @@ export const startSetup = action({
     if (!session) throw new Error("Session not found");
 
     // Check user has sufficient credits
-    const balance = await ctx.runQuery(internal.sessions.checkUserBalance, {
+    const balance = await ctx.runQuery(internal.sessions.getUserBalance, {
       sessionId,
     });
     if (balance < 15) {
@@ -320,7 +320,7 @@ Guidelines:
 });
 
 // Internal query to check user balance
-export const checkUserBalance = query({
+export const getUserBalance = query({
   args: { sessionId: v.id("interview_sessions") },
   returns: v.number(),
   handler: async (ctx, { sessionId }) => {
@@ -439,7 +439,7 @@ export const ensureCharge = internalAction({
     const elapsed = Date.now() - (session.startedAt || session.createdAt);
     if (elapsed >= 120 * 1000) {
       try {
-        await ctx.runMutation(internal.credits.debit, { sessionId });
+        await ctx.runMutation(internal.credits.debitAccount, { sessionId });
         await ctx.runMutation(internal.sessions.markCharged, { sessionId });
         console.log(
           `Charged session ${sessionId} after ${Math.round(elapsed / 1000)}s`,
@@ -467,7 +467,7 @@ export const markCharged = internalMutation({
 });
 
 // Mutation to end session
-export const end = mutation({
+export const endSession = mutation({
   args: {
     sessionId: v.id("interview_sessions"),
     elevenlabsConversationId: v.optional(v.string()),
@@ -544,7 +544,7 @@ export const getConversationToken = action({
 });
 
 // Action to analyze session
-export const analyze = action({
+export const analyzeSession = action({
   args: { sessionId: v.id("interview_sessions") },
   returns: v.union(
     v.null(),
