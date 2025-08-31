@@ -10,16 +10,16 @@ import {
 import { env } from "./env";
 import { requireUser } from "./users";
 
-export const balance = query(async (ctx: QueryCtx): Promise<number> => {
+export const getBalance = query(async (ctx: QueryCtx): Promise<number> => {
   const user = await requireUser(ctx);
   return user.credits ?? 0;
 });
 
-export const availablePackages = query(
+export const getAvailablePackages = query(
   async (): Promise<
     Array<{ id: string; credits: number; price: string; description: string }>
   > => {
-    const packs: Array<{
+    const packages: Array<{
       id: string;
       credits: number;
       price: string;
@@ -27,7 +27,7 @@ export const availablePackages = query(
     }> = [];
 
     if (env.POLAR_PRODUCT_ID_CREDITS_15) {
-      packs.push({
+      packages.push({
         id: env.POLAR_PRODUCT_ID_CREDITS_15,
         credits: 15,
         price: "39.99 USD",
@@ -35,7 +35,7 @@ export const availablePackages = query(
       });
     }
 
-    return packs;
+    return packages;
   },
 );
 
@@ -63,7 +63,7 @@ export const createCheckout = action({
   },
 });
 
-export const addCredits = internalMutation({
+export const creditAccount = internalMutation({
   args: {
     clerkUserId: v.string(),
     orderId: v.string(),
@@ -95,6 +95,53 @@ export const addCredits = internalMutation({
       credits: (user.credits ?? 0) + credits,
     });
 
+    return null;
+  },
+});
+
+export const debitAccount = internalMutation({
+  args: {
+    sessionId: v.id("interview_sessions"),
+    amount: v.optional(v.number()),
+  },
+  returns: v.null(),
+  handler: async (ctx, { sessionId, amount = 15 }) => {
+    const session = await ctx.db.get(sessionId);
+    if (!session) throw new Error("Session not found");
+
+    const user = await ctx.db.get(session.userId);
+    if (!user) throw new Error("User not found");
+
+    const existingCharge = await ctx.db
+      .query("credits_log")
+      .withIndex("by_session", (q) => q.eq("sessionId", sessionId))
+      .filter((q) => q.eq(q.field("reason"), "session:debit"))
+      .unique();
+
+    if (existingCharge) {
+      console.log(`Session ${sessionId} already charged`);
+      return null;
+    }
+
+    const currentBalance = user.credits ?? 0;
+    if (currentBalance < amount) {
+      throw new Error(`Insufficient credits: ${currentBalance} < ${amount}`);
+    }
+
+    await ctx.db.insert("credits_log", {
+      userId: user._id,
+      amount: -amount,
+      reason: "session:debit",
+      sessionId,
+    });
+
+    await ctx.db.patch(user._id, {
+      credits: currentBalance - amount,
+    });
+
+    console.log(
+      `Debited ${amount} credits from user ${user._id} for session ${sessionId}`,
+    );
     return null;
   },
 });
