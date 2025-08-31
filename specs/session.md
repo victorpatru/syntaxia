@@ -65,8 +65,8 @@ Note: Align shapes with `packages/shared/src/interview.ts` and `apps/app/src/typ
 
 ### Server Functions (Convex)
 - credits (exists):
-  - `balance` (query) — already present.
-  - Add `debit` (internal mutation): atomically subtract credits (>=15), log in `credits_log` with `reason: "session:debit"` and `sessionId` metadata.
+  - `credits.getBalance` (query) — already present.
+  - Add `credits.debitAccount` (internal mutation): atomically subtract credits (>=15), log in `credits_log` with `reason: "session:debit"` and `sessionId` metadata.
     - Schema: extend `credits_log` with optional `sessionId: v.id("interview_sessions")`.
 
 - sessions (new):
