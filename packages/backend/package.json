@@ -2,6 +2,7 @@
   "name": "@syntaxia/backend",
   "version": "1.0.0",
   "description": "",
+  "types": "./convex/_generated/api.d.ts",
   "exports": {
     ".": {
       "types": "./convex/_generated/api.d.ts",
@@ -10,6 +11,10 @@
     "./convex/_generated/api": {
       "types": "./convex/_generated/api.d.ts",
       "default": "./convex/_generated/api.js"
+    },
+    "./convex/_generated/dataModel": {
+      "types": "./convex/_generated/dataModel.d.ts",
+      "default": "./convex/_generated/dataModel.js"
     }
   },
   "scripts": {
