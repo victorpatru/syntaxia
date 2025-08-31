@@ -1,6 +1,9 @@
+import { api } from "@syntaxia/backend/convex/_generated/api";
 import { LoadingTerminal } from "@syntaxia/ui/interview";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useAction as useConvexAction, useQuery } from "convex/react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authed/interview/analysis/$sessionId")({
   component: InterviewAnalysis,
@@ -10,65 +13,97 @@ function InterviewAnalysis() {
   const navigate = useNavigate();
   const { sessionId } = Route.useParams();
   const [analysisProgress, setAnalysisProgress] = useState(0);
-  const [analysisStep, setAnalysisStep] = useState("");
+  const [analysisStep, setAnalysisStep] = useState("Preparing analysis...");
+  const [hasTriggeredAnalysis, setHasTriggeredAnalysis] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
+  // Convex hooks
+  const session = useQuery(api.sessions.getSession, { sessionId });
+  const analyzeAction = useConvexAction(api.sessions.analyzeSession);
+
+  // Trigger analysis once when session is ready
   useEffect(() => {
-    // TODO: Replace with actual AI analysis API call
-    // const analyzeInterview = async () => {
-    //   try {
-    //     const response = await fetch('/api/interview/analyze', {
-    //       method: 'POST',
-    //       headers: { 'Content-Type': 'application/json' },
-    //       body: JSON.stringify({ sessionId })
-    //     });
-    //     const result = await response.json();
-    //     // Navigate to report with analysis results
-    //   } catch (error) {
-    //     console.error('Failed to analyze interview:', error);
-    //   }
-    // };
+    if (!session || hasTriggeredAnalysis) return;
 
-    // Mock analysis sequence - replace with actual AI analysis
-    const analysisSteps = [
-      "Processing audio transcript...",
-      "Analyzing response quality...",
-      "Evaluating technical accuracy...",
-      "Identifying improvement areas...",
-      "Generating personalized feedback...",
-    ];
+    // Only proceed if session is in analyzing status
+    if (session.status !== "analyzing") {
+      // Redirect based on status
+      if (session.status === "setup") {
+        navigate({ to: "/interview/setup", search: { sessionId } });
+      } else if (session.status === "active") {
+        navigate({
+          to: "/interview/session/$sessionId",
+          params: { sessionId },
+        });
+      } else if (session.status === "complete") {
+        navigate({ to: "/interview/report/$sessionId", params: { sessionId } });
+      } else {
+        navigate({ to: "/interview" });
+      }
+      return;
+    }
 
-    let stepIndex = 0;
-    const analysisInterval = setInterval(() => {
-      setAnalysisProgress((prev) => {
-        const newProgress = prev + 2; // Increment by 2% each 100ms
+    // Trigger analysis
+    setHasTriggeredAnalysis(true);
+    setAnalysisStep("Processing audio transcript...");
 
-        // Update analysis step based on progress
-        const stepProgress = Math.floor(newProgress / 20); // Each step is 20%
-        if (stepProgress < analysisSteps.length && stepProgress !== stepIndex) {
-          stepIndex = stepProgress;
-          setAnalysisStep(analysisSteps[stepIndex]);
-        }
+    analyzeAction({ sessionId }).catch((error: any) => {
+      console.error("Failed to analyze session:", error);
+      if (retryCount < 1) {
+        toast.error("Failed to analyze interview", {
+          action: {
+            label: "Retry",
+            onClick: () => {
+              setRetryCount((prev) => prev + 1);
+              setHasTriggeredAnalysis(false); // Reset to allow retry
+            },
+          },
+        });
+        setHasTriggeredAnalysis(false); // Reset to allow retry
+      } else {
+        toast.error("Failed to analyze interview. Returning to start page.");
+        setTimeout(() => navigate({ to: "/interview" }), 2000);
+      }
+    });
+  }, [
+    session,
+    hasTriggeredAnalysis,
+    sessionId,
+    analyzeAction,
+    navigate,
+    retryCount,
+  ]);
 
-        // Complete analysis after processing
-        if (newProgress >= 100) {
-          clearInterval(analysisInterval);
-          // Navigate to report
-          navigate({
-            to: "/interview/report/$sessionId",
-            params: { sessionId },
-          });
-          return 100;
-        }
+  // Monitor session status and update progress
+  useEffect(() => {
+    if (!session) return;
 
-        return newProgress;
-      });
-    }, 100); // Update every 100ms for smooth progress
+    if (session.status === "analyzing") {
+      // Show progress animation while analyzing
+      const analysisSteps = [
+        "Processing audio transcript...",
+        "Analyzing response quality...",
+        "Evaluating technical accuracy...",
+        "Identifying improvement areas...",
+        "Generating personalized feedback...",
+      ];
 
-    return () => clearInterval(analysisInterval);
-  }, [sessionId, navigate]);
-
-  // TODO: Get actual interview duration from session data
-  const mockInterviewTime = 450; // 7:30 mock duration
+      // Cycle through steps for visual feedback
+      const stepIndex = Math.floor(Date.now() / 2000) % analysisSteps.length;
+      setAnalysisStep(analysisSteps[stepIndex]);
+      setAnalysisProgress(Math.min(analysisProgress + 1, 90)); // Keep progress moving but not complete
+    } else if (session.status === "complete") {
+      // Analysis complete, navigate to report
+      setAnalysisStep("Analysis complete!");
+      setAnalysisProgress(100);
+      setTimeout(() => {
+        navigate({
+          to: "/interview/report/$sessionId",
+          params: { sessionId },
+        });
+      }, 500);
+    }
+  }, [session, navigate, sessionId, analysisProgress]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -76,8 +111,10 @@ function InterviewAnalysis() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const interviewDuration = session?.duration || 0;
+
   const additionalInfo = [
-    `<span class="text-terminal-green font-mono">[INFO]</span> Interview duration: ${formatTime(mockInterviewTime)}`,
+    `<span class="text-terminal-green font-mono">[INFO]</span> Interview duration: ${formatTime(interviewDuration)}`,
     `<span class="text-terminal-amber">[AI]</span> Transcribing audio responses...`,
     ...(analysisProgress > 20
       ? [
@@ -100,6 +137,21 @@ function InterviewAnalysis() {
         ]
       : []),
   ];
+
+  // Loading state
+  if (!session) {
+    return (
+      <LoadingTerminal
+        progress={0}
+        currentStep="Loading session..."
+        title="syntaxia@ai-analyzer"
+        subtitle="~/analysis"
+        additionalInfo={[
+          `<span class="text-terminal-green font-mono">[INFO]</span> Retrieving session data...`,
+        ]}
+      />
+    );
+  }
 
   return (
     <LoadingTerminal

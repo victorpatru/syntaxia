@@ -1,6 +1,18 @@
+import { api } from "@syntaxia/backend/convex/_generated/api";
 import { Button } from "@syntaxia/ui/button";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Download, RotateCcw } from "lucide-react";
+import { useQuery } from "convex/react";
+import { RotateCcw } from "lucide-react";
+
+// Local type definitions for strong typing
+type Highlight = {
+  id: string;
+  timestamp: number;
+  type: "strength" | "improvement" | "concern";
+  text: string;
+  analysis: string;
+  transcriptId: string;
+};
 
 export const Route = createFileRoute("/_authed/interview/report/$sessionId")({
   component: InterviewReport,
@@ -10,8 +22,8 @@ function InterviewReport() {
   const navigate = useNavigate();
   const { sessionId } = Route.useParams();
 
-  // TODO: Load actual interview results from Convex based on sessionId
-  const mockInterviewTime = 450; // 7:30 mock duration
+  // Load session data from Convex
+  const session = useQuery(api.sessions.getSession, { sessionId });
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -23,10 +35,34 @@ function InterviewReport() {
     navigate({ to: "/interview" });
   };
 
-  const downloadReport = () => {
-    // TODO: Generate and download PDF/JSON report
-    console.log("Downloading report for session:", sessionId);
-  };
+  // Helper to determine if session was too short for meaningful analysis
+  const isShortSession = session ? (session.duration || 0) < 120 : false;
+
+  // Loading state
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center font-mono">
+        <div className="text-center">
+          <div className="text-terminal-green/60 mb-2">Loading report...</div>
+          <div className="w-2 h-2 bg-terminal-green animate-pulse mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect if session is not complete
+  if (session.status !== "complete") {
+    if (session.status === "setup") {
+      navigate({ to: "/interview/setup", search: { sessionId } });
+    } else if (session.status === "active") {
+      navigate({ to: "/interview/session/$sessionId", params: { sessionId } });
+    } else if (session.status === "analyzing") {
+      navigate({ to: "/interview/analysis/$sessionId", params: { sessionId } });
+    } else {
+      navigate({ to: "/interview" });
+    }
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background font-mono">
@@ -47,22 +83,38 @@ function InterviewReport() {
                   SESSION_DURATION:
                 </span>
                 <span className="ml-2 text-terminal-green">
-                  {formatTime(mockInterviewTime)}
+                  {formatTime(session.duration || 0)}
                 </span>
               </div>
               <div className="mb-4">
                 <span className="text-terminal-green/60 font-mono text-sm">
                   OVERALL_ASSESSMENT:
                 </span>
-                <div className="mt-2 border border-terminal-amber bg-terminal-amber/10 px-3 py-2">
-                  <span className="text-terminal-amber font-mono">
-                    PASS_WITH_RESERVATIONS
-                  </span>
-                </div>
+                {isShortSession ? (
+                  <div className="mt-2 border border-orange-400 bg-orange-400/10 px-3 py-2">
+                    <span className="text-orange-400 font-mono">
+                      SESSION_TOO_SHORT_FOR_ANALYSIS
+                    </span>
+                  </div>
+                ) : session.scores ? (
+                  <div className="mt-2 border border-terminal-amber bg-terminal-amber/10 px-3 py-2">
+                    <span className="text-terminal-amber font-mono">
+                      SCORE: {session.scores.overall}/4
+                    </span>
+                  </div>
+                ) : (
+                  <div className="mt-2 border border-terminal-amber bg-terminal-amber/10 px-3 py-2">
+                    <span className="text-terminal-amber font-mono">
+                      ANALYSIS_PENDING
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="text-terminal-green/60 text-sm">
-                Strong technical knowledge demonstrated, but could improve
-                communication clarity and provide more specific examples.
+                {isShortSession
+                  ? "Session ended early. For detailed analysis, sessions must be at least 2 minutes long."
+                  : session.scores?.comments?.strengths?.[0] ||
+                    "Technical interview completed successfully."}
               </div>
             </div>
           </div>
@@ -75,30 +127,57 @@ function InterviewReport() {
                 </span>
               </div>
               <div className="p-4 space-y-4">
-                {/* TODO: Replace with actual analysis results */}
-                <div className="border-l-4 border-terminal-green pl-4">
-                  <div className="text-terminal-green/60 font-mono text-xs mb-1">
-                    [03:42] POSITIVE_SIGNAL
+                {isShortSession ? (
+                  <div className="text-center py-4">
+                    <div className="text-orange-400 text-sm">
+                      ⚠ Session was too short for detailed strength analysis.
+                      Try a longer session next time.
+                    </div>
                   </div>
-                  <div className="text-sm mb-2 text-terminal-green">
-                    "I used React hooks to manage state efficiently..."
+                ) : session.highlights?.filter(
+                    (h: Highlight) => h.type === "strength",
+                  ).length ? (
+                  session.highlights
+                    .filter((h: Highlight) => h.type === "strength")
+                    .slice(0, 3)
+                    .map((highlight: Highlight, index: number) => (
+                      <div
+                        key={highlight.id || index}
+                        className="border-l-4 border-terminal-green pl-4"
+                      >
+                        <div className="text-terminal-green/60 font-mono text-xs mb-1">
+                          [{Math.floor(highlight.timestamp / 60)}:
+                          {(highlight.timestamp % 60)
+                            .toString()
+                            .padStart(2, "0")}
+                          ] POSITIVE_SIGNAL
+                        </div>
+                        <div className="text-sm mb-2 text-terminal-green">
+                          "{highlight.text.slice(0, 60)}..."
+                        </div>
+                        <div className="text-xs text-terminal-green">
+                          ✓ {highlight.analysis}
+                        </div>
+                      </div>
+                    ))
+                ) : (
+                  <div className="text-center py-4">
+                    <span className="text-terminal-green/60 text-sm">
+                      {session.scores?.comments?.strengths?.map(
+                        (strength: string, index: number) => (
+                          <div
+                            key={index}
+                            className="border-l-4 border-terminal-green pl-4 mb-2"
+                          >
+                            <div className="text-xs text-terminal-green">
+                              ✓ {strength}
+                            </div>
+                          </div>
+                        ),
+                      ) || "No specific strengths recorded."}
+                    </span>
                   </div>
-                  <div className="text-xs text-terminal-green">
-                    ✓ Modern React patterns demonstrated
-                  </div>
-                </div>
-                <div className="border-l-4 border-terminal-green pl-4">
-                  <div className="text-terminal-green/60 font-mono text-xs mb-1">
-                    [07:15] POSITIVE_SIGNAL
-                  </div>
-                  <div className="text-sm mb-2 text-terminal-green">
-                    "I considered the trade-offs between performance and
-                    maintainability..."
-                  </div>
-                  <div className="text-xs text-terminal-green">
-                    ✓ Strong architectural thinking
-                  </div>
-                </div>
+                )}
               </div>
             </div>
 
@@ -109,29 +188,76 @@ function InterviewReport() {
                 </span>
               </div>
               <div className="p-4 space-y-4">
-                {/* TODO: Replace with actual analysis results */}
-                <div className="border-l-4 border-orange-400 pl-4">
-                  <div className="text-terminal-green/60 font-mono text-xs mb-1">
-                    [05:23] WARNING
+                {isShortSession ? (
+                  <div className="text-center py-4">
+                    <span className="text-terminal-green/60 text-sm">
+                      {session.scores?.comments?.improvements?.map(
+                        (improvement: string, index: number) => (
+                          <div
+                            key={index}
+                            className="border-l-4 border-orange-400 pl-4 mb-2"
+                          >
+                            <div className="text-xs text-orange-400">
+                              ⚠ {improvement}
+                            </div>
+                          </div>
+                        ),
+                      ) || (
+                        <div className="text-orange-400 text-sm">
+                          ⚠ Session was too short for detailed analysis. Try a
+                          longer session next time.
+                        </div>
+                      )}
+                    </span>
                   </div>
-                  <div className="text-sm mb-2 text-terminal-green">
-                    "Um, well, it was kind of complex..."
+                ) : session.highlights?.filter(
+                    (h: Highlight) =>
+                      h.type === "improvement" || h.type === "concern",
+                  ).length ? (
+                  session.highlights
+                    .filter(
+                      (h: Highlight) =>
+                        h.type === "improvement" || h.type === "concern",
+                    )
+                    .slice(0, 3)
+                    .map((highlight: Highlight, index: number) => (
+                      <div
+                        key={highlight.id || index}
+                        className="border-l-4 border-orange-400 pl-4"
+                      >
+                        <div className="text-terminal-green/60 font-mono text-xs mb-1">
+                          [{Math.floor(highlight.timestamp / 60)}:
+                          {(highlight.timestamp % 60)
+                            .toString()
+                            .padStart(2, "0")}
+                          ] WARNING
+                        </div>
+                        <div className="text-sm mb-2 text-terminal-green">
+                          "{highlight.text.slice(0, 60)}..."
+                        </div>
+                        <div className="text-xs text-orange-400">
+                          ⚠ {highlight.analysis}
+                        </div>
+                      </div>
+                    ))
+                ) : (
+                  <div className="text-center py-4">
+                    <span className="text-terminal-green/60 text-sm">
+                      {session.scores?.comments?.improvements?.map(
+                        (improvement: string, index: number) => (
+                          <div
+                            key={index}
+                            className="border-l-4 border-orange-400 pl-4 mb-2"
+                          >
+                            <div className="text-xs text-orange-400">
+                              ⚠ {improvement}
+                            </div>
+                          </div>
+                        ),
+                      ) || "No specific improvements identified."}
+                    </span>
                   </div>
-                  <div className="text-xs text-orange-400">
-                    ⚠ Be more specific about complexity
-                  </div>
-                </div>
-                <div className="border-l-4 border-orange-400 pl-4">
-                  <div className="text-terminal-green/60 font-mono text-xs mb-1">
-                    [09:41] WARNING
-                  </div>
-                  <div className="text-sm mb-2 text-terminal-green">
-                    "I think the solution worked fine..."
-                  </div>
-                  <div className="text-xs text-orange-400">
-                    ⚠ Quantify results with metrics
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -144,44 +270,64 @@ function InterviewReport() {
             </div>
             <div className="p-4">
               <div className="space-y-2 text-sm">
-                {/* TODO: Replace with AI-generated personalized recommendations */}
-                <div className="flex items-start space-x-2">
-                  <span className="text-terminal-green">$</span>
-                  <span className="text-terminal-green">
-                    Practice explaining technical concepts with specific metrics
-                  </span>
-                </div>
-                <div className="flex items-start space-x-2">
-                  <span className="text-terminal-green">$</span>
-                  <span className="text-terminal-green">
-                    Prepare 2-3 detailed technical stories with clear structure
-                  </span>
-                </div>
-                <div className="flex items-start space-x-2">
-                  <span className="text-terminal-green">$</span>
-                  <span className="text-terminal-green">
-                    Reduce filler words and speak more confidently
-                  </span>
-                </div>
+                {isShortSession ? (
+                  <>
+                    <div className="flex items-start space-x-2">
+                      <span className="text-terminal-green">$</span>
+                      <span className="text-terminal-green">
+                        Practice with longer interview sessions
+                      </span>
+                    </div>
+                    <div className="flex items-start space-x-2">
+                      <span className="text-terminal-green">$</span>
+                      <span className="text-terminal-green">
+                        Focus on detailed technical explanations
+                      </span>
+                    </div>
+                  </>
+                ) : session.scores?.comments?.nextSteps?.length ? (
+                  session.scores.comments.nextSteps.map(
+                    (step: string, index: number) => (
+                      <div key={index} className="flex items-start space-x-2">
+                        <span className="text-terminal-green">$</span>
+                        <span className="text-terminal-green">{step}</span>
+                      </div>
+                    ),
+                  )
+                ) : (
+                  <>
+                    <div className="flex items-start space-x-2">
+                      <span className="text-terminal-green">$</span>
+                      <span className="text-terminal-green">
+                        Continue practicing technical interviews regularly
+                      </span>
+                    </div>
+                    <div className="flex items-start space-x-2">
+                      <span className="text-terminal-green">$</span>
+                      <span className="text-terminal-green">
+                        Focus on clear communication and specific examples
+                      </span>
+                    </div>
+                    <div className="flex items-start space-x-2">
+                      <span className="text-terminal-green">$</span>
+                      <span className="text-terminal-green">
+                        Review fundamentals in {session.experienceLevel} level{" "}
+                        {session.domainTrack} engineering
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
 
-          <div className="flex justify-center space-x-4">
+          <div className="flex justify-center">
             <Button
               onClick={startNewInterview}
               className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20"
             >
               <RotateCcw className="w-4 h-4 mr-2" />
               ./practice-again
-            </Button>
-            <Button
-              variant="outline"
-              onClick={downloadReport}
-              className="font-mono text-xs bg-transparent border border-terminal-amber/30 text-terminal-amber hover:bg-terminal-amber/10 hover:text-terminal-green px-3 py-1 transition-colors h-8 min-w-20"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              ./download-report
             </Button>
           </div>
         </div>

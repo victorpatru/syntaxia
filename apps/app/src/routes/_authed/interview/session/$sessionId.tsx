@@ -1,8 +1,16 @@
+import { useConversation } from "@elevenlabs/react";
+import { api } from "@syntaxia/backend/convex/_generated/api";
 import { Button } from "@syntaxia/ui/button";
 import { ConversationPanel, WaveformRingOrb } from "@syntaxia/ui/interview";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+  useAction,
+  useMutation as useConvexMutation,
+  useQuery,
+} from "convex/react";
 import { Clock } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { env } from "../../../../env";
 import {
   Question,
   TranscriptEntry,
@@ -19,16 +27,49 @@ function InterviewSession() {
   const [isRecording, setIsRecording] = useState(false);
   const [interviewTime, setInterviewTime] = useState(0);
   const [isInterviewActive, setIsInterviewActive] = useState(false);
+  const [hasStartedActive, setHasStartedActive] = useState(false);
+  const [micOnAt, setMicOnAt] = useState<number | null>(null);
 
-  // TODO: Replace with actual session data from Convex
-  const [currentQuestion] = useState<Question>({
-    id: "1",
-    type: "background",
-    text: "Tell me about a challenging technical problem you've solved recently. Walk me through your approach and the technologies you used.",
-    expectedDuration: 300,
-    difficulty: 3,
-    tags: ["problem-solving", "technical-depth"],
+  // Convex hooks
+  const session = useQuery(api.sessions.getSession, { sessionId });
+  const startActiveMutation = useConvexMutation(api.sessions.startActive);
+  const endMutation = useConvexMutation(api.sessions.endSession);
+  const getConversationTokenAction = useAction(
+    api.sessions.getConversationToken,
+  );
+
+  // ElevenLabs conversation hook
+  const conversation = useConversation({
+    onConnect: () => {
+      console.log("ElevenLabs conversation connected");
+      setVoiceState((prev) => ({ ...prev, connectionStatus: "connected" }));
+
+      // Auto-start recording when connection is established
+      if (!isRecording) {
+        toggleRecording();
+      }
+    },
+    onDisconnect: () => {
+      console.log("ElevenLabs conversation disconnected");
+      setVoiceState((prev) => ({ ...prev, connectionStatus: "disconnected" }));
+    },
+    onMessage: (message) => {
+      console.log("ElevenLabs message:", message);
+      // TODO: Handle real transcript messages
+    },
+    onError: (error) => {
+      console.error("ElevenLabs error:", error);
+      setVoiceState((prev) => ({
+        ...prev,
+        connectionStatus: "error",
+        lastError: String(error),
+      }));
+    },
   });
+
+  // Get current question from session data
+  const currentQuestion: Question | null =
+    session?.questions?.[session.currentQuestionIndex] || null;
 
   const [transcript] = useState<TranscriptEntry[]>([]);
 
@@ -36,16 +77,122 @@ function InterviewSession() {
     isRecording: false,
     isPlaying: false,
     currentAudioLevel: 0.3,
-    connectionStatus: "connected", // TODO: Set based on actual ElevenLabs connection
+    connectionStatus: "disconnected",
   });
 
+  // Update voice state based on ElevenLabs conversation status
   useEffect(() => {
-    // TODO: Load interview session data from Convex
-    // TODO: Initialize ElevenLabs voice connection
+    setVoiceState((prev) => ({
+      ...prev,
+      isPlaying: conversation.isSpeaking || false,
+      connectionStatus:
+        conversation.status === "connected"
+          ? "connected"
+          : conversation.status === "disconnected"
+            ? "disconnected"
+            : "connecting",
+    }));
+  }, [conversation.status, conversation.isSpeaking]);
 
-    setIsInterviewActive(true);
+  useEffect(() => {
+    if (!session) return;
 
-    // Start interview timer
+    // Redirect if session is not ready for live interview
+    if (session.status !== "setup" && session.status !== "active") {
+      if (session.status === "analyzing") {
+        navigate({
+          to: "/interview/analysis/$sessionId",
+          params: { sessionId },
+        });
+      } else if (session.status === "complete") {
+        navigate({
+          to: "/interview/report/$sessionId",
+          params: { sessionId },
+        });
+      } else {
+        navigate({ to: "/interview" });
+      }
+      return;
+    }
+
+    // If session is active, we can start the timer
+    if (session.status === "active" && session.startedAt) {
+      setIsInterviewActive(true);
+      // Calculate elapsed time from when session started
+      const elapsed = Math.floor((Date.now() - session.startedAt) / 1000);
+      setInterviewTime(elapsed);
+    }
+
+    // Auto-start voice connection when session is ready
+    console.log("🔍 Checking auto-start conditions:", {
+      status: session.status,
+      isActive: session.status === "active",
+      hasExperienceLevel: !!session.experienceLevel,
+      hasDomainTrack: !!session.domainTrack,
+      hasStartedActive,
+      shouldAutoStart:
+        session.status === "active" &&
+        session.experienceLevel &&
+        session.domainTrack &&
+        !hasStartedActive,
+    });
+
+    if (
+      session.status === "active" &&
+      session.experienceLevel &&
+      session.domainTrack &&
+      !hasStartedActive
+    ) {
+      console.log("🔄 Auto-starting voice connection for active session...");
+      startVoiceConnection();
+    } else if (
+      session.status === "setup" &&
+      session.experienceLevel &&
+      session.domainTrack &&
+      session.questions &&
+      session.questions.length > 0 &&
+      !hasStartedActive
+    ) {
+      console.log(
+        "🔄 Session has questions but still in setup - starting voice connection anyway...",
+      );
+      startVoiceConnection();
+    }
+  }, [session, navigate, sessionId, hasStartedActive]);
+
+  const endInterview = useCallback(async () => {
+    setIsInterviewActive(false);
+
+    // End ElevenLabs conversation and get conversation ID
+    let conversationId: string | undefined;
+    try {
+      if (conversation.status === "connected") {
+        conversationId = conversation.getId();
+        await conversation.endSession();
+      }
+    } catch (error) {
+      console.error("Failed to end ElevenLabs conversation:", error);
+    }
+
+    // Call Convex end mutation
+    endMutation({ sessionId, elevenlabsConversationId: conversationId })
+      .then(() => {
+        // Navigate to analysis
+        navigate({
+          to: "/interview/analysis/$sessionId",
+          params: { sessionId },
+        });
+      })
+      .catch((error: any) => {
+        console.error("Failed to end session:", error);
+        alert("Failed to end session. Please try again.");
+      });
+  }, [sessionId, endMutation, navigate, conversation]);
+
+  // Timer effect - separate from session loading
+  useEffect(() => {
+    if (!isInterviewActive) return;
+
     const timer = setInterval(() => {
       setInterviewTime((prev) => {
         if (prev >= 900) {
@@ -59,18 +206,7 @@ function InterviewSession() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [sessionId]);
-
-  const endInterview = () => {
-    setIsInterviewActive(false);
-    // TODO: Stop ElevenLabs session and save transcript
-
-    // Navigate to analysis
-    navigate({
-      to: "/interview/analysis/$sessionId",
-      params: { sessionId },
-    });
-  };
+  }, [isInterviewActive, endInterview]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -78,15 +214,149 @@ function InterviewSession() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const toggleRecording = () => {
-    // TODO: Integrate with ElevenLabs STT
+  const startVoiceConnection = async () => {
+    if (
+      !session?.experienceLevel ||
+      !session?.domainTrack ||
+      hasStartedActive
+    ) {
+      console.log("⚠️ Cannot start voice connection:", {
+        hasExperienceLevel: !!session?.experienceLevel,
+        hasDomainTrack: !!session?.domainTrack,
+        hasStartedActive,
+      });
+      return;
+    }
+
+    console.log("🔊 Starting ElevenLabs voice connection...");
+    setHasStartedActive(true);
+
+    try {
+      console.log("📋 Session data:", {
+        experienceLevel: session.experienceLevel,
+        domainTrack: session.domainTrack,
+        detectedSkills: session.detectedSkills,
+        hasQuestions: !!session.questions,
+      });
+
+      try {
+        console.log("🎫 Getting conversation token...");
+        console.log(
+          "⏰ Timing - about to call getConversationTokenAction at:",
+          new Date().toISOString(),
+        );
+
+        const tokenResponse = await getConversationTokenAction({
+          sessionId,
+        });
+        console.log("✅ Token response received:", tokenResponse);
+        console.log("⏰ Timing - token received at:", new Date().toISOString());
+
+        console.log("🌐 Starting conversation with token...");
+        await conversation.startSession({
+          conversationToken: tokenResponse.conversationToken,
+          connectionType: "webrtc",
+          userId: sessionId,
+        });
+        console.log("✅ Conversation started successfully");
+      } catch (tokenError) {
+        console.error("❌ Failed to get conversation token:", tokenError);
+        console.log("🔄 Falling back to public agent...");
+
+        try {
+          await conversation.startSession({
+            agentId: env.VITE_ELEVENLABS_AGENT_ID || "demo-agent",
+            connectionType: "webrtc",
+            userId: sessionId,
+            dynamicVariables: {
+              experience_level: session.experienceLevel,
+              domain_track: session.domainTrack,
+              top_skills: session.detectedSkills?.join(", ") || "JavaScript",
+              questions_json: JSON.stringify(session.questions || []),
+              time_limit_secs: "900",
+              charge_threshold_secs: "120",
+            },
+          });
+          console.log("✅ Fallback conversation started successfully");
+        } catch (fallbackError) {
+          console.error("❌ Fallback also failed:", fallbackError);
+          throw fallbackError;
+        }
+      }
+    } catch (error: any) {
+      console.error("💥 Voice connection failed:", error);
+      setHasStartedActive(false);
+      // Don't throw here - just log the error so the UI remains functional
+    }
+  };
+
+  const toggleRecording = async () => {
+    console.log("🎤 toggleRecording called, current state:", {
+      isRecording,
+      hasStartedActive,
+      sessionStatus: session?.status,
+      sessionId,
+    });
+
     const newRecordingState = !isRecording;
     setIsRecording(newRecordingState);
     setVoiceState((prev) => ({
       ...prev,
       isRecording: newRecordingState,
     }));
+
+    // On first mic-ON for setup sessions, trigger startActive
+    if (newRecordingState && session?.status === "setup") {
+      console.log("🚀 Starting new session...");
+      setHasStartedActive(true);
+      const micStartTime = Date.now();
+      setMicOnAt(micStartTime);
+
+      console.log("📋 Current session state before startActive:", {
+        status: session?.status,
+        experienceLevel: session?.experienceLevel,
+        domainTrack: session?.domainTrack,
+        hasQuestions: !!session?.questions,
+        questionsCount: session?.questions?.length || 0,
+      });
+
+      try {
+        // Start Convex session
+        console.log("🎯 Calling startActiveMutation...");
+        await startActiveMutation({ sessionId, micOnAt: micStartTime });
+        console.log("✅ startActiveMutation completed successfully");
+        setIsInterviewActive(true);
+
+        // Voice connection will be started automatically when session becomes active
+      } catch (error: any) {
+        console.error("Failed to start session:", error);
+        alert("Failed to start interview session. Please try again.");
+        setHasStartedActive(false);
+        setIsRecording(false);
+        setIsInterviewActive(false);
+      }
+    }
   };
+
+  // Debug logging for voice state
+  console.log("🔊 Current voice state:", voiceState);
+  console.log("🔊 Conversation status:", conversation.status);
+  console.log(
+    "🎤 Mic button should be enabled:",
+    voiceState.connectionStatus === "connected",
+  );
+
+  // Loading state
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center font-mono">
+        <div className="text-center">
+          <div className="text-terminal-green/60 mb-2">Loading session...</div>
+          <div className="w-2 h-2 bg-terminal-green animate-pulse mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col font-mono">
@@ -120,13 +390,23 @@ function InterviewSession() {
 
         <div className="flex-1 pt-4">
           <div className="max-w-2xl mx-auto w-full">
-            <ConversationPanel
-              transcript={transcript}
-              currentQuestion={currentQuestion}
-              isRecording={isRecording}
-              onToggleRecording={toggleRecording}
-              voiceState={voiceState}
-            />
+            {currentQuestion && (
+              <ConversationPanel
+                transcript={transcript}
+                currentQuestion={currentQuestion}
+                isRecording={isRecording}
+                onToggleRecording={toggleRecording}
+                voiceState={voiceState}
+              />
+            )}
+
+            {!currentQuestion && (
+              <div className="text-center py-8">
+                <span className="text-terminal-green/60 font-mono">
+                  Loading interview questions...
+                </span>
+              </div>
+            )}
 
             <div className="text-center">
               <Button
