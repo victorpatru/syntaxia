@@ -1,5 +1,3 @@
-import { redirect } from "@tanstack/react-router";
-
 /**
  * Route guard utilities for handling session-based redirects
  * Replaces useEffect navigation logic with proper route-level handling

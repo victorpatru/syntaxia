@@ -4,6 +4,7 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useAction, useQuery } from "convex/react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { validateSetupRoute } from "@/utils/route-guards";
 
 export const Route = createFileRoute("/_authed/interview/setup")({
   beforeLoad: ({ search }) => {
@@ -76,37 +77,11 @@ function InterviewSetup() {
   useEffect(() => {
     if (session === undefined) return;
 
-    // Not found: redirect user out of setup
-    if (session === null) {
-      navigate({ to: "/interview" });
-      return;
+    const validation = validateSetupRoute(session);
+    if (!validation.isValid && validation.redirectTo) {
+      navigate({ to: validation.redirectTo });
     }
-
-    // If analysis already started or completed, navigate accordingly
-    if (session.status === "analyzing") {
-      navigate({
-        to: "/interview/analysis/$sessionId",
-        params: { sessionId },
-      });
-      return;
-    }
-
-    if (session.status === "complete") {
-      navigate({
-        to: "/interview/report/$sessionId",
-        params: { sessionId },
-      });
-      return;
-    }
-
-    // If questions are ready, go to the live session view
-    if (session?.questions) {
-      navigate({
-        to: "/interview/session/$sessionId",
-        params: { sessionId },
-      });
-    }
-  }, [session, session?.status, session?.questions, navigate, sessionId]);
+  }, [session, session?.status, session?.questions, navigate]);
 
   // Use useEffect for progress animation to prevent infinite renders
   useEffect(() => {

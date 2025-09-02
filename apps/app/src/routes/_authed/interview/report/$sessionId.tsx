@@ -3,6 +3,8 @@ import { Button } from "@syntaxia/ui/button";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
 import { RotateCcw } from "lucide-react";
+import { useEffect } from "react";
+import { validateSessionForRoute } from "@/utils/route-guards";
 
 // Local type definitions for strong typing
 type Highlight = {
@@ -25,6 +27,16 @@ function InterviewReport() {
   // Load session data from Convex
   const session = useQuery(api.sessions.getSession, { sessionId });
 
+  // Navigate based on session validity and status
+  useEffect(() => {
+    if (session === undefined) return;
+
+    const validation = validateSessionForRoute(session, ["complete"]);
+    if (!validation.isValid && validation.redirectTo) {
+      navigate({ to: validation.redirectTo });
+    }
+  }, [session, session?.status, navigate]);
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -39,7 +51,7 @@ function InterviewReport() {
   const isShortSession = session ? (session.duration || 0) < 120 : false;
 
   // Loading state
-  if (!session) {
+  if (session === undefined) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center font-mono">
         <div className="text-center">
@@ -50,17 +62,8 @@ function InterviewReport() {
     );
   }
 
-  // Redirect if session is not complete
-  if (session.status !== "complete") {
-    if (session.status === "setup") {
-      navigate({ to: "/interview/setup", search: { sessionId } });
-    } else if (session.status === "active") {
-      navigate({ to: "/interview/session/$sessionId", params: { sessionId } });
-    } else if (session.status === "analyzing") {
-      navigate({ to: "/interview/analysis/$sessionId", params: { sessionId } });
-    } else {
-      navigate({ to: "/interview" });
-    }
+  // Not found: let the effect handle navigation without rendering a flicker
+  if (session === null) {
     return null;
   }
 

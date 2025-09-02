@@ -10,13 +10,13 @@ import {
 } from "convex/react";
 import { Clock } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { env } from "../../../../env";
+import { env } from "@/env";
 import {
   Question,
   TranscriptEntry,
   VoiceSessionState,
-} from "../../../../types/interview";
-import { validateSessionRoute } from "../../../../utils/route-guards";
+} from "@/types/interview";
+import { validateSessionRoute } from "@/utils/route-guards";
 
 export const Route = createFileRoute("/_authed/interview/session/$sessionId")({
   component: InterviewSession,
@@ -68,9 +68,11 @@ function InterviewSession() {
     },
   });
 
-  // Get current question from session data
+  // Get current question from session data safely
   const currentQuestion: Question | null =
-    session?.questions?.[session.currentQuestionIndex] || null;
+    session?.questions && typeof session?.currentQuestionIndex === "number"
+      ? (session.questions[session.currentQuestionIndex] ?? null)
+      : null;
 
   const [transcript] = useState<TranscriptEntry[]>([]);
 
@@ -151,7 +153,6 @@ function InterviewSession() {
         const tokenResponse = await getConversationTokenAction({
           sessionId,
         });
-        console.log("✅ Token response received:", tokenResponse);
         console.log("⏰ Timing - token received at:", new Date().toISOString());
 
         console.log("🌐 Starting conversation with token...");
@@ -200,7 +201,7 @@ function InterviewSession() {
 
   // Use useEffect for session validation and state updates to prevent infinite renders
   useEffect(() => {
-    if (!session) return;
+    if (session === undefined) return;
 
     const validation = validateSessionRoute(session);
     if (!validation.isValid && validation.redirectTo) {
@@ -243,6 +244,7 @@ function InterviewSession() {
     }
   }, [
     session,
+    session?.status,
     navigate,
     isInterviewActive,
     hasStartedActive,
@@ -362,7 +364,7 @@ function InterviewSession() {
   );
 
   // Loading state
-  if (!session) {
+  if (session === undefined) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center font-mono">
         <div className="text-center">
@@ -371,6 +373,11 @@ function InterviewSession() {
         </div>
       </div>
     );
+  }
+
+  // Not found: let the effect handle navigation without rendering a flicker
+  if (session === null) {
+    return null;
   }
 
   return (

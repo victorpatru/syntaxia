@@ -4,7 +4,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useAction as useConvexAction, useQuery } from "convex/react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { validateAnalysisRoute } from "../../../../utils/route-guards";
+import { validateAnalysisRoute } from "@/utils/route-guards";
 
 export const Route = createFileRoute("/_authed/interview/analysis/$sessionId")({
   component: InterviewAnalysis,

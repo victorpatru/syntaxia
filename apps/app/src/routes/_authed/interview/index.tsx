@@ -8,7 +8,7 @@ import { useMutation as useConvexMutation } from "convex/react";
 import { Play } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { getSessionRoute } from "../../../utils/route-guards";
+import { getSessionRoute } from "@/utils/route-guards";
 
 export const Route = createFileRoute("/_authed/interview/")({
   loader: async (opts) => {
