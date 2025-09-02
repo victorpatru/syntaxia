@@ -42,7 +42,6 @@ function InterviewSession() {
   // ElevenLabs conversation hook
   const conversation = useConversation({
     onConnect: () => {
-      console.log("ElevenLabs conversation connected");
       setVoiceState((prev) => ({ ...prev, connectionStatus: "connected" }));
 
       // Auto-start recording when connection is established
@@ -51,12 +50,10 @@ function InterviewSession() {
       }
     },
     onDisconnect: () => {
-      console.log("ElevenLabs conversation disconnected");
       setVoiceState((prev) => ({ ...prev, connectionStatus: "disconnected" }));
     },
-    onMessage: (message) => {
-      console.log("ElevenLabs message:", message);
-      // TODO: Handle real transcript messages
+    onMessage: () => {
+      // Handle transcript or other messages if needed
     },
     onError: (error) => {
       console.error("ElevenLabs error:", error);
@@ -125,72 +122,40 @@ function InterviewSession() {
       !session?.domainTrack ||
       hasStartedActive
     ) {
-      console.log("⚠️ Cannot start voice connection:", {
-        hasExperienceLevel: !!session?.experienceLevel,
-        hasDomainTrack: !!session?.domainTrack,
-        hasStartedActive,
-      });
       return;
     }
 
-    console.log("🔊 Starting ElevenLabs voice connection...");
+    // Require questions before starting; if missing, fail setup and navigate back
+    if (!session?.questions || session.questions.length === 0) {
+      navigate({ to: "/interview" });
+      return;
+    }
+
     setHasStartedActive(true);
 
+    const dynamicVariables = {
+      experience_level: session.experienceLevel,
+      domain_track: session.domainTrack,
+      top_skills: session.detectedSkills?.join(", ") || "",
+      questions_json: JSON.stringify(session.questions || []),
+      time_limit_secs: "900",
+      charge_threshold_secs: "120",
+    } as const;
+
     try {
-      console.log("📋 Session data:", {
-        experienceLevel: session.experienceLevel,
-        domainTrack: session.domainTrack,
-        detectedSkills: session.detectedSkills,
-        hasQuestions: !!session.questions,
+      const tokenResponse = await getConversationTokenAction({ sessionId });
+      await conversation.startSession({
+        agentId: env.VITE_ELEVENLABS_AGENT_ID,
+        conversationToken: tokenResponse.conversationToken,
+        connectionType: "webrtc",
+        userId: sessionId,
+        dynamicVariables,
       });
-
-      try {
-        console.log("🎫 Getting conversation token...");
-        console.log(
-          "⏰ Timing - about to call getConversationTokenAction at:",
-          new Date().toISOString(),
-        );
-
-        const tokenResponse = await getConversationTokenAction({
-          sessionId,
-        });
-        console.log("⏰ Timing - token received at:", new Date().toISOString());
-
-        console.log("🌐 Starting conversation with token...");
-        await conversation.startSession({
-          conversationToken: tokenResponse.conversationToken,
-          connectionType: "webrtc",
-          userId: sessionId,
-        });
-        console.log("✅ Conversation started successfully");
-      } catch (tokenError) {
-        console.error("❌ Failed to get conversation token:", tokenError);
-        console.log("🔄 Falling back to public agent...");
-
-        try {
-          await conversation.startSession({
-            agentId: env.VITE_ELEVENLABS_AGENT_ID || "demo-agent",
-            connectionType: "webrtc",
-            userId: sessionId,
-            dynamicVariables: {
-              experience_level: session.experienceLevel,
-              domain_track: session.domainTrack,
-              top_skills: session.detectedSkills?.join(", ") || "JavaScript",
-              questions_json: JSON.stringify(session.questions || []),
-              time_limit_secs: "900",
-              charge_threshold_secs: "120",
-            },
-          });
-          console.log("✅ Fallback conversation started successfully");
-        } catch (fallbackError) {
-          console.error("❌ Fallback also failed:", fallbackError);
-          throw fallbackError;
-        }
-      }
-    } catch (error: any) {
-      console.error("💥 Voice connection failed:", error);
+    } catch (error) {
+      // If token fetch fails, fail the setup and navigate out
+      console.error("Failed to start WebRTC session:", error);
       setHasStartedActive(false);
-      // Don't throw here - just log the error so the UI remains functional
+      navigate({ to: "/interview" });
     }
   }, [
     session,
@@ -198,6 +163,7 @@ function InterviewSession() {
     getConversationTokenAction,
     sessionId,
     conversation,
+    navigate,
   ]);
 
   // Use useEffect for session validation and state updates to prevent infinite renders
@@ -235,12 +201,8 @@ function InterviewSession() {
       !hasStartedActive;
 
     if (shouldAutoStart) {
-      console.log("🔄 Auto-starting voice connection for active session...");
       startVoiceConnection();
     } else if (shouldStartSetupVoice) {
-      console.log(
-        "🔄 Session has questions but still in setup - starting voice connection anyway...",
-      );
       startVoiceConnection();
     }
   }, [
@@ -309,13 +271,6 @@ function InterviewSession() {
   // startVoiceConnection function moved earlier in the component to avoid hoisting issues
 
   const toggleRecording = async () => {
-    console.log("🎤 toggleRecording called, current state:", {
-      isRecording,
-      hasStartedActive,
-      sessionStatus: session?.status,
-      sessionId,
-    });
-
     const newRecordingState = !isRecording;
     setIsRecording(newRecordingState);
     setVoiceState((prev) => ({
@@ -325,24 +280,13 @@ function InterviewSession() {
 
     // On first mic-ON for setup sessions, trigger startActive
     if (newRecordingState && session?.status === "setup") {
-      console.log("🚀 Starting new session...");
       setHasStartedActive(true);
       const micStartTime = Date.now();
       setMicOnAt(micStartTime);
 
-      console.log("📋 Current session state before startActive:", {
-        status: session?.status,
-        experienceLevel: session?.experienceLevel,
-        domainTrack: session?.domainTrack,
-        hasQuestions: !!session?.questions,
-        questionsCount: session?.questions?.length || 0,
-      });
-
       try {
         // Start Convex session
-        console.log("🎯 Calling startActiveMutation...");
         await startActiveMutation({ sessionId, micOnAt: micStartTime });
-        console.log("✅ startActiveMutation completed successfully");
         setIsInterviewActive(true);
 
         // Voice connection will be started automatically when session becomes active
@@ -355,14 +299,6 @@ function InterviewSession() {
       }
     }
   };
-
-  // Debug logging for voice state
-  console.log("🔊 Current voice state:", voiceState);
-  console.log("🔊 Conversation status:", conversation.status);
-  console.log(
-    "🎤 Mic button should be enabled:",
-    voiceState.connectionStatus === "connected",
-  );
 
   // Loading state
   if (session === undefined) {
