@@ -2,13 +2,15 @@ import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@syntaxia/backend/convex/_generated/api";
 import { Button } from "@syntaxia/ui/button";
 import { Textarea } from "@syntaxia/ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@syntaxia/ui/tooltip";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useMutation as useConvexMutation } from "convex/react";
 import { Play } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { getSessionRoute } from "@/utils/route-guards";
+import { JD_PRESETS, PRIMARY_PRESET_COUNT } from "./jd-presets";
 
 export const Route = createFileRoute("/_authed/interview/")({
   loader: async (opts) => {
@@ -38,6 +40,8 @@ function InterviewStart() {
   const navigate = useNavigate();
   const [jobDescription, setJobDescription] = useState("");
   const [retryCount, setRetryCount] = useState(0);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [showAllPresets, setShowAllPresets] = useState(false);
 
   const { data: balance } = useSuspenseQuery(
     convexQuery(api.credits.getBalance, {}),
@@ -130,11 +134,57 @@ function InterviewStart() {
                   </span>
                 </div>
                 <Textarea
+                  ref={textareaRef}
                   placeholder="We're looking for a Senior Full-Stack Engineer with experience in React, Node.js, and system design..."
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
                   className="min-h-32 font-mono bg-background border border-terminal-green/30 text-terminal-green placeholder:text-terminal-green/40 focus:outline-none focus:border-terminal-green/50 resize-none"
                 />
+                <div className="mt-4">
+                  <div className="mb-2">
+                    <span className="text-terminal-green/60 font-mono text-xs">
+                      # Sample job descriptions (click to autofill)
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {(showAllPresets
+                      ? JD_PRESETS
+                      : JD_PRESETS.slice(0, PRIMARY_PRESET_COUNT)
+                    ).map((preset) => {
+                      const company =
+                        preset.label.split(" — ")[0] || preset.label;
+                      return (
+                        <Tooltip key={preset.id}>
+                          <TooltipTrigger asChild>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setJobDescription(preset.description.trim());
+                                if (textareaRef.current)
+                                  textareaRef.current.focus();
+                              }}
+                              className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20"
+                            >
+                              {company}
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <span className="font-mono">{preset.label}</span>
+                          </TooltipContent>
+                        </Tooltip>
+                      );
+                    })}
+                    {JD_PRESETS.length > PRIMARY_PRESET_COUNT && (
+                      <button
+                        type="button"
+                        onClick={() => setShowAllPresets((v) => !v)}
+                        className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20"
+                      >
+                        {showAllPresets ? "./less" : "./more"}
+                      </button>
+                    )}
+                  </div>
+                </div>
                 <div className="mt-6 flex items-center justify-between">
                   <span className="text-terminal-green/60 text-sm font-mono">
                     {jobDescription.length} chars
