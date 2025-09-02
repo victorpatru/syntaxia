@@ -54,11 +54,13 @@ function InterviewAnalysis() {
 
   // Use useEffect for session validation and navigation to prevent infinite renders
   useEffect(() => {
-    if (!session) return;
+    if (session === undefined) return;
 
-    const validation = validateAnalysisRoute(session);
-    if (!validation.isValid && validation.redirectTo) {
-      navigate({ to: validation.redirectTo });
+    if (session === null) {
+      const validation = validateAnalysisRoute(session);
+      if (!validation.isValid && validation.redirectTo) {
+        navigate({ to: validation.redirectTo });
+      }
       return;
     }
 
@@ -131,7 +133,7 @@ function InterviewAnalysis() {
   ];
 
   // Loading state
-  if (!session) {
+  if (session === undefined) {
     return (
       <LoadingTerminal
         progress={0}
@@ -143,6 +145,11 @@ function InterviewAnalysis() {
         ]}
       />
     );
+  }
+
+  // Not found: let the effect handle navigation without rendering a flicker
+  if (session === null) {
+    return null;
   }
 
   return (

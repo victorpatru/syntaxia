@@ -74,13 +74,39 @@ function InterviewSetup() {
 
   // Use useEffect for navigation to prevent infinite renders
   useEffect(() => {
+    if (session === undefined) return;
+
+    // Not found: redirect user out of setup
+    if (session === null) {
+      navigate({ to: "/interview" });
+      return;
+    }
+
+    // If analysis already started or completed, navigate accordingly
+    if (session.status === "analyzing") {
+      navigate({
+        to: "/interview/analysis/$sessionId",
+        params: { sessionId },
+      });
+      return;
+    }
+
+    if (session.status === "complete") {
+      navigate({
+        to: "/interview/report/$sessionId",
+        params: { sessionId },
+      });
+      return;
+    }
+
+    // If questions are ready, go to the live session view
     if (session?.questions) {
       navigate({
         to: "/interview/session/$sessionId",
         params: { sessionId },
       });
     }
-  }, [session?.questions, navigate, sessionId]);
+  }, [session, session?.status, session?.questions, navigate, sessionId]);
 
   // Use useEffect for progress animation to prevent infinite renders
   useEffect(() => {
@@ -117,6 +143,30 @@ function InterviewSetup() {
         ]
       : []),
   ];
+
+  // Only render setup UI when in loading or setup states to avoid flicker
+  if (session === undefined) {
+    return (
+      <LoadingTerminal
+        progress={0}
+        currentStep="Loading session..."
+        title="syntaxia@ai-parser"
+        subtitle="~/processing"
+        additionalInfo={[
+          `<span class=\"text-terminal-green font-mono\">[INFO]</span> Retrieving session data...`,
+        ]}
+      />
+    );
+  }
+
+  if (
+    session === null ||
+    session.status === "analyzing" ||
+    session.status === "complete"
+  ) {
+    // Let the effect handle navigation without rendering the setup UI
+    return null;
+  }
 
   return (
     <LoadingTerminal
