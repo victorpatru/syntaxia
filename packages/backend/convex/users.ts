@@ -1,7 +1,12 @@
 import type { UserJSON } from "@clerk/backend";
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
-import { internalMutation, type QueryCtx, query } from "./_generated/server";
+import {
+  internalMutation,
+  internalQuery,
+  type QueryCtx,
+  query,
+} from "./_generated/server";
 import { computePrimaryEmail } from "./utils/clerk";
 
 /** Get the current user (null if not authenticated) */
@@ -57,6 +62,18 @@ export const deleteUser = internalMutation({
     if (user) {
       await ctx.db.delete(user._id);
     }
+  },
+});
+
+export const getUserIdByClerk = internalQuery({
+  args: { clerkUserId: v.string() },
+  returns: v.union(v.id("users"), v.null()),
+  handler: async (ctx, { clerkUserId }) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkUserId", clerkUserId))
+      .unique();
+    return user?._id ?? null;
   },
 });
 

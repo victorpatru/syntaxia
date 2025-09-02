@@ -60,13 +60,12 @@ export function validateSetupRoute(session: SessionData | null): {
   if (!session) {
     return { isValid: false, redirectTo: "/interview" };
   }
-
-  // If questions are ready, redirect to session
+  // If questions are ready, redirect to session (session route accepts 'setup' or 'active')
   if (session.questions && session.questions.length > 0) {
     return { isValid: false, redirectTo: `/interview/session/${session._id}` };
   }
 
-  // Only allow setup status
+  // Otherwise, only allow setup status
   return validateSessionForRoute(session, ["setup"]);
 }
 

@@ -69,10 +69,11 @@ function InterviewSession() {
   });
 
   // Get current question from session data safely
+  const idxRaw = session?.currentQuestionIndex;
+  const idx = typeof idxRaw === "number" ? idxRaw : -1;
+  const questions = session?.questions ?? [];
   const currentQuestion: Question | null =
-    session?.questions && typeof session?.currentQuestionIndex === "number"
-      ? (session.questions[session.currentQuestionIndex] ?? null)
-      : null;
+    idx >= 0 && idx < questions.length ? (questions[idx] ?? null) : null;
 
   const [transcript] = useState<TranscriptEntry[]>([]);
 

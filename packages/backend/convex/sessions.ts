@@ -286,6 +286,13 @@ export const startSetup = action({
     });
     if (!session) throw new Error("Session not found");
 
+    // Resolve internal user id by Clerk subject and enforce ownership
+    const resolvedUserId = await ctx.runQuery(internal.users.getUserIdByClerk, {
+      clerkUserId: identity.subject,
+    });
+    if (!resolvedUserId) throw new Error("User not found");
+    if (session.userId !== resolvedUserId) throw new Error("Unauthorized");
+
     // Check user has sufficient credits
     const balance = await ctx.runQuery(internal.sessions.getUserBalance, {
       sessionId,
