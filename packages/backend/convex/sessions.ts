@@ -465,7 +465,6 @@ export const ensureCharge = internalAction({
     if (elapsed >= 120 * 1000) {
       try {
         await ctx.runMutation(internal.credits.debitAccount, { sessionId });
-        await ctx.runMutation(internal.sessions.markCharged, { sessionId });
         console.log(
           `Charged session ${sessionId} after ${Math.round(elapsed / 1000)}s`,
         );

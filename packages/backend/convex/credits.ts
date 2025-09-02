@@ -123,10 +123,19 @@ export const debitAccount = internalMutation({
     const user = await ctx.db.get(session.userId);
     if (!user) throw new Error("User not found");
 
+    // Guard: already marked as charged
+    if (session.chargeCommittedAt) {
+      console.log(
+        `Session ${sessionId} already charged at ${session.chargeCommittedAt}`,
+      );
+      return null;
+    }
+
     const existingCharge = await ctx.db
       .query("credits_log")
-      .withIndex("by_session", (q) => q.eq("sessionId", sessionId))
-      .filter((q) => q.eq(q.field("reason"), "session:debit"))
+      .withIndex("by_session_reason", (q) =>
+        q.eq("sessionId", sessionId).eq("reason", "session:debit"),
+      )
       .unique();
 
     if (existingCharge) {
@@ -148,6 +157,12 @@ export const debitAccount = internalMutation({
 
     await ctx.db.patch(user._id, {
       credits: currentBalance - amount,
+    });
+
+    // Mark session as charged atomically within the same transaction
+    await ctx.db.patch(sessionId, {
+      chargeCommittedAt: Date.now(),
+      updatedAt: Date.now(),
     });
 
     console.log(

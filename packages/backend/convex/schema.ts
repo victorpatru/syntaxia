@@ -33,7 +33,8 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_order_id", ["orderId"])
-    .index("by_session", ["sessionId"]),
+    .index("by_session", ["sessionId"])
+    .index("by_session_reason", ["sessionId", "reason"]),
 
   interview_sessions: defineTable({
     userId: v.id("users"),
