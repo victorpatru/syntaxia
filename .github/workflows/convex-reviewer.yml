@@ -47,6 +47,7 @@ jobs:
             --jq '.[] | select(.body | contains("convex-rule")) | .body' >> existing_comments.txt
           gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews \
             --jq '.[] | select(.user.login == "github-actions[bot]") | .body' >> existing_comments.txt
+          echo "Found $(wc -l < existing_comments.txt | tr -d ' ') existing comments"
 
       - name: Load Convex best practices
         run: |
@@ -185,7 +186,7 @@ jobs:
           EOF
 
           if [ "$first" = true ]; then
-            echo "No new violations to report (all already exist)"
+            echo "No new violations to report"
             exit 0
           fi
 
