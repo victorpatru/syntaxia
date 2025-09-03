@@ -320,23 +320,19 @@ export const startSetup = action({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
 
-    const session = await ctx.runQuery(internal.sessions.getInternal, {
-      sessionId,
-    });
-    if (!session) throw new Error("Session not found");
+    // Single query for transaction consistency
+    const { session, resolvedUserId, balance } = await ctx.runQuery(
+      internal.sessions.getSessionDataForSetup,
+      {
+        sessionId,
+        clerkUserId: identity.subject,
+      },
+    );
 
-    const resolvedUserId = await ctx.runQuery(internal.users.getUserIdByClerk, {
-      clerkUserId: identity.subject,
-    });
+    if (!session) throw new Error("Session not found");
     if (!resolvedUserId) throw new Error("User not found");
     if (session.userId !== resolvedUserId) throw new Error("Unauthorized");
 
-    const balance = await ctx.runQuery(internal.sessions.getUserBalance, {
-      sessionId,
-    });
-    if (balance === undefined || balance === null) {
-      throw new Error("Unable to retrieve user balance");
-    }
     if (balance < 15) {
       throw new Error(
         "Insufficient credits. Need at least 15 credits to start an interview.",
@@ -400,6 +396,44 @@ export const getUserBalance = query({
     if (!user) throw new Error("User not found");
 
     return user.credits ?? 0;
+  },
+});
+
+export const getSessionDataForSetup = internalQuery({
+  args: {
+    sessionId: v.id("interview_sessions"),
+    clerkUserId: v.string(),
+  },
+  returns: v.object({
+    session: v.union(v.null(), SessionValidator),
+    resolvedUserId: v.union(v.null(), v.id("users")),
+    balance: v.number(),
+  }),
+  handler: async (ctx, { sessionId, clerkUserId }) => {
+    // Get session
+    const session = await ctx.db.get(sessionId);
+    if (!session) {
+      return { session: null, resolvedUserId: null, balance: 0 };
+    }
+
+    // Get user by Clerk ID
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkUserId", clerkUserId))
+      .unique();
+
+    if (!user) {
+      return { session, resolvedUserId: null, balance: 0 };
+    }
+
+    // Get balance
+    const balance = user.credits ?? 0;
+
+    return {
+      session,
+      resolvedUserId: user._id,
+      balance,
+    };
   },
 });
 
