@@ -34,9 +34,11 @@ jobs:
           git config user.email "convex-bot@syntaxia.com"
 
       - name: Convex Best Practices Review
+        id: convex-review
+        continue-on-error: true
         env:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
-          MODEL: grok-code-fast-1
+          MODEL: auto
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BLOCKING_REVIEW: ${{ vars.CONVEX_BLOCKING_REVIEW || 'true' }}
         run: |
@@ -109,13 +111,29 @@ jobs:
           '
 
       - name: Debug - Show environment variables
+        if: steps.convex-review.outcome == 'success'
         run: |
           echo "CONVEX_CRITICAL_ISSUES: ${CONVEX_CRITICAL_ISSUES:-not_set}"
           echo "Files changed in this PR:"
           gh pr diff --name-only
 
+      - name: Handle review setup failure
+        if: steps.convex-review.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "❌ Convex review setup failed - not a code issue"
+          gh pr comment ${{ github.event.pull_request.number }} --body "## ⚠️ Convex Best Practices Check Failed
+
+          The automated review encountered a setup issue and could not analyze your code. This is likely a configuration problem with the workflow, not your code.
+
+          **This is not blocking your PR** - the failure was during setup, not code analysis.
+
+          **For maintainers:** Check the workflow logs for configuration issues (API keys, model availability, etc.)."
+          echo "CONVEX_CRITICAL_ISSUES=false" >> $GITHUB_ENV
+
       - name: Check for critical Convex violations
-        if: env.BLOCKING_REVIEW == 'true'
+        if: steps.convex-review.outcome == 'success' && env.BLOCKING_REVIEW == 'true'
         run: |
           echo "Checking for critical Convex best practices violations..."
           echo "CONVEX_CRITICAL_ISSUES: ${CONVEX_CRITICAL_ISSUES:-unset}"
@@ -130,13 +148,15 @@ jobs:
           fi
 
       - name: Post summary comment
-        if: failure()
+        if: steps.convex-review.outcome == 'success' && env.CONVEX_CRITICAL_ISSUES == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr comment ${{ github.event.pull_request.number }} --body "## 🚨 Convex Best Practices Violations Found
 
           This PR has been blocked due to critical Convex best practices violations.
+
+          **Look for inline comments above** for specific line-by-line issues.
 
           **Common fixes:**
           - Add \`await\` to all database operations and function calls
