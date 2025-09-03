@@ -1,0 +1,467 @@
+---
+description: Convex best practices and anti-patterns to ensure production-ready code quality, performance, and maintainability
+globs: **/convex/**/*.ts,**/convex/**/*.tsx,**/convex/**/*.js,**/convex/**/*.jsx
+---
+
+# Convex Best Practices
+
+These best practices are based on the official Convex documentation and should be followed to ensure production-ready applications.
+
+## Promise Handling
+
+### ❌ DON'T: Forget to await promises
+```typescript
+// WRONG - Missing await can cause unexpected behavior
+export const badExample = mutation({
+  args: { message: v.string() },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    ctx.db.insert("messages", { text: args.message }); // Missing await!
+    ctx.scheduler.runAfter(1000, internal.notifications.send, {}); // Missing await!
+    return null;
+  },
+});
+```
+
+### ✅ DO: Always await all promises
+```typescript
+// CORRECT - All promises are properly awaited
+export const goodExample = mutation({
+  args: { message: v.string() },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    await ctx.db.insert("messages", { text: args.message });
+    await ctx.scheduler.runAfter(1000, internal.notifications.send, {});
+    return null;
+  },
+});
+```
+
+**Use the `no-floating-promises` ESLint rule with TypeScript to catch these issues.**
+
+## Database Query Optimization
+
+### ❌ DON'T: Use `.filter()` on database queries
+```typescript
+// WRONG - Inefficient filtering in query
+export const getMessagesByAuthor = query({
+  args: { author: v.string() },
+  returns: v.array(v.any()),
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("messages")
+      .filter((q) => q.eq(q.field("author"), args.author))
+      .collect();
+  },
+});
+```
+
+### ✅ DO: Use indexes with `.withIndex()` or filter in code
+```typescript
+// CORRECT - Option 1: Use an index (preferred for large datasets)
+export const getMessagesByAuthor = query({
+  args: { author: v.string() },
+  returns: v.array(v.any()),
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("messages")
+      .withIndex("by_author", (q) => q.eq("author", args.author))
+      .collect();
+  },
+});
+
+// CORRECT - Option 2: Filter in code (for small datasets)
+export const getMessagesByAuthorFiltered = query({
+  args: { author: v.string() },
+  returns: v.array(v.any()),
+  handler: async (ctx, args) => {
+    const allMessages = await ctx.db.query("messages").collect();
+    return allMessages.filter((m) => m.author === args.author);
+  },
+});
+```
+
+## Limiting Query Results
+
+### ❌ DON'T: Use `.collect()` with potentially large result sets
+```typescript
+// WRONG - Could load thousands of documents
+export const getAllUserMovies = query({
+  args: { userId: v.id("users") },
+  returns: v.array(v.any()),
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("watchedMovies")
+      .withIndex("by_user", (q) => q.eq("user", args.userId))
+      .collect(); // Potentially unbounded!
+  },
+});
+```
+
+### ✅ DO: Use pagination, limits, or denormalization
+```typescript
+// CORRECT - Option 1: Use pagination
+export const getUserMoviesPaginated = query({
+  args: { 
+    userId: v.id("users"),
+    paginationOpts: paginationOptsValidator 
+  },
+  returns: v.any(),
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("watchedMovies")
+      .withIndex("by_user", (q) => q.eq("user", args.userId))
+      .order("desc")
+      .paginate(args.paginationOpts);
+  },
+});
+
+// CORRECT - Option 2: Use limits with "99+" pattern
+export const getUserMoviesCount = query({
+  args: { userId: v.id("users") },
+  returns: v.string(),
+  handler: async (ctx, args) => {
+    const movies = await ctx.db
+      .query("watchedMovies")
+      .withIndex("by_user", (q) => q.eq("user", args.userId))
+      .take(100);
+    return movies.length === 100 ? "99+" : movies.length.toString();
+  },
+});
+
+// CORRECT - Option 3: Denormalize data
+export const getUserMoviesCountDenormalized = query({
+  args: { userId: v.id("users") },
+  returns: v.number(),
+  handler: async (ctx, args) => {
+    const countDoc = await ctx.db
+      .query("userMovieCounts")
+      .withIndex("by_user", (q) => q.eq("user", args.userId))
+      .unique();
+    return countDoc?.count || 0;
+  },
+});
+```
+
+## Index Optimization
+
+### ❌ DON'T: Create redundant indexes
+```typescript
+// WRONG - Redundant indexes in schema
+export default defineSchema({
+  teamMembers: defineTable({
+    team: v.id("teams"),
+    user: v.id("users"),
+    role: v.string(),
+  })
+    .index("by_team", ["team"])              // Redundant!
+    .index("by_team_and_user", ["team", "user"]), // This covers both cases
+});
+```
+
+### ✅ DO: Use composite indexes efficiently
+```typescript
+// CORRECT - Single composite index handles both use cases
+export default defineSchema({
+  teamMembers: defineTable({
+    team: v.id("teams"),
+    user: v.id("users"),
+    role: v.string(),
+  })
+    .index("by_team_and_user", ["team", "user"]), // Covers team-only and team+user queries
+});
+
+// Usage examples:
+export const getAllTeamMembers = query({
+  args: { teamId: v.id("teams") },
+  returns: v.array(v.any()),
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("teamMembers")
+      .withIndex("by_team_and_user", (q) => q.eq("team", args.teamId))
+      .collect();
+  },
+});
+
+export const getSpecificTeamMember = query({
+  args: { teamId: v.id("teams"), userId: v.id("users") },
+  returns: v.union(v.any(), v.null()),
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("teamMembers")
+      .withIndex("by_team_and_user", (q) => 
+        q.eq("team", args.teamId).eq("user", args.userId)
+      )
+      .unique();
+  },
+});
+```
+
+## Function Validation and Security
+
+### ❌ DON'T: Skip argument validators or access control
+```typescript
+// WRONG - No validators, no access control
+export const deleteUserData = mutation({
+  args: {},
+  handler: async (ctx, args) => {
+    // No validation, no access control - dangerous!
+  },
+});
+```
+
+### ✅ DO: Always use validators and access control
+```typescript
+// CORRECT - Proper validation and access control
+export const deleteUserData = mutation({
+  args: { 
+    userId: v.id("users"),
+    confirmationCode: v.string() 
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    // Access control
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+    
+    const currentUser = await getUserByClerkId(ctx, identity.subject);
+    if (currentUser._id !== args.userId) {
+      throw new Error("Unauthorized");
+    }
+    
+    // Additional validation
+    if (args.confirmationCode !== "DELETE_MY_DATA") {
+      throw new Error("Invalid confirmation code");
+    }
+    
+    // Safe to proceed
+    await ctx.db.delete(args.userId);
+    return null;
+  },
+});
+```
+
+## Action Optimization
+
+### ❌ DON'T: Use `ctx.runAction()` unnecessarily
+```typescript
+// WRONG - Unnecessary action calls add overhead
+export const processWebsiteData = action({
+  args: { urls: v.array(v.string()) },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    for (const url of args.urls) {
+      // Each call has overhead and memory usage
+      await ctx.runAction(internal.scraper.scrapePage, { url });
+    }
+    return null;
+  },
+});
+```
+
+### ✅ DO: Use helper functions instead
+```typescript
+// CORRECT - Use helper functions for better performance
+import * as Scraper from "./helpers/scraper";
+
+export const processWebsiteData = action({
+  args: { urls: v.array(v.string()) },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    for (const url of args.urls) {
+      // Direct function call - much more efficient
+      await Scraper.scrapePage(ctx, { url });
+    }
+    return null;
+  },
+});
+
+// helpers/scraper.ts
+export async function scrapePage(
+  ctx: ActionCtx,
+  args: { url: string }
+) {
+  const response = await fetch(args.url);
+  const data = await response.text();
+  await ctx.runMutation(internal.pages.storePage, { url: args.url, data });
+}
+```
+
+**Only use `ctx.runAction()` when crossing runtimes (V8 to Node.js).**
+
+## Transaction Consistency
+
+### ❌ DON'T: Make sequential `ctx.runQuery`/`ctx.runMutation` calls
+```typescript
+// WRONG - Race conditions possible between calls
+export const processTeamUpdate = action({
+  args: { teamId: v.id("teams") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const team = await ctx.runQuery(internal.teams.getTeam, { teamId: args.teamId });
+    const owner = await ctx.runQuery(internal.users.getUser, { userId: team.ownerId });
+    
+    // Team could change between these calls!
+    assert(team.ownerId === owner._id); // Might fail unexpectedly
+    
+    await ctx.runMutation(internal.billing.sendReminder, { 
+      email: owner.email,
+      teamName: team.name 
+    });
+    return null;
+  },
+});
+```
+
+### ✅ DO: Use single queries/mutations for consistency
+```typescript
+// CORRECT - Single query ensures consistency
+export const processTeamUpdate = action({
+  args: { teamId: v.id("teams") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const { team, owner } = await ctx.runQuery(
+      internal.teams.getTeamWithOwner, 
+      { teamId: args.teamId }
+    );
+    
+    // Always consistent within transaction
+    assert(team.ownerId === owner._id);
+    
+    await ctx.runMutation(internal.billing.sendReminder, { 
+      email: owner.email,
+      teamName: team.name 
+    });
+    return null;
+  },
+});
+
+export const getTeamWithOwner = internalQuery({
+  args: { teamId: v.id("teams") },
+  returns: v.object({
+    team: v.any(),
+    owner: v.any()
+  }),
+  handler: async (ctx, args) => {
+    const team = await ctx.db.get(args.teamId);
+    if (!team) throw new Error("Team not found");
+    
+    const owner = await ctx.db.get(team.ownerId);
+    if (!owner) throw new Error("Owner not found");
+    
+    return { team, owner };
+  },
+});
+```
+
+## Helper Function Usage
+
+### ❌ DON'T: Overuse `ctx.runQuery`/`ctx.runMutation` in queries/mutations
+```typescript
+// WRONG - Unnecessary overhead for simple operations
+export const createUserProfile = mutation({
+  args: { name: v.string(), email: v.string() },
+  returns: v.id("users"),
+  handler: async (ctx, args) => {
+    return await ctx.runMutation(internal.users.insertUser, args);
+  },
+});
+```
+
+### ✅ DO: Use helper functions for shared code
+```typescript
+// CORRECT - Direct helper function usage
+import * as Users from "./helpers/users";
+
+export const createUserProfile = mutation({
+  args: { name: v.string(), email: v.string() },
+  returns: v.id("users"),
+  handler: async (ctx, args) => {
+    return await Users.insertUser(ctx, args);
+  },
+});
+
+// helpers/users.ts
+export async function insertUser(
+  ctx: MutationCtx,
+  args: { name: string; email: string }
+): Promise<Id<"users">> {
+  return await ctx.db.insert("users", {
+    name: args.name,
+    email: args.email,
+    createdAt: Date.now(),
+  });
+}
+```
+
+**Exception: Use `ctx.runMutation` for partial rollback scenarios or when using components.**
+
+## Internal Function Scheduling
+
+### ❌ DON'T: Schedule or call public functions internally
+```typescript
+// WRONG - Scheduling public functions
+export const processOrder = mutation({
+  args: { orderId: v.id("orders") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    // Wrong - scheduling public function
+    await ctx.scheduler.runAfter(1000, api.notifications.sendEmail, { orderId: args.orderId });
+    return null;
+  },
+});
+```
+
+### ✅ DO: Only schedule internal functions
+```typescript
+// CORRECT - Schedule internal functions only
+export const processOrder = mutation({
+  args: { orderId: v.id("orders") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    // Correct - scheduling internal function
+    await ctx.scheduler.runAfter(1000, internal.notifications.sendEmail, { orderId: args.orderId });
+    return null;
+  },
+});
+
+export const sendEmail = internalAction({
+  args: { orderId: v.id("orders") },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    // Email sending logic
+    return null;
+  },
+});
+```
+
+## Performance Monitoring
+
+### Best Practice Checklist
+
+- [ ] All promises are awaited (use `no-floating-promises` ESLint rule)
+- [ ] Database queries use indexes instead of `.filter()`
+- [ ] `.collect()` is only used with small result sets (< 1000 docs)
+- [ ] Redundant indexes are removed
+- [ ] All public functions have argument validators
+- [ ] All public functions implement access control
+- [ ] Only internal functions are scheduled
+- [ ] Helper functions are used instead of unnecessary `ctx.runAction()`
+- [ ] Sequential query/mutation calls are minimized in actions
+- [ ] `ctx.runQuery`/`ctx.runMutation` usage is minimized in queries/mutations
+
+### Performance Monitoring
+
+Use the Convex Dashboard's function health page to identify:
+- Functions with high execution time
+- Functions with high database bandwidth usage
+- Functions that frequently conflict in mutations
+
+### Related Documentation
+
+- [Convex Best Practices](https://docs.convex.dev/understanding/best-practices/)
+- [Database Indexes](https://docs.convex.dev/database/indexes)
+- [Function Types](https://docs.convex.dev/functions)
+- [Scheduling](https://docs.convex.dev/scheduling)
