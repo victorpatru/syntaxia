@@ -1,14 +1,11 @@
 name: Convex Reviewer
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-    paths:
-      - 'packages/backend/convex/**'
-      - '**/convex/**'
+  issue_comment:
+    types: [created]
 
 concurrency:
-  group: convex-reviewer-${{ github.event.pull_request.number }}
+  group: convex-reviewer-${{ github.event.issue.number }}
   cancel-in-progress: true
 
 permissions:
@@ -19,13 +16,16 @@ permissions:
 jobs:
   convex-reviewer:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == false
+    # Run only when: comment is on a PR and starts with '/convex review'
+    if: github.event.issue.pull_request != null && startsWith(github.event.comment.body, '/convex review')
     steps:
+      - name: Derive PR number
+        run: echo "PR_NUMBER=${{ github.event.issue.number }}" >> $GITHUB_ENV
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: refs/pull/${{ env.PR_NUMBER }}/head
 
       - name: Install Cursor CLI
         run: |
@@ -43,8 +43,8 @@ jobs:
           echo "::endgroup::"
 
           echo "::group::PR stats"
-          DIFF_BYTES=$(gh pr diff ${{ github.event.pull_request.number }} | wc -c)
-          CHANGED_CONVEX_FILES=$(gh pr diff ${{ github.event.pull_request.number }} | grep -E '^diff --git a/.*/convex/|^diff --git a/packages/backend/convex/' | wc -l)
+          DIFF_BYTES=$(gh pr diff $PR_NUMBER | wc -c)
+          CHANGED_CONVEX_FILES=$(gh pr diff $PR_NUMBER | grep -E '^diff --git a/.*/convex/|^diff --git a/packages/backend/convex/' | wc -l)
           echo "diff_bytes=$DIFF_BYTES" | tee -a metrics.txt
           echo "changed_convex_files=$CHANGED_CONVEX_FILES" | tee -a metrics.txt
           echo "::endgroup::"
@@ -58,11 +58,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments \
+          gh api repos/${{ github.repository }}/pulls/$PR_NUMBER/comments \
             --jq '.[] | select(.body | contains("convex-rule")) | .body' > existing_comments.txt
-          gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews \
+          gh api repos/${{ github.repository }}/pulls/$PR_NUMBER/reviews \
             --jq '.[] | select(.body | contains("convex-rule")) | .body' >> existing_comments.txt
-          gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews \
+          gh api repos/${{ github.repository }}/pulls/$PR_NUMBER/reviews \
             --jq '.[] | select(.user.login == "github-actions[bot]") | .body' >> existing_comments.txt
           echo "Found $(wc -l < existing_comments.txt | tr -d ' ') existing comments"
 
@@ -79,14 +79,14 @@ jobs:
             You are a Convex code analyzer. Analyze ONLY the changed Convex files for best practices violations.
 
             Context:
-            - PR: ${{ github.event.pull_request.number }}
+            - PR: ${{ env.PR_NUMBER }}
             - Repository: ${{ github.repository }}
 
             Reference the Convex best practices document in convex_practices.md for detailed examples and explanations.
 
             Your task:
             1. Read convex_practices.md to understand all 15 violation types
-            2. Get the PR diff: gh pr diff ${{ github.event.pull_request.number }}
+            2. Get the PR diff: gh pr diff ${{ env.PR_NUMBER }}
             3. Focus ONLY on files in packages/backend/convex/ or any path containing 'convex/'
             4. Analyze changed lines against the 15 violations from the reference document
 
@@ -183,7 +183,8 @@ jobs:
           violation_count=$(grep -c "VIOLATION|" analysis_dedup.txt || echo "0")
           
           if [ "$violation_count" -eq 0 ]; then
-            echo "No violations found, skipping review creation"
+            gh api repos/${{ github.repository }}/issues/$PR_NUMBER/comments \
+              -f body='Convex Reviewer: All clear — no Convex best‑practice issues detected in changed code. ✅'
             exit 0
           fi
 
@@ -257,13 +258,17 @@ jobs:
           fi
 
           echo "Submitting review with $(jq '.comments | length' review.json) comments"
-          gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews \
+          gh api repos/${{ github.repository }}/pulls/$PR_NUMBER/reviews \
             -X POST --input review.json
+
+          # Post a summary issue comment
+          gh api repos/${{ github.repository }}/issues/$PR_NUMBER/comments \
+            -f body="Convex Reviewer: Found $violation_count best‑practice improvement(s). Inline suggestions added. 🔍"
 
       - name: Upload reviewer artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: convex-reviewer-logs-${{ github.event.pull_request.number }}
+          name: convex-reviewer-logs-${{ env.PR_NUMBER }}
           path: |
             analysis_output.txt
             analysis_dedup.txt
