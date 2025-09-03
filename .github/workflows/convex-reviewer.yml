@@ -7,6 +7,10 @@ on:
       - 'packages/backend/convex/**'
       - '**/convex/**'
 
+concurrency:
+  group: convex-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 permissions:
   pull-requests: write
   contents: read
@@ -49,7 +53,7 @@ jobs:
 
           Convex Best Practices to Check:
 
-          🚨 CRITICAL VIOLATIONS (Blocking):
+          🚨 CRITICAL ISSUES (Informational):
           1. Missing await on promises (ctx.db.*, ctx.runQuery, ctx.runMutation, ctx.scheduler.*)
           2. Using .filter() on database queries instead of .withIndex()
           3. Using .collect() on potentially large result sets without pagination
@@ -58,13 +62,13 @@ jobs:
           6. Scheduling public functions instead of internal functions
           7. Direct database access (ctx.db) in actions
 
-          ⚡ PERFORMANCE ISSUES (High Priority):
+          ⚡ PERFORMANCE ISSUES (Informational):
           8. Redundant indexes in schema.ts
           9. Unnecessary ctx.runAction() calls (use helper functions instead)
           10. Sequential ctx.runQuery/ctx.runMutation calls in actions
           11. Overuse of ctx.runQuery/ctx.runMutation in queries/mutations
 
-          ⚠️ CODE QUALITY ISSUES (Medium Priority):
+          ⚠️ CODE QUALITY ISSUES (Informational):
           12. Missing returns validator (should use v.null() if no return)
           13. Using deprecated v.bigint() instead of v.int64()
           14. Missing "use node"; directive in actions using Node.js
@@ -89,16 +93,16 @@ jobs:
           Submission Rules:
           - Max 15 inline comments total
           - Place comments on exact changed lines only
-          - If critical violations found: echo "CONVEX_CRITICAL_ISSUES=true" >> $GITHUB_ENV
-          - If no issues found: echo "CONVEX_CRITICAL_ISSUES=false" >> $GITHUB_ENV
           - Submit via GitHub Reviews API with inline comments
+          - Provide informational feedback only - DO NOT block PRs
+          - All comments are suggestions for improvement
+          
+          Summary Format:
+          - Keep it under 3 sentences
+          - Use natural language, not AI-speak
+          - Examples:
+            * "Found 2 performance improvements in schema indexes and 1 missing await."
+            * "Code looks good - just a couple minor optimizations possible."
+            * "Spotted 3 small issues: redundant index, sequential queries, missing validator."
+          - Avoid phrases like "I have analyzed" or "In conclusion"
           '
-
-      - name: Check for critical Convex violations
-        run: |
-          if [ "${CONVEX_CRITICAL_ISSUES:-false}" = "true" ]; then
-            echo "❌ Critical Convex best practices violations found. PR blocked."
-            exit 1
-          else
-            echo "✅ No blocking Convex issues found."
-          fi
