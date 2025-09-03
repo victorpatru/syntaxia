@@ -802,3 +802,15 @@ export const markComplete = internalMutation({
     return null;
   },
 });
+
+export const ciTestViolationFilter = internalQuery({
+  args: {},
+  returns: v.number(),
+  handler: async (ctx) => {
+    const sessions = await ctx.db
+      .query("interview_sessions")
+      .filter((q) => q.eq(q.field("status"), "complete"))
+      .collect();
+    return sessions.length;
+  },
+});

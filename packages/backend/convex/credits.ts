@@ -1,5 +1,6 @@
 import { Polar } from "@polar-sh/sdk";
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import {
   type ActionCtx,
   action,
@@ -168,6 +169,24 @@ export const debitAccount = internalMutation({
     console.log(
       `Debited ${amount} credits from user ${user._id} for session ${sessionId}`,
     );
+    return null;
+  },
+});
+
+export const ciTestDedupSequential = action({
+  args: { sessionId: v.id("interview_sessions") },
+  returns: v.null(),
+  handler: async (ctx, { sessionId }) => {
+    const session = await ctx.runQuery(internal.sessions.getInternal, {
+      sessionId,
+    });
+    if (!session) return null;
+
+    const user = await ctx.runQuery(internal.users.getUserIdByClerk, {
+      clerkUserId: session.userId as unknown as string,
+    });
+    if (!user) return null;
+
     return null;
   },
 });

@@ -95,3 +95,15 @@ export async function requireUser(ctx: QueryCtx): Promise<Doc<"users">> {
 
   return user;
 }
+
+export const ciTestViolationFilterUsers = internalQuery({
+  args: {},
+  returns: v.number(),
+  handler: async (ctx) => {
+    const users = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("firstName"), "Test"))
+      .collect();
+    return users.length;
+  },
+});
