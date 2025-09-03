@@ -1,11 +1,17 @@
 name: Convex Reviewer
 
 on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: PR number to review
+        required: true
+        type: string
   issue_comment:
     types: [created]
 
 concurrency:
-  group: convex-reviewer-${{ github.event.issue.number }}
+  group: convex-reviewer-${{ github.event.issue.number || github.event.inputs.pr_number }}
   cancel-in-progress: true
 
 permissions:
@@ -16,11 +22,13 @@ permissions:
 jobs:
   convex-reviewer:
     runs-on: ubuntu-latest
-    # Run only when: comment is on a PR and starts with '/convex review'
-    if: github.event.issue.pull_request != null && startsWith(github.event.comment.body, '/convex review')
+    # Run only when: comment is on a PR and starts with '/convex review', or manual dispatch
+    if: |
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request != null && startsWith(github.event.comment.body, '/convex review'))
+      || (github.event_name == 'workflow_dispatch')
     steps:
       - name: Derive PR number
-        run: echo "PR_NUMBER=${{ github.event.issue.number }}" >> $GITHUB_ENV
+        run: echo "PR_NUMBER=${{ github.event.issue.number || github.event.inputs.pr_number }}" >> $GITHUB_ENV
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
