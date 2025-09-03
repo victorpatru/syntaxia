@@ -273,7 +273,7 @@ export const createSession = internalMutation({
     return sessionId;
   },
 });
-
+// add useless comment
 export const createSessionValidated = action({
   args: { jobDescription: v.string() },
   returns: v.union(
