@@ -38,7 +38,7 @@ jobs:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
           MODEL: grok-code-fast-1
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BLOCKING_REVIEW: true
+          BLOCKING_REVIEW: ${{ vars.CONVEX_BLOCKING_REVIEW || 'true' }}
         run: |
           cursor-agent --force --model "$MODEL" --output-format=text --print 'You are a specialized Convex code reviewer operating in GitHub Actions. Focus ONLY on Convex best practices violations.
 
