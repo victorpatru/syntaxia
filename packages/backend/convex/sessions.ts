@@ -323,17 +323,17 @@ export const startSetup = action({
             ${session.jobDescription}
 
 Guidelines:
-- Questions should be realistic phone screen questions
-- Mix of technical depth, system design, and practical experience
-- Difficulty should match experience level (1-5 scale)
-- Focus on skills actually mentioned in the JD
-- Types: "background", "technical", "system_design", "scenario", "problem_solving"
-- For experience level: mid = 2-5 years, senior = 5+ years, staff = 8+ years
-- For domain: web = frontend/fullstack, infrastructure = backend/devops, analytics = data, edge = performance/CDN
-- Include expected duration (60-300 seconds) and relevant tags for each question`,
+- Ask concept-first; mention vendors only briefly in parentheses if helpful (e.g., "workflow orchestration (Temporal)").
+- For niche terms, either include a brief 6-12 word micro-primer inline or first ask: "In one sentence, define X; then ...".
+- Cover themes explicitly present in the JD (e.g., orchestration, TypeScript + GraphQL API design, observability/logging at scale, reproducible builds, distributed/oncall, ERDs/planning, frontend data architecture). Do not add themes not in the JD. Do not name the company.
+- Question mix: 8-12 total with a balance of types: include "background", "technical", "system_design", "scenario", and "problem_solving".
+- Difficulty: mostly 3-4; include at least one level-2 warm-up; at most one level-5.
+- Durations: each 60-240 seconds; target total across all questions ≈ 850 seconds (finish slightly early vs 900 hard cap).
+- For each question, include followUps (0-2) as concise, voice-friendly prompts focused on decisions, trade-offs, or metrics; avoid vendor-deep details.
+- Keep each question 1-2 sentences, voice-friendly (no code-style syntax). Optionally add a brief follow-up hint in parentheses.
+- Output strict JSON only; no explanations`,
       });
 
-      // Update session with parsed data
       await ctx.runMutation(internal.sessions.updateSetupData, {
         sessionId,
         questions: parseResult.questions,
@@ -343,10 +343,14 @@ Guidelines:
       });
 
       return parseResult;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Failed to parse job description:", error);
+      const message =
+        typeof error === "object" && error && "message" in error
+          ? String((error as any).message)
+          : "Failed to analyze job description. Please try again.";
       await ctx.runMutation(internal.sessions.markFailed, { sessionId });
-      throw new Error("Failed to analyze job description. Please try again.");
+      throw new Error(message);
     }
   },
 });
