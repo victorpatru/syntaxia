@@ -96,7 +96,7 @@ export async function requireUser(ctx: QueryCtx): Promise<Doc<"users">> {
   return user;
 }
 
-export const ciTestViolationFilterUsers = internalQuery({
+export const letsFilterUsers = internalQuery({
   args: {},
   returns: v.number(),
   handler: async (ctx) => {
