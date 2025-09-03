@@ -50,6 +50,7 @@ jobs:
 
       - name: Load Convex best practices
         run: |
+          echo "Loading Convex best practices reference..."
           cat .github/convex-best-practices.md > convex_practices.md
 
       - name: Analyze Convex code for violations
@@ -107,19 +108,23 @@ jobs:
 
       - name: Show analysis results
         run: |
+          echo "=== CURSOR-AGENT ANALYSIS OUTPUT ==="
           cat analysis_output.txt
+          echo "=== END ANALYSIS OUTPUT ==="
 
       - name: Create GitHub review from analysis
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if grep -q "NO_VIOLATIONS_FOUND" analysis_output.txt; then
+            echo "No violations found, skipping review creation"
             exit 0
           fi
 
           violation_count=$(grep -c "VIOLATION|" analysis_output.txt || echo "0")
           
           if [ "$violation_count" -eq 0 ]; then
+            echo "No violations found, skipping review creation"
             exit 0
           fi
 
@@ -143,6 +148,7 @@ jobs:
             if [ "$prefix" = "VIOLATION" ]; then
               comment_id="convex-rule-${rule_num}-$(basename "$file_path")-${line_num}"
               if grep -q "$comment_id" existing_comments.txt; then
+                echo "Skipping duplicate comment: $comment_id"
                 continue
               fi
 
@@ -179,8 +185,10 @@ jobs:
           EOF
 
           if [ "$first" = true ]; then
+            echo "No new violations to report (all already exist)"
             exit 0
           fi
 
+          echo "Submitting review with $(jq '.comments | length' review.json) comments"
           gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews \
             -X POST --input review.json
