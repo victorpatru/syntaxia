@@ -100,11 +100,19 @@ jobs:
           Submission Rules:
           - Max 15 inline comments total
           - Place comments on exact changed lines only
+          - ALWAYS echo findings to console for debugging
           - If critical violations found: echo "CONVEX_CRITICAL_ISSUES=true" >> $GITHUB_ENV
           - If no issues found: echo "CONVEX_CRITICAL_ISSUES=false" >> $GITHUB_ENV
           - Submit via GitHub Reviews API with inline comments
           - Include summary of total violations by category
+          - DEBUG: Print each violation found with file path and line number before submitting
           '
+
+      - name: Debug - Show environment variables
+        run: |
+          echo "CONVEX_CRITICAL_ISSUES: ${CONVEX_CRITICAL_ISSUES:-not_set}"
+          echo "Files changed in this PR:"
+          gh pr diff --name-only
 
       - name: Check for critical Convex violations
         if: env.BLOCKING_REVIEW == 'true'
