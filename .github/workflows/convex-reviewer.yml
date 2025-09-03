@@ -34,13 +34,10 @@ jobs:
           git config user.email "convex-bot@syntaxia.com"
 
       - name: Convex Best Practices Review
-        id: convex-review
-        continue-on-error: true
         env:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
           MODEL: auto
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BLOCKING_REVIEW: ${{ vars.CONVEX_BLOCKING_REVIEW || 'true' }}
         run: |
           cursor-agent --force --model "$MODEL" --output-format=text --print 'You are a specialized Convex code reviewer operating in GitHub Actions. Focus ONLY on Convex best practices violations.
 
@@ -49,7 +46,6 @@ jobs:
           - PR Number: ${{ github.event.pull_request.number }}
           - PR Head SHA: ${{ github.event.pull_request.head.sha }}
           - PR Base SHA: ${{ github.event.pull_request.base.sha }}
-          - Blocking Review: ${{ env.BLOCKING_REVIEW }}
 
           Convex Best Practices to Check:
 
@@ -79,93 +75,30 @@ jobs:
           - Get diff of only Convex files: gh pr diff -- "**/convex/**"
           - Analyze ONLY changed lines in Convex files
           - Focus on the 15 specific violations listed above
-          - Check existing .cursor/rules/convex_best_practices.mdc for reference patterns
 
           Analysis Rules:
           - ONLY flag clear violations of the 15 specific practices above
           - Provide specific line references and suggest fixes
           - Include code examples in comments when helpful
-          - Reference the official Convex best practices documentation
-          - Mark resolved issues with ✅ when fixed
 
           Commenting Format:
           - 🚨 Critical: [Brief description] - [Specific fix]
           - ⚡ Performance: [Brief description] - [Optimization suggestion]  
           - ⚠️ Quality: [Brief description] - [Improvement suggestion]
-          - ✅ Resolved: [Brief acknowledgment of fix]
-
-          Example Comments:
-          - "🚨 Critical: Missing await on ctx.db.insert() - Add await to prevent silent failures"
-          - "⚡ Performance: Using .filter() on messages query - Replace with .withIndex(\"by_author\") for better performance"
-          - "⚠️ Quality: Missing returns validator - Add returns: v.null() to function definition"
 
           Submission Rules:
           - Max 15 inline comments total
           - Place comments on exact changed lines only
-          - ALWAYS echo findings to console for debugging
           - If critical violations found: echo "CONVEX_CRITICAL_ISSUES=true" >> $GITHUB_ENV
           - If no issues found: echo "CONVEX_CRITICAL_ISSUES=false" >> $GITHUB_ENV
           - Submit via GitHub Reviews API with inline comments
-          - Include summary of total violations by category
-          - DEBUG: Print each violation found with file path and line number before submitting
           '
 
-      - name: Debug - Show environment variables
-        if: steps.convex-review.outcome == 'success'
-        run: |
-          echo "CONVEX_CRITICAL_ISSUES: ${CONVEX_CRITICAL_ISSUES:-not_set}"
-          echo "Files changed in this PR:"
-          gh pr diff --name-only
-
-      - name: Handle review setup failure
-        if: steps.convex-review.outcome == 'failure'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "❌ Convex review setup failed - not a code issue"
-          gh pr comment ${{ github.event.pull_request.number }} --body "## ⚠️ Convex Best Practices Check Failed
-
-          The automated review encountered a setup issue and could not analyze your code. This is likely a configuration problem with the workflow, not your code.
-
-          **This is not blocking your PR** - the failure was during setup, not code analysis.
-
-          **For maintainers:** Check the workflow logs for configuration issues (API keys, model availability, etc.)."
-          echo "CONVEX_CRITICAL_ISSUES=false" >> $GITHUB_ENV
-
       - name: Check for critical Convex violations
-        if: steps.convex-review.outcome == 'success' && env.BLOCKING_REVIEW == 'true'
         run: |
-          echo "Checking for critical Convex best practices violations..."
-          echo "CONVEX_CRITICAL_ISSUES: ${CONVEX_CRITICAL_ISSUES:-unset}"
-
           if [ "${CONVEX_CRITICAL_ISSUES:-false}" = "true" ]; then
-            echo "❌ Critical Convex best practices violations found. PR blocked until resolved."
-            echo "Please review the inline comments and fix the issues before merging."
-            echo "See .cursor/rules/convex_best_practices.mdc for reference."
+            echo "❌ Critical Convex best practices violations found. PR blocked."
             exit 1
           else
             echo "✅ No blocking Convex issues found."
           fi
-
-      - name: Post summary comment
-        if: steps.convex-review.outcome == 'success' && env.CONVEX_CRITICAL_ISSUES == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh pr comment ${{ github.event.pull_request.number }} --body "## 🚨 Convex Best Practices Violations Found
-
-          This PR has been blocked due to critical Convex best practices violations.
-
-          **Look for inline comments above** for specific line-by-line issues.
-
-          **Common fixes:**
-          - Add \`await\` to all database operations and function calls
-          - Replace \`.filter()\` with \`.withIndex()\` for database queries  
-          - Add argument validators to all public functions
-          - Implement access control for public functions
-          - Use internal functions for scheduling
-
-          **Reference:** See [\`.cursor/rules/convex_best_practices.mdc\`](.cursor/rules/convex_best_practices.mdc) for detailed examples and fixes.
-
-          **Documentation:** [Convex Best Practices](https://docs.convex.dev/understanding/best-practices/)
-          "
