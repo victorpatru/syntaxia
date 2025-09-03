@@ -211,8 +211,7 @@ export const getCurrentSession = query({
   },
 });
 
-// Mutation to create a new session
-export const createSession = mutation({
+export const createSession = internalMutation({
   args: { jobDescription: v.string() },
   returns: v.id("interview_sessions"),
   handler: async (ctx, { jobDescription }) => {
@@ -297,7 +296,7 @@ export const createSessionValidated = action({
       };
     }
 
-    const sessionId = await ctx.runMutation(api.sessions.createSession, {
+    const sessionId = await ctx.runMutation(internal.sessions.createSession, {
       jobDescription,
     });
     return {
