@@ -123,8 +123,10 @@ jobs:
             * "Spotted 3 small issues: redundant index, sequential queries, missing validator."
           - Avoid phrases like "I have analyzed" or "In conclusion"
           
-          Important: Use GitHub Reviews API format:
-          - ONE review submission with body + inline comments
-          - Do NOT use gh pr comment for summary
-          - Do NOT post multiple separate comments
+          CRITICAL: Use ONLY GitHub Reviews API:
+          - Submit EXACTLY ONE review using: gh api repos/OWNER/REPO/pulls/NUMBER/reviews
+          - Include summary in review body and inline comments
+          - NEVER use "gh pr comment" - this creates duplicate comments
+          - NEVER post separate summary comments
+          - NEVER post multiple reviews or comments
           '
