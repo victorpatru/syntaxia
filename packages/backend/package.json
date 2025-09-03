@@ -26,7 +26,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@ai-sdk/gateway": "^1.0.15",
+    "@ai-sdk/google": "^2.0.11",
     "@clerk/backend": "^2.7.0",
     "@notionhq/client": "^4.0.2",
     "@polar-sh/sdk": "^0.34.12",
