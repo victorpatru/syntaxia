@@ -205,8 +205,9 @@ jobs:
           first=true
           while IFS='|' read -r prefix rule_num file_path line_num category description fix; do
             if [ "$prefix" = "VIOLATION" ]; then
-              # Stable dedupe key across pushes: rule + full path + category + hash(description|fix)
-              hash=$(printf "%s" "$description|$fix" | sha1sum | awk '{print $1}')
+              # Stable dedupe key across pushes: rule + full path + category + hash(description)
+              # Note: Excluding 'fix' avoids churn when line lists change (e.g., "also at lines: ...")
+              hash=$(printf "%s" "$description" | sha1sum | awk '{print $1}')
               comment_id="convex-rule-${rule_num}-${file_path}-${category}-${hash}"
               if grep -q "$comment_id" existing_comments.txt; then
                 echo "Skipping duplicate comment: $comment_id"
@@ -227,13 +228,18 @@ jobs:
               fi
               first=false
 
+              # Escape strings safely for JSON
+              body_raw="$emoji $category: $description\n\n<!-- $comment_id -->\n\n**Fix:** $fix"
+              body_json=$(printf "%s" "$body_raw" | jq -Rs .)
+              path_json=$(printf "%s" "$file_path" | jq -Rs .)
+
               # Add the comment to JSON
               cat >> review.json << EOF
               {
-                "path": "$file_path",
+                "path": $path_json,
                 "line": $line_num,
                 "side": "RIGHT",
-                "body": "$emoji $category: $description\n\n<!-- $comment_id -->\n\n**Fix:** $fix"
+                "body": $body_json
               }
           EOF
             fi
