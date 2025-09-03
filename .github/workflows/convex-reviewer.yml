@@ -37,96 +37,148 @@ jobs:
           git config user.name "Convex Best Practices Bot"
           git config user.email "convex-bot@syntaxia.com"
 
-      - name: Convex Best Practices Review
+      - name: Check for existing Convex comments
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Checking for existing Convex rule comments..."
+          gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments \
+            --jq '.[] | select(.body | contains("convex-rule")) | .body' > existing_comments.txt
+          
+          gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews \
+            --jq '.[] | select(.body | contains("convex-rule")) | .body' >> existing_comments.txt
+          
+          echo "Found $(wc -l < existing_comments.txt) existing Convex comments"
+
+      - name: Analyze Convex code for violations
         env:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
           MODEL: auto
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cursor-agent --force --model "$MODEL" --output-format=text --print 'You are a specialized Convex code reviewer operating in GitHub Actions. Focus ONLY on Convex best practices violations.
+          cursor-agent --force --model "$MODEL" --output-format=text --print "You are a Convex code analyzer. Analyze ONLY the changed Convex files for best practices violations.
 
           Context:
-          - Repo: ${{ github.repository }}
-          - PR Number: ${{ github.event.pull_request.number }}
-          - PR Head SHA: ${{ github.event.pull_request.head.sha }}
-          - PR Base SHA: ${{ github.event.pull_request.base.sha }}
+          - PR: ${{ github.event.pull_request.number }}
+          - Repository: ${{ github.repository }}
 
-          Convex Best Practices to Check:
+          Your task:
+          1. Get the PR diff: gh pr diff ${{ github.event.pull_request.number }}
+          2. Focus ONLY on files in packages/backend/convex/ or any path containing 'convex/'
+          3. Analyze changed lines for these 15 violations:
 
-          🚨 CRITICAL ISSUES (Informational):
-          1. Missing await on promises (ctx.db.*, ctx.runQuery, ctx.runMutation, ctx.scheduler.*)
-          2. Using .filter() on database queries instead of .withIndex()
-          3. Using .collect() on potentially large result sets without pagination
+          🚨 CRITICAL (1-7):
+          1. Missing await on ctx.db.*, ctx.runQuery, ctx.runMutation, ctx.scheduler.*
+          2. Using .filter() instead of .withIndex() on database queries
+          3. Using .collect() without pagination on large result sets
           4. Missing argument validators on public functions
-          5. Missing access control on public functions
+          5. Missing access control on public functions  
           6. Scheduling public functions instead of internal functions
-          7. Direct database access (ctx.db) in actions
+          7. Direct ctx.db access in actions
 
-          ⚡ PERFORMANCE ISSUES (Informational):
+          ⚡ PERFORMANCE (8-11):
           8. Redundant indexes in schema.ts
-          9. Unnecessary ctx.runAction() calls (use helper functions instead)
-          10. Sequential ctx.runQuery/ctx.runMutation calls in actions
-          11. Overuse of ctx.runQuery/ctx.runMutation in queries/mutations
+          9. Unnecessary ctx.runAction() calls
+          10. Sequential ctx.runQuery/ctx.runMutation in actions
+          11. Overuse of ctx.runQuery/ctx.runMutation
 
-          ⚠️ CODE QUALITY ISSUES (Informational):
-          12. Missing returns validator (should use v.null() if no return)
+          ⚠️ QUALITY (12-15):
+          12. Missing returns validator
           13. Using deprecated v.bigint() instead of v.int64()
-          14. Missing "use node"; directive in actions using Node.js
-          15. Incorrect TypeScript types for Convex IDs (use Id<"table"> not string)
+          14. Missing 'use node' directive in Node.js actions
+          15. Wrong TypeScript types for Convex IDs
 
-          Procedure:
-          - Get existing comments: gh pr view --json comments
-          - Get diff of only Convex files: gh pr diff -- "**/convex/**"
-          - Analyze ONLY changed lines in Convex files
-          - Focus on the 15 specific violations listed above
-          - Check for existing comment IDs to avoid duplicates
+          Output format - for each violation found, output EXACTLY this format:
+          VIOLATION|[rule_number]|[file_path]|[line_number]|[category]|[description]|[fix_suggestion]
 
-          Comment ID Tracking:
-          - Each comment must include hidden ID: <!-- convex-rule-[number]-[file]-[line] -->
-          - Examples: <!-- convex-rule-1-sessions.ts-45 --> for missing await on line 45
-          - Examples: <!-- convex-rule-8-schema.ts-23 --> for redundant index on line 23
-          - Rule numbers: 1-7 (Critical), 8-11 (Performance), 12-15 (Quality)
-          - Before posting new comment, check if ID already exists in PR comments
-          - If existing comment found: UPDATE it instead of creating duplicate
-          - If violation is fixed: UPDATE existing comment to mark as resolved
+          Example:
+          VIOLATION|8|packages/backend/convex/schema.ts|115|Performance|Redundant index - by_user covered by by_user_status|Remove the by_user index
 
-          Analysis Rules:
-          - ONLY flag clear violations of the 15 specific practices above
-          - Provide specific line references and suggest fixes
-          - Include code examples in comments when helpful
-          - Track each violation with unique ID to prevent duplicates
+          If no violations found, output: NO_VIOLATIONS_FOUND
 
-          Commenting Format:
-          - 🚨 Critical: [Brief description] - [Specific fix]
-          - ⚡ Performance: [Brief description] - [Optimization suggestion]  
-          - ⚠️ Quality: [Brief description] - [Improvement suggestion]
-          - ✅ Resolved: [Brief acknowledgment] (for updating fixed issues)
+          IMPORTANT: Only analyze changed lines, provide specific line numbers, be concise." > analysis_output.txt
 
-          Submission Rules:
-          - Max 15 inline comments total
-          - Place comments on exact changed lines only
-          - Submit ONLY ONE review via GitHub Reviews API with inline comments + summary
-          - DO NOT post separate summary comments - include summary in the review body
-          - Provide informational feedback only - DO NOT block PRs
-          - All comments are suggestions for improvement
-          - ALWAYS include hidden comment ID for tracking
-          - Check existing comments before posting to avoid duplicates
-          - Update existing comments when violations are fixed or changed
+      - name: Create GitHub review from analysis
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if grep -q "NO_VIOLATIONS_FOUND" analysis_output.txt; then
+            echo "No violations found, skipping review creation"
+            exit 0
+          fi
+
+          # Count violations and create summary
+          violation_count=$(grep -c "VIOLATION|" analysis_output.txt || echo "0")
           
-          Summary Format (for review body only):
-          - Keep it under 3 sentences
-          - Use natural language, not AI-speak
-          - Put summary in the main review body, NOT as separate comment
-          - Examples:
-            * "Found 2 performance improvements in schema indexes and 1 missing await."
-            * "Code looks good - just a couple minor optimizations possible."
-            * "Spotted 3 small issues: redundant index, sequential queries, missing validator."
-          - Avoid phrases like "I have analyzed" or "In conclusion"
-          
-          CRITICAL: Use ONLY GitHub Reviews API:
-          - Submit EXACTLY ONE review using: gh api repos/OWNER/REPO/pulls/NUMBER/reviews
-          - Include summary in review body and inline comments
-          - NEVER use "gh pr comment" - this creates duplicate comments
-          - NEVER post separate summary comments
-          - NEVER post multiple reviews or comments
-          '
+          if [ "$violation_count" -eq 0 ]; then
+            echo "No violations found, skipping review creation"
+            exit 0
+          fi
+
+          # Create summary based on violation count
+          if [ "$violation_count" -eq 1 ]; then
+            summary="Found 1 Convex best practice improvement."
+          else
+            summary="Found $violation_count Convex best practice improvements."
+          fi
+
+          # Start building the review JSON
+          cat > review.json << EOF
+          {
+            "event": "COMMENT",
+            "body": "$summary",
+            "comments": [
+          EOF
+
+          # Process each violation and add to comments array
+          first=true
+          while IFS='|' read -r prefix rule_num file_path line_num category description fix; do
+            if [ "$prefix" = "VIOLATION" ]; then
+              # Check if this violation already exists
+              comment_id="convex-rule-${rule_num}-$(basename "$file_path")-${line_num}"
+              if grep -q "$comment_id" existing_comments.txt; then
+                echo "Skipping duplicate comment: $comment_id"
+                continue
+              fi
+
+              # Determine emoji based on category
+              case "$category" in
+                "Critical") emoji="🚨" ;;
+                "Performance") emoji="⚡" ;;
+                "Quality") emoji="⚠️" ;;
+                *) emoji="ℹ️" ;;
+              esac
+
+              # Add comma if not first comment
+              if [ "$first" = false ]; then
+                echo "," >> review.json
+              fi
+              first=false
+
+              # Add the comment to JSON
+              cat >> review.json << EOF
+              {
+                "path": "$file_path",
+                "line": $line_num,
+                "side": "RIGHT",
+                "body": "$emoji $category: $description\n\n<!-- $comment_id -->\n\n**Fix:** $fix"
+              }
+          EOF
+            fi
+          done < analysis_output.txt
+
+          # Close the JSON
+          cat >> review.json << EOF
+            ]
+          }
+          EOF
+
+          # Only submit if we have comments
+          if [ "$first" = true ]; then
+            echo "No new violations to report (all already exist)"
+            exit 0
+          fi
+
+          # Submit the review
+          echo "Submitting review with $(jq '.comments | length' review.json) comments"
+          gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews \
+            -X POST --input review.json
