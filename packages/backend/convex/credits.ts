@@ -172,21 +172,3 @@ export const debitAccount = internalMutation({
     return null;
   },
 });
-
-export const ciTestDedupSequential = action({
-  args: { sessionId: v.id("interview_sessions") },
-  returns: v.null(),
-  handler: async (ctx, { sessionId }) => {
-    const session = await ctx.runQuery(internal.sessions.getInternal, {
-      sessionId,
-    });
-    if (!session) return null;
-
-    const user = await ctx.runQuery(internal.users.getUserIdByClerk, {
-      clerkUserId: session.userId as unknown as string,
-    });
-    if (!user) return null;
-
-    return null;
-  },
-});
