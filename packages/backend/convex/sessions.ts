@@ -1,9 +1,9 @@
-import { gateway } from "@ai-sdk/gateway";
+import { google } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { z } from "zod";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import {
   action,
   internalAction,
@@ -15,9 +15,9 @@ import {
 import { env } from "./env";
 import { requireUser } from "./users";
 
-const GATEWAY_MODEL = gateway("google/gemini-2.0-flash-lite");
+const GATEWAY_MODEL_ADVANCED = google("gemini-2.5-pro");
+const GATEWAY_MODEL_CLASSIFICATION = google("gemini-2.0-flash-lite");
 
-// Reusable validator constants
 const StatusValidator = v.union(
   v.literal("setup"),
   v.literal("active"),
@@ -46,6 +46,7 @@ const QuestionValidator = v.object({
   difficulty: v.number(),
   expectedDuration: v.optional(v.number()),
   tags: v.optional(v.array(v.string())),
+  followUps: v.optional(v.array(v.string())),
 });
 
 const HighlightValidator = v.object({
@@ -98,7 +99,6 @@ const SessionValidator = v.object({
   micOnAt: v.optional(v.number()),
 });
 
-// Types for AI responses
 const MinimalQuestionSchema = z.object({
   id: z.string(),
   text: z.string(),
@@ -106,6 +106,7 @@ const MinimalQuestionSchema = z.object({
   difficulty: z.number(),
   expectedDuration: z.number().optional(),
   tags: z.array(z.string()).optional(),
+  followUps: z.array(z.string()).max(2).optional(),
 });
 
 const JDParseResponseSchema = z.object({
@@ -145,7 +146,6 @@ const AnalysisResponseSchema = z.object({
   ),
 });
 
-// Query to get a session by ID
 export const getSession = query({
   args: { sessionId: v.id("interview_sessions") },
   returns: v.union(v.null(), SessionValidator),
@@ -156,7 +156,6 @@ export const getSession = query({
     const session = await ctx.db.get(sessionId);
     if (!session) return null;
 
-    // Verify user owns this session
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkUserId", identity.subject))
@@ -169,7 +168,6 @@ export const getSession = query({
   },
 });
 
-// Query to get current active session for a user
 export const getCurrentSession = query({
   args: {},
   returns: v.union(v.null(), SessionValidator),
@@ -183,7 +181,6 @@ export const getCurrentSession = query({
       .unique();
     if (!user) return null;
 
-    // Find any non-complete session (prefer active, then analyzing, then setup)
     const active = await ctx.db
       .query("interview_sessions")
       .withIndex("by_user_status", (q) =>
@@ -217,7 +214,6 @@ export const createSession = internalMutation({
   handler: async (ctx, { jobDescription }) => {
     const user = await requireUser(ctx);
 
-    // Validate job description
     if (!jobDescription || jobDescription.trim().length < 50) {
       throw new Error("Job description must be at least 50 characters");
     }
@@ -226,7 +222,6 @@ export const createSession = internalMutation({
       throw new Error("Job description too long (max 10,000 characters)");
     }
 
-    // Check for existing non-complete session
     const existingActive = await ctx.db
       .query("interview_sessions")
       .withIndex("by_user_status", (q) =>
@@ -257,7 +252,6 @@ export const createSession = internalMutation({
       throw new Error("You already have an active interview session");
     }
 
-    // Create new session
     const now = Date.now();
     const sessionId = await ctx.db.insert("interview_sessions", {
       userId: user._id,
@@ -267,6 +261,14 @@ export const createSession = internalMutation({
       jobDescription: jobDescription.trim(),
       currentQuestionIndex: 0,
     });
+
+    await ctx.scheduler.runAfter(
+      15 * 60 * 1000,
+      internal.sessions.cleanupStaleSetup,
+      {
+        sessionId,
+      },
+    );
 
     return sessionId;
   },
@@ -318,20 +320,17 @@ export const startSetup = action({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
 
-    // Get session and verify ownership
     const session = await ctx.runQuery(internal.sessions.getInternal, {
       sessionId,
     });
     if (!session) throw new Error("Session not found");
 
-    // Resolve internal user id by Clerk subject and enforce ownership
     const resolvedUserId = await ctx.runQuery(internal.users.getUserIdByClerk, {
       clerkUserId: identity.subject,
     });
     if (!resolvedUserId) throw new Error("User not found");
     if (session.userId !== resolvedUserId) throw new Error("Unauthorized");
 
-    // Check user has sufficient credits
     const balance = await ctx.runQuery(internal.sessions.getUserBalance, {
       sessionId,
     });
@@ -344,12 +343,9 @@ export const startSetup = action({
       );
     }
 
-    // Parse job description with AI Gateway (Gemini)
-    const model = GATEWAY_MODEL;
-
     try {
       const { object: parseResult } = await generateObject({
-        model,
+        model: GATEWAY_MODEL_ADVANCED,
         schema: JDParseResponseSchema,
         prompt: `Analyze this job description and extract:
 1. 8-12 technical interview questions appropriate for the role
@@ -393,7 +389,6 @@ Guidelines:
   },
 });
 
-// Internal query to check user balance
 export const getUserBalance = query({
   args: { sessionId: v.id("interview_sessions") },
   returns: v.number(),
@@ -408,7 +403,6 @@ export const getUserBalance = query({
   },
 });
 
-// Internal query to get session without auth check
 export const getInternal = internalQuery({
   args: { sessionId: v.id("interview_sessions") },
   returns: v.union(v.null(), SessionValidator),
@@ -417,7 +411,6 @@ export const getInternal = internalQuery({
   },
 });
 
-// Internal mutation to update session with setup data
 export const updateSetupData = internalMutation({
   args: {
     sessionId: v.id("interview_sessions"),
@@ -442,7 +435,6 @@ export const updateSetupData = internalMutation({
   },
 });
 
-// Internal mutation to mark session as failed
 export const markFailed = internalMutation({
   args: { sessionId: v.id("interview_sessions") },
   returns: v.null(),
@@ -455,7 +447,6 @@ export const markFailed = internalMutation({
   },
 });
 
-// Mutation to start active session
 export const startActive = mutation({
   args: {
     sessionId: v.id("interview_sessions"),
@@ -482,7 +473,6 @@ export const startActive = mutation({
       updatedAt: now,
     });
 
-    // Schedule charge enforcement at T+120s
     await ctx.scheduler.runAfter(120 * 1000, internal.sessions.ensureCharge, {
       sessionId,
     });
@@ -491,7 +481,6 @@ export const startActive = mutation({
   },
 });
 
-// Internal action to ensure charge is applied
 export const ensureCharge = internalAction({
   args: { sessionId: v.id("interview_sessions") },
   returns: v.null(),
@@ -501,7 +490,6 @@ export const ensureCharge = internalAction({
     });
     if (!session) return null;
 
-    // Only charge if session is still active or analyzing and hasn't been charged yet
     if (
       !["active", "analyzing"].includes(session.status) ||
       session.chargeCommittedAt
@@ -509,7 +497,6 @@ export const ensureCharge = internalAction({
       return null;
     }
 
-    // Check if we've passed the 120-second threshold
     const elapsed = Date.now() - (session.startedAt || session.createdAt);
     if (elapsed >= 120 * 1000) {
       try {
@@ -519,14 +506,31 @@ export const ensureCharge = internalAction({
         );
       } catch (error) {
         console.error(`Failed to charge session ${sessionId}:`, error);
-        // Don't fail the session, just log the error
       }
     }
     return null;
   },
 });
 
-// Internal mutation to mark session as charged
+export const cleanupStaleSetup = internalAction({
+  args: { sessionId: v.id("interview_sessions") },
+  returns: v.null(),
+  handler: async (ctx, { sessionId }) => {
+    const session = await ctx.runQuery(internal.sessions.getInternal, {
+      sessionId,
+    });
+    if (!session) return null;
+    if (session.status !== "setup") return null;
+
+    try {
+      await ctx.runMutation(internal.sessions.markFailed, { sessionId });
+    } catch (error) {
+      console.error(`Failed to mark session ${sessionId} as failed:`, error);
+    }
+    return null;
+  },
+});
+
 export const markCharged = internalMutation({
   args: { sessionId: v.id("interview_sessions") },
   returns: v.null(),
@@ -539,7 +543,6 @@ export const markCharged = internalMutation({
   },
 });
 
-// Mutation to end session
 export const endSession = mutation({
   args: {
     sessionId: v.id("interview_sessions"),
@@ -569,7 +572,6 @@ export const endSession = mutation({
       updatedAt: now,
     });
 
-    // Ensure charge is applied if needed
     await ctx.scheduler.runAfter(0, internal.sessions.ensureCharge, {
       sessionId,
     });
@@ -578,7 +580,6 @@ export const endSession = mutation({
   },
 });
 
-// Action to get ElevenLabs conversation token
 export const getConversationToken = action({
   args: { sessionId: v.id("interview_sessions") },
   returns: v.object({ conversationToken: v.string() }),
@@ -592,7 +593,6 @@ export const getConversationToken = action({
     if (!session) throw new Error("Session not found");
 
     try {
-      // Call ElevenLabs API to get conversation token
       const response = await fetch(
         `https://api.elevenlabs.io/v1/convai/conversation/token?agent_id=${env.ELEVENLABS_AGENT_ID}`,
         {
@@ -616,7 +616,6 @@ export const getConversationToken = action({
   },
 });
 
-// Action to analyze session
 export const analyzeSession = action({
   args: { sessionId: v.id("interview_sessions") },
   returns: v.union(
@@ -638,7 +637,6 @@ export const analyzeSession = action({
       throw new Error("Session not ready for analysis");
 
     try {
-      // Get transcript from ElevenLabs if available
       let transcript = "No transcript available";
       if (session.elevenlabsConversationId) {
         try {
@@ -662,19 +660,15 @@ export const analyzeSession = action({
         }
       }
 
-      // Analyze with AI if session was long enough
       if ((session.duration || 0) < 120) {
-        // Session too short for meaningful analysis - just mark as complete without scores
         await ctx.runMutation(internal.sessions.markCompleteWithoutScores, {
           sessionId,
         });
         return null;
       }
 
-      const model = GATEWAY_MODEL;
-
       const { object: analysisResult } = await generateObject({
-        model,
+        model: GATEWAY_MODEL_ADVANCED,
         schema: AnalysisResponseSchema,
         prompt: `Analyze this technical interview session and provide detailed feedback.
 
@@ -703,7 +697,6 @@ Focus on:
 - Constructive, actionable feedback`,
       });
 
-      // Save analysis results
       await ctx.runMutation(internal.sessions.markComplete, {
         sessionId,
         scores: analysisResult.scores,
@@ -719,7 +712,6 @@ Focus on:
   },
 });
 
-// Internal mutation to mark session as complete without scores (for short sessions)
 export const markCompleteWithoutScores = internalMutation({
   args: { sessionId: v.id("interview_sessions") },
   returns: v.null(),
@@ -734,7 +726,6 @@ export const markCompleteWithoutScores = internalMutation({
   },
 });
 
-// Query to get completed sessions for reports page
 export const getCompletedSessions = query({
   args: { paginationOpts: paginationOptsValidator },
   handler: async (ctx, args) => {
@@ -747,7 +738,6 @@ export const getCompletedSessions = query({
       .unique();
     if (!user) throw new Error("User not found");
 
-    // Query completed sessions with pagination
     return await ctx.db
       .query("interview_sessions")
       .withIndex("by_user_status", (q) =>
@@ -758,7 +748,6 @@ export const getCompletedSessions = query({
   },
 });
 
-// Internal mutation to mark session as complete
 export const markComplete = internalMutation({
   args: {
     sessionId: v.id("interview_sessions"),
