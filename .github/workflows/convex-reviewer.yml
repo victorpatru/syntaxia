@@ -87,15 +87,40 @@ jobs:
           14. Missing 'use node' directive in Node.js actions
           15. Wrong TypeScript types for Convex IDs
 
-          Output format - for each violation found, output EXACTLY this format:
+          ANALYSIS PROCESS:
+          - Show your step-by-step analysis for each file
+          - Explain WHY each violation exists and WHY it matters
+          - Include line-by-line reasoning for violations found
+          - Mention checks that passed (no violation found)
+
+          Output format:
+          
+          ANALYSIS_START
+          [Explain your analysis process, what you checked, reasoning for each violation]
+          ANALYSIS_END
+
+          For each violation found, output EXACTLY this format:
           VIOLATION|[rule_number]|[file_path]|[line_number]|[category]|[description]|[fix_suggestion]
 
           Example:
+          ANALYSIS_START
+          Checking schema.ts lines 110-120: Found by_user index on line 115. Also found by_user_status composite index on line 117. Since composite indexes can handle queries on prefix fields, the by_user index is redundant and wastes storage.
+          ANALYSIS_END
           VIOLATION|8|packages/backend/convex/schema.ts|115|Performance|Redundant index - by_user covered by by_user_status|Remove the by_user index
 
-          If no violations found, output: NO_VIOLATIONS_FOUND
+          If no violations found, output: 
+          ANALYSIS_START
+          [Explain what you checked and why no violations were found]
+          ANALYSIS_END
+          NO_VIOLATIONS_FOUND
 
-          IMPORTANT: Only analyze changed lines, provide specific line numbers, be concise." > analysis_output.txt
+          IMPORTANT: Only analyze changed lines, provide specific line numbers, include detailed reasoning." > analysis_output.txt
+
+      - name: Show analysis results
+        run: |
+          echo "=== CURSOR-AGENT ANALYSIS OUTPUT ==="
+          cat analysis_output.txt
+          echo "=== END ANALYSIS OUTPUT ==="
 
       - name: Create GitHub review from analysis
         env:
