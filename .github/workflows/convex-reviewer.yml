@@ -42,13 +42,31 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Checking for existing Convex rule comments..."
+          
+          # The key fix: Check review comments (inline comments) - this is where our tracking IDs are!
           gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments \
             --jq '.[] | select(.body | contains("convex-rule")) | .body' > existing_comments.txt
           
+          # Also check review bodies for any that might contain tracking IDs
           gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews \
             --jq '.[] | select(.body | contains("convex-rule")) | .body' >> existing_comments.txt
           
-          echo "Found $(wc -l < existing_comments.txt) existing Convex comments"
+          # Check for github-actions bot reviews (broader detection)
+          gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews \
+            --jq '.[] | select(.user.login == "github-actions[bot]") | .body' >> existing_comments.txt
+          
+          comment_count=$(wc -l < existing_comments.txt | tr -d ' ')
+          echo "Found $comment_count existing Convex comments"
+          
+          # Debug: show what we found
+          if [ "$comment_count" -gt 0 ]; then
+            echo "Sample of existing comments:"
+            head -3 existing_comments.txt || true
+          else
+            echo "DEBUG: No convex-rule comments found. Checking for any github-actions comments..."
+            gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments \
+              --jq '.[] | select(.user.login == "github-actions[bot]") | .body' | head -2 || true
+          fi
 
       - name: Load Convex best practices
         run: |
