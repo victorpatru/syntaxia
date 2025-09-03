@@ -1,4 +1,4 @@
-name: Convex Best Practices Check
+name: Convex Reviewer
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ on:
       - '**/convex/**'
 
 concurrency:
-  group: convex-review-${{ github.event.pull_request.number }}
+  group: convex-reviewer-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 permissions:
@@ -17,7 +17,7 @@ permissions:
   issues: write
 
 jobs:
-  convex-best-practices:
+  convex-reviewer:
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false
     steps:
@@ -31,6 +31,23 @@ jobs:
         run: |
           curl https://cursor.com/install -fsS | bash
           echo "$HOME/.cursor/bin" >> $GITHUB_PATH
+
+      - name: System and PR stats
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "::group::System info"
+          uname -a || true
+          nproc --all || true
+          free -h || true
+          echo "::endgroup::"
+
+          echo "::group::PR stats"
+          DIFF_BYTES=$(gh pr diff ${{ github.event.pull_request.number }} | wc -c)
+          CHANGED_CONVEX_FILES=$(gh pr diff ${{ github.event.pull_request.number }} | grep -E '^diff --git a/.*/convex/|^diff --git a/packages/backend/convex/' | wc -l)
+          echo "diff_bytes=$DIFF_BYTES" | tee -a metrics.txt
+          echo "changed_convex_files=$CHANGED_CONVEX_FILES" | tee -a metrics.txt
+          echo "::endgroup::"
 
       - name: Configure git identity
         run: |
@@ -59,7 +76,9 @@ jobs:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
           MODEL: auto
         run: |
-          cursor-agent --force --model "$MODEL" --output-format=text --print "You are a Convex code analyzer. Analyze ONLY the changed Convex files for best practices violations.
+          echo "::group::Analyze (cursor-agent)"
+          ANALYZE_START=$(date +%s%3N)
+          /usr/bin/time -v cursor-agent --force --model "$MODEL" --output-format=text --print "You are a Convex code analyzer. Analyze ONLY the changed Convex files for best practices violations.
 
           Context:
           - PR: ${{ github.event.pull_request.number }}
@@ -81,6 +100,7 @@ jobs:
           - For missing await detection: Look at 2-3 lines before ctx.* calls to find 'await' or 'const x = await'
           - Be extra careful with multi-line statements - 'await' may be on a previous line
           - Use the examples from convex_practices.md to guide your analysis
+          - De-duplicate repeats of the same rule within the same file/function by emitting a single VIOLATION with the earliest line_number; append the other line numbers in parentheses at the end of fix_suggestion like "(also at lines: 123, 456)"
 
           Output format:
           
@@ -105,24 +125,60 @@ jobs:
           ANALYSIS_END
           NO_VIOLATIONS_FOUND
 
-          IMPORTANT: Only analyze changed lines, provide specific line numbers, include detailed reasoning." > analysis_output.txt
+          IMPORTANT: Only analyze changed lines, provide specific line numbers, include detailed reasoning." > analysis_output.txt 2> cursor_time.txt
+          ANALYZE_END=$(date +%s%3N)
+          ANALYZE_MS=$((ANALYZE_END - ANALYZE_START))
+          RAW=$(grep -c '^VIOLATION|' analysis_output.txt || true)
+          echo "analyze_ms=$ANALYZE_MS" | tee -a metrics.txt
+          echo "violations_raw=$RAW" | tee -a metrics.txt
+          echo "::endgroup::"
+
+      - name: Deduplicate analysis output
+        run: |
+          # Collapse duplicate findings across identical rule/file/category/description/fix; keep earliest line
+          DEDUP_START=$(date +%s%3N)
+          awk -F'|' '
+          $1=="VIOLATION"{
+            key=$2 "|" $3 "|" $5 "|" $6 "|" $7
+            if (!(key in min) || $4 < min[key]) min[key]=$4
+            if (key in lines) { lines[key]=lines[key] "," $4 } else { lines[key]=$4 }
+            rule[key]=$2; path[key]=$3; cat[key]=$5; desc[key]=$6; fix[key]=$7
+          }
+          END{
+            for (k in min) {
+              extra = (lines[k] ~ /,/) ? " (also at lines: " lines[k] ")" : ""
+              printf "VIOLATION|%s|%s|%s|%s|%s|%s%s\n", rule[k], path[k], min[k], cat[k], desc[k], fix[k], extra
+            }
+          }' analysis_output.txt > analysis_dedup.txt
+          DEDUP_END=$(date +%s%3N)
+          DEDUP_MS=$((DEDUP_END - DEDUP_START))
+          RAW=$(grep -c '^VIOLATION|' analysis_output.txt || true)
+          DEDUP=$(grep -c '^VIOLATION|' analysis_dedup.txt || true)
+          SAVED=$((RAW - DEDUP))
+          echo "dedup_ms=$DEDUP_MS" | tee -a metrics.txt
+          echo "violations_dedup=$DEDUP" | tee -a metrics.txt
+          echo "violations_saved=$SAVED" | tee -a metrics.txt
+          echo "Deduplicated violations: $DEDUP (saved $SAVED from $RAW)"
 
       - name: Show analysis results
         run: |
           echo "=== CURSOR-AGENT ANALYSIS OUTPUT ==="
-          cat analysis_output.txt
+          # Showing deduplicated output for clarity
+          cat analysis_dedup.txt
           echo "=== END ANALYSIS OUTPUT ==="
 
       - name: Create GitHub review from analysis
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Still honor NO_VIOLATIONS_FOUND from the raw analyzer output
           if grep -q "NO_VIOLATIONS_FOUND" analysis_output.txt; then
             echo "No violations found, skipping review creation"
             exit 0
           fi
 
-          violation_count=$(grep -c "VIOLATION|" analysis_output.txt || echo "0")
+          # Count violations after deduplication
+          violation_count=$(grep -c "VIOLATION|" analysis_dedup.txt || echo "0")
           
           if [ "$violation_count" -eq 0 ]; then
             echo "No violations found, skipping review creation"
@@ -147,7 +203,9 @@ jobs:
           first=true
           while IFS='|' read -r prefix rule_num file_path line_num category description fix; do
             if [ "$prefix" = "VIOLATION" ]; then
-              comment_id="convex-rule-${rule_num}-$(basename "$file_path")-${line_num}"
+              # Stable dedupe key across pushes: rule + full path + category + hash(description|fix)
+              hash=$(printf "%s" "$description|$fix" | sha1sum | awk '{print $1}')
+              comment_id="convex-rule-${rule_num}-${file_path}-${category}-${hash}"
               if grep -q "$comment_id" existing_comments.txt; then
                 echo "Skipping duplicate comment: $comment_id"
                 continue
@@ -177,7 +235,7 @@ jobs:
               }
           EOF
             fi
-          done < analysis_output.txt
+          done < analysis_dedup.txt
 
           # Close the JSON
           cat >> review.json << EOF
@@ -193,3 +251,26 @@ jobs:
           echo "Submitting review with $(jq '.comments | length' review.json) comments"
           gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews \
             -X POST --input review.json
+
+      - name: Upload reviewer artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: convex-reviewer-logs-${{ github.event.pull_request.number }}
+          path: |
+            analysis_output.txt
+            analysis_dedup.txt
+            cursor_time.txt
+            review.json
+            metrics.txt
+
+      - name: Append performance summary
+        run: |
+          echo "### Convex Reviewer Metrics" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "| Metric | Value |"
+            echo "|---|---|"
+            grep -E '^(analyze_ms|dedup_ms|violations_raw|violations_dedup|violations_saved|diff_bytes|changed_convex_files)=' metrics.txt | while IFS='=' read -r k v; do
+              echo "| $k | $v |"
+            done
+          } >> $GITHUB_STEP_SUMMARY
