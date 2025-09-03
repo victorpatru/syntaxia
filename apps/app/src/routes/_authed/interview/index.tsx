@@ -1,11 +1,12 @@
 import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@syntaxia/backend/convex/_generated/api";
+import { JD_PRESETS, PRIMARY_PRESET_COUNT } from "@syntaxia/shared";
 import { Button } from "@syntaxia/ui/button";
 import { Textarea } from "@syntaxia/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@syntaxia/ui/tooltip";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { useMutation as useConvexMutation } from "convex/react";
+import { useAction } from "convex/react";
 import { Play } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
@@ -13,7 +14,6 @@ import { getSessionRoute } from "@/utils/route-guards";
 
 export const Route = createFileRoute("/_authed/interview/")({
   loader: async (opts) => {
-    // Prefetch both queries before the component renders
     await Promise.all([
       opts.context.queryClient.ensureQueryData(
         convexQuery(api.credits.getBalance, {}),
@@ -23,7 +23,6 @@ export const Route = createFileRoute("/_authed/interview/")({
       ),
     ]);
 
-    // Check for existing session and redirect if found
     const currentSession = await opts.context.queryClient.ensureQueryData(
       convexQuery(api.sessions.getCurrentSession, {}),
     );
@@ -38,7 +37,7 @@ export const Route = createFileRoute("/_authed/interview/")({
 function InterviewStart() {
   const navigate = useNavigate();
   const [jobDescription, setJobDescription] = useState("");
-  const [retryCount, setRetryCount] = useState(0);
+
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [showAllPresets, setShowAllPresets] = useState(false);
 
@@ -50,42 +49,33 @@ function InterviewStart() {
     convexQuery(api.sessions.getCurrentSession, {}),
   );
 
-  const convexCreateSession = useConvexMutation(api.sessions.createSession);
+  const convexCreateSession = useAction(api.sessions.createSessionValidated);
+  const [isCreating, setIsCreating] = useState(false);
 
-  const createSessionMutation = useMutation({
-    mutationFn: async (jobDescription: string) => {
-      const sessionId = await convexCreateSession({ jobDescription });
-      return sessionId;
-    },
-    onSuccess: (sessionId) => {
-      // Navigate to setup/processing route
+  const createSession = async () => {
+    try {
+      setIsCreating(true);
+      const result = await convexCreateSession({
+        jobDescription: jobDescription.trim(),
+      });
+
+      if (!result.success) {
+        toast.error(
+          "We are not able to start the interview. Please try again with a different description.",
+        );
+        return;
+      }
+
       navigate({
         to: "/interview/setup",
-        search: {
-          sessionId,
-        },
+        search: { sessionId: result.sessionId },
       });
-    },
-    onError: (error) => {
-      console.error("Failed to create session:", error);
-      if (retryCount < 1) {
-        toast.error("Failed to start interview", {
-          action: {
-            label: "Retry",
-            onClick: () => {
-              setRetryCount((prev) => prev + 1);
-              createSessionMutation.mutate(jobDescription.trim());
-            },
-          },
-        });
-      } else {
-        toast.error("Failed to start interview. Please try again later.");
-        setRetryCount(0); // Reset for next attempt
-      }
-    },
-  });
-
-  // Note: Session redirect logic moved to route loader for better performance
+    } catch (error: unknown) {
+      toast.error("Something went wrong. Please try again later.");
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   const startInterview = () => {
     if (!jobDescription.trim()) return;
@@ -98,11 +88,8 @@ function InterviewStart() {
       });
       return;
     }
-    setRetryCount(0); // Reset retry count for new attempt
-    createSessionMutation.mutate(jobDescription.trim());
+    createSession();
   };
-
-  // Note: Redirect logic moved to loader - this component only renders when no active session exists
 
   return (
     <div className="min-h-screen bg-background font-mono">
@@ -191,16 +178,12 @@ function InterviewStart() {
                   <Button
                     onClick={startInterview}
                     disabled={
-                      !jobDescription.trim() ||
-                      createSessionMutation.isPending ||
-                      balance < 15
+                      !jobDescription.trim() || isCreating || balance < 15
                     }
                     className="font-mono text-sm bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-4 py-2 transition-colors h-10 min-w-28"
                   >
                     <Play className="w-4 h-4 mr-2" />
-                    {createSessionMutation.isPending
-                      ? "./creating..."
-                      : "./start-interview"}
+                    {isCreating ? "./creating..." : "./start-interview"}
                   </Button>
                 </div>
               </div>
@@ -232,7 +215,6 @@ function InterviewStart() {
                 </div>
               </div>
 
-              {/* Subtle bottom accent line */}
               <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-terminal-green/20 to-transparent"></div>
             </div>
           </div>
