@@ -70,6 +70,7 @@ export default defineSchema({
           difficulty: v.number(),
           expectedDuration: v.optional(v.number()),
           tags: v.optional(v.array(v.string())),
+          followUps: v.optional(v.array(v.string())),
         }),
       ),
     ),
