@@ -67,7 +67,7 @@ jobs:
           3. Analyze changed lines for these 15 violations:
 
           🚨 CRITICAL (1-7):
-          1. Missing await on ctx.db.*, ctx.runQuery, ctx.runMutation, ctx.scheduler.*
+          1. Missing await on ctx.db.*, ctx.runQuery, ctx.runMutation, ctx.scheduler.* - CHECK CAREFULLY: Look for 'await' keyword before the ctx call, even across multiple lines
           2. Using .filter() instead of .withIndex() on database queries
           3. Using .collect() without pagination on large result sets
           4. Missing argument validators on public functions
@@ -92,6 +92,8 @@ jobs:
           - Explain WHY each violation exists and WHY it matters
           - Include line-by-line reasoning for violations found
           - Mention checks that passed (no violation found)
+          - For missing await detection: Look at 2-3 lines before ctx.* calls to find 'await' or 'const x = await'
+          - Be extra careful with multi-line statements - 'await' may be on a previous line
 
           Output format:
           
@@ -105,6 +107,8 @@ jobs:
           Example:
           ANALYSIS_START
           Checking schema.ts lines 110-120: Found by_user index on line 115. Also found by_user_status composite index on line 117. Since composite indexes can handle queries on prefix fields, the by_user index is redundant and wastes storage.
+
+          Checking sessions.ts lines 300-305: Found 'const sessionId = await ctx.runMutation(...)' on line 303. The 'await' keyword is present before ctx.runMutation, so this is correctly awaited. NO VIOLATION.
           ANALYSIS_END
           VIOLATION|8|packages/backend/convex/schema.ts|115|Performance|Redundant index - by_user covered by by_user_status|Remove the by_user index
 
