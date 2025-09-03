@@ -50,6 +50,11 @@ jobs:
           
           echo "Found $(wc -l < existing_comments.txt) existing Convex comments"
 
+      - name: Load Convex best practices
+        run: |
+          echo "Loading Convex best practices reference..."
+          cat .github/convex-best-practices.md > convex_practices.md
+
       - name: Analyze Convex code for violations
         env:
           CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
@@ -61,39 +66,22 @@ jobs:
           - PR: ${{ github.event.pull_request.number }}
           - Repository: ${{ github.repository }}
 
+          Reference the Convex best practices document in convex_practices.md for detailed examples and explanations.
+
           Your task:
-          1. Get the PR diff: gh pr diff ${{ github.event.pull_request.number }}
-          2. Focus ONLY on files in packages/backend/convex/ or any path containing 'convex/'
-          3. Analyze changed lines for these 15 violations:
-
-          🚨 CRITICAL (1-7):
-          1. Missing await on ctx.db.*, ctx.runQuery, ctx.runMutation, ctx.scheduler.* - CHECK CAREFULLY: Look for 'await' keyword before the ctx call, even across multiple lines
-          2. Using .filter() instead of .withIndex() on database queries
-          3. Using .collect() without pagination on large result sets
-          4. Missing argument validators on public functions
-          5. Missing access control on public functions  
-          6. Scheduling public functions instead of internal functions
-          7. Direct ctx.db access in actions
-
-          ⚡ PERFORMANCE (8-11):
-          8. Redundant indexes in schema.ts
-          9. Unnecessary ctx.runAction() calls
-          10. Sequential ctx.runQuery/ctx.runMutation in actions
-          11. Overuse of ctx.runQuery/ctx.runMutation
-
-          ⚠️ QUALITY (12-15):
-          12. Missing returns validator
-          13. Using deprecated v.bigint() instead of v.int64()
-          14. Missing 'use node' directive in Node.js actions
-          15. Wrong TypeScript types for Convex IDs
+          1. Read convex_practices.md to understand all 15 violation types
+          2. Get the PR diff: gh pr diff ${{ github.event.pull_request.number }}
+          3. Focus ONLY on files in packages/backend/convex/ or any path containing 'convex/'
+          4. Analyze changed lines against the 15 violations from the reference document
 
           ANALYSIS PROCESS:
           - Show your step-by-step analysis for each file
-          - Explain WHY each violation exists and WHY it matters
+          - Explain WHY each violation exists and WHY it matters (reference the best practices doc)
           - Include line-by-line reasoning for violations found
           - Mention checks that passed (no violation found)
           - For missing await detection: Look at 2-3 lines before ctx.* calls to find 'await' or 'const x = await'
           - Be extra careful with multi-line statements - 'await' may be on a previous line
+          - Use the examples from convex_practices.md to guide your analysis
 
           Output format:
           
