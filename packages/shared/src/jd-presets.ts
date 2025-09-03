@@ -16,13 +16,13 @@ Our core mission at Railway is to make software engineers higher leverage. We be
 
 At Railway, we believe that making tooling more accessible for build and deployment is one of the greatest possible productivity unlocks of our generation. We also believe that the major roadblock between us and our goal is strong interfacing paradigms.
 
-If you’re looking to build an operating system for builders, we’d love to talk with you!
+If you're looking to build an operating system for builders, we'd love to talk with you!
 
-“Computer scientists have so far worked on developing powerful programming languages that make it possible to solve the technical problems of computation. Little effort has gone toward devising the language of interaction.”
+"Computer scientists have so far worked on developing powerful programming languages that make it possible to solve the technical problems of computation. Little effort has gone toward devising the language of interaction."
 
 - Donald Norman
 
-Curious? Learn more in our blog post about this team and the great work they’re doing: Team Spotlight: Product Engineering
+Curious? Learn more in our blog post about this team and the great work they're doing: Team Spotlight: Product Engineering
 
 Want to learn about our work culture? Here is a three-part blog series that will help you see the unique ways our team works (Parts 1, 2, 3, and 4).
 
@@ -33,7 +33,7 @@ For this role, you will:
 Build features end-to-end, from the UI in our dashboard to orchestrating workflows that interact with our microservices using Temporal.
 Craft intuitive interfaces that allow our users to interface with powerful computing paradigms, with help from our design team.
 Build TypeScript + GraphQL APIs with strong guarantees around modeling data, allowing both internal and external users to build against.
-Write Engineering Requirement Documents to take something from idea, to defined tasks, to implementation, to monitoring it’s success.
+Write Engineering Requirement Documents to take something from idea, to defined tasks, to implementation, to monitoring it's success.
 Experience with, or at least the desire to learn Rust to contribute to our open-source repositories (CLI, Nixpacks, etc)
 You may be oncall from time to time in this role
 Some projects full-stack engineers have worked on in the past
@@ -71,7 +71,7 @@ Beyond compensation, there are a few things that we believe that make working at
 
 Autonomy: We have very few meetings. Just a Monday and a Friday to go over the Company Board. We think your time is sacred, whether it's at work, or outside of work.
 Ownership: We're a company with a high ownership, high autonomy culture. We hope that you'll come in, help us, and over the course of many years do the best work of your life. When we bring you onboard, we expect you to change the company.
-Novel problems/solutions: We're a startup that's well funded, with cool problems, which lets us implement novel solutions! We abhor “busywork” and think, whether it's community, engineering, operations, etc there's always opportunity for creative and high leverage solutions.
+Novel problems/solutions: We're a startup that's well funded, with cool problems, which lets us implement novel solutions! We abhor "busywork" and think, whether it's community, engineering, operations, etc there's always opportunity for creative and high leverage solutions.
 Growth: We want you to grow with us, but we know that talent is loaned, so when you figure out what area you want to grow in next, whether it's at Railway or outside, we'll make sure you land there.`,
   },
   {

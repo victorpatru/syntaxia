@@ -10,7 +10,6 @@ import { Play } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { getSessionRoute } from "@/utils/route-guards";
-import { JD_PRESETS, PRIMARY_PRESET_COUNT } from "./jd-presets";
 
 export const Route = createFileRoute("/_authed/interview/")({
   loader: async (opts) => {
