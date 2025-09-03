@@ -112,7 +112,6 @@ export default defineSchema({
     startedAt: v.optional(v.number()),
     micOnAt: v.optional(v.number()),
   })
-    .index("by_user", ["userId"])
     .index("by_status", ["status"])
     .index("by_user_status", ["userId", "status"]),
 });
