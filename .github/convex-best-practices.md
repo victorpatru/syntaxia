@@ -1,91 +1,180 @@
-# Convex Best Practices Reference
+# Convex Best Practices
 
-This document contains the official Convex best practices that should be checked during code review.
+This is a list of best practices and common anti-patterns around using Convex. We recommend going through this list before broadly releasing your app to production. You may choose to try using all of these best practices from the start, or you may wait until you've gotten major parts of your app working before going through and adopting the best practices here.
 
-## 1. Await all Promises ⚠️ CRITICAL
+## Await all Promises
 
-**Why?** Missing await can cause unexpected behavior or missed error handling.
+### Why?
+Convex functions use `async / await`. If you don't await all your promises (e.g. `await ctx.scheduler.runAfter`, `await ctx.db.patch`), you may run into unexpected behavior (e.g. failing to schedule a function) or miss handling errors.
 
-**Examples:**
+## Avoid .filter on database queries
+
+### Why?
+Filtering in code instead of using the `.filter` syntax has the same performance, and is generally easier code to write. Conditions in `.withIndex` or `.withSearchIndex` are more efficient than `.filter` or filtering in code, so almost all uses of `.filter` should either be replaced with a `.withIndex` or `.withSearchIndex` condition, or written as TypeScript code.
+
+Read through the indexes documentation for an overview of how to define indexes and how they work.
+
+### Examples
+
 ```typescript
-// ❌ WRONG
-ctx.db.patch(id, data); // Missing await!
-ctx.scheduler.runAfter(1000, internal.func, {}); // Missing await!
-
-// ✅ CORRECT
-await ctx.db.patch(id, data);
-await ctx.scheduler.runAfter(1000, internal.func, {});
-const result = await ctx.runMutation(internal.func, args);
-```
-
-**Detection:** Look for `ctx.db.*`, `ctx.runQuery`, `ctx.runMutation`, `ctx.scheduler.*` without `await` keyword (check 2-3 lines before for multi-line statements).
-
-## 2. Avoid .filter on database queries ⚡ PERFORMANCE
-
-**Why?** Use indexes instead of filtering for better performance on large datasets.
-
-**Examples:**
-```typescript
-// ❌ WRONG
-const results = ctx.db.query("messages")
+// ❌
+const tomsMessages = ctx.db
+  .query("messages")
   .filter((q) => q.eq(q.field("author"), "Tom"))
   .collect();
 
-// ✅ CORRECT - Use index
-const results = await ctx.db.query("messages")
+// ✅
+// Option 1: Use an index
+const tomsMessages = await ctx.db
+  .query("messages")
   .withIndex("by_author", (q) => q.eq("author", "Tom"))
   .collect();
 
-// ✅ CORRECT - Filter in code for small datasets
+// Option 2: Filter in code
 const allMessages = await ctx.db.query("messages").collect();
-const results = allMessages.filter((m) => m.author === "Tom");
+const tomsMessages = allMessages.filter((m) => m.author === "Tom");
 ```
 
-## 3. Only use .collect with small result sets ⚡ PERFORMANCE
+### How?
+Search for `.filter` in your Convex codebase — a regex like `\.filter\(\(?q` will probably find all the ones on database queries.
 
-**Why?** Large .collect() calls waste bandwidth and can cause conflicts.
+Decide whether they should be replaced with a `.withIndex` condition — per this section, if you are filtering over a large (1000+) or potentially unbounded number of documents, you should use an index. If not using a `.withIndex` / `.withSearchIndex` condition, consider replacing them with a filter in code for more readability and flexibility.
 
-**Examples:**
+See this article for more strategies for filtering.
+
+### Exceptions
+Using `.filter` on a paginated query (`.paginate`) has advantages over filtering in code. The paginated query will return the number of documents requested, including the `.filter` condition, so filtering in code afterwards can result in a smaller page or even an empty page. Using `.withIndex` on a paginated query will still be more efficient than a `.filter`.
+
+## Only use .collect with a small number of results
+
+### Why?
+All results returned from `.collect` count towards database bandwidth (even ones filtered out by `.filter`). It also means that if any document in the result changes, the query will re-run or the mutation will hit a conflict.
+
+If there's a chance the number of results is large (say 1000+ documents), you should use an index to filter the results further before calling `.collect`, or find some other way to avoid loading all the documents such as using pagination, denormalizing data, or changing the product feature.
+
+### Examples
+
+**Using an index:**
 ```typescript
-// ❌ WRONG - Potentially unbounded
+// ❌ -- potentially unbounded
 const allMovies = await ctx.db.query("movies").collect();
+const moviesByDirector = allMovies.filter(
+  (m) => m.director === "Steven Spielberg",
+);
 
-// ✅ CORRECT - Use pagination
-const movies = await ctx.db.query("movies")
+// ✅ -- small number of results, so `collect` is fine
+const moviesByDirector = await ctx.db
+  .query("movies")
+  .withIndex("by_director", (q) => q.eq("director", "Steven Spielberg"))
+  .collect();
+```
+
+**Using pagination:**
+```typescript
+// ❌ -- potentially unbounded
+const watchedMovies = await ctx.db
+  .query("watchedMovies")
+  .withIndex("by_user", (q) => q.eq("user", "Tom"))
+  .collect();
+
+// ✅ -- using pagination, showing recently watched movies first
+const watchedMovies = await ctx.db
+  .query("watchedMovies")
+  .withIndex("by_user", (q) => q.eq("user", "Tom"))
   .order("desc")
   .paginate(paginationOptions);
-
-// ✅ CORRECT - Use limits with "99+" pattern
-const movies = await ctx.db.query("movies").take(100);
-const count = movies.length === 100 ? "99+" : movies.length.toString();
 ```
 
-## 4. Check for redundant indexes ⚡ PERFORMANCE
-
-**Why?** Composite indexes make single-field indexes redundant.
-
-**Examples:**
+**Using a limit or denormalizing:**
 ```typescript
-// ❌ WRONG - Redundant indexes
-.index("by_team", ["team"])              // Redundant!
-.index("by_team_and_user", ["team", "user"])
+// ❌ -- potentially unbounded
+const watchedMovies = await ctx.db
+  .query("watchedMovies")
+  .withIndex("by_user", (q) => q.eq("user", "Tom"))
+  .collect();
+const numberOfWatchedMovies = watchedMovies.length;
 
-// ✅ CORRECT - Single composite index
-.index("by_team_and_user", ["team", "user"]) // Handles both cases
+// ✅ -- Show "99+" instead of needing to load all documents
+const watchedMovies = await ctx.db
+  .query("watchedMovies")
+  .withIndex("by_user", (q) => q.eq("user", "Tom"))
+  .take(100);
+const numberOfWatchedMovies =
+  watchedMovies.length === 100 ? "99+" : watchedMovies.length.toString();
+
+// ✅ -- Denormalize the number of watched movies in a separate table
+const watchedMoviesCount = await ctx.db
+  .query("watchedMoviesCount")
+  .withIndex("by_user", (q) => q.eq("user", "Tom"))
+  .unique();
 ```
 
-## 5. Use argument validators for all public functions 🔒 SECURITY
+### How?
+Search for `.collect` in your Convex codebase (a regex like `\.collect\(` will probably find these). And think through whether the number of results is small. This function health page in the dashboard can also help surface these.
 
-**Why?** Public functions need validation against malicious input.
+The aggregate component or database triggers can be helpful patterns for denormalizing data.
 
-**Examples:**
+### Exceptions
+If you're doing something that requires loading a large number of documents (e.g. performing a migration, making a summary), you may want to use an action to load them in batches via separate queries / mutations.
+
+## Check for redundant indexes
+
+### Why?
+Indexes like `by_foo` and `by_foo_and_bar` are usually redundant (you only need `by_foo_and_bar`). Reducing the number of indexes saves on database storage and reduces the overhead of writing to the table.
+
 ```typescript
-// ❌ WRONG - No validators
+// ❌
+const allTeamMembers = await ctx.db
+  .query("teamMembers")
+  .withIndex("by_team", (q) => q.eq("team", teamId))
+  .collect();
+const currentUserId = /* get current user id from `ctx.auth` */
+const currentTeamMember = await ctx.db
+  .query("teamMembers")
+  .withIndex("by_team_and_user", (q) =>
+    q.eq("team", teamId).eq("user", currentUserId),
+  )
+  .unique();
+
+// ✅
+// Just don't include a condition on `user` when querying for results on `team`
+const allTeamMembers = await ctx.db
+  .query("teamMembers")
+  .withIndex("by_team_and_user", (q) => q.eq("team", teamId))
+  .collect();
+const currentUserId = /* get current user id from `ctx.auth` */
+const currentTeamMember = await ctx.db
+  .query("teamMembers")
+  .withIndex("by_team_and_user", (q) =>
+    q.eq("team", teamId).eq("user", currentUserId),
+  )
+  .unique();
+```
+
+### How?
+Look through your indexes, either in your schema.ts file or in the dashboard, and look for any indexes where one is a prefix of another.
+
+### Exceptions
+`.index("by_foo", ["foo"])` is really an index on the properties `foo` and `_creationTime`, while `.index("by_foo_and_bar", ["foo", "bar"])` is an index on the properties `foo`, `bar`, and `_creationTime`. If you have queries that need to be sorted by `foo` and then `_creationTime`, then you need both indexes.
+
+For example, `.index("by_channel", ["channel"])` on a table of messages can be used to query for the most recent messages in a channel, but `.index("by_channel_and_author", ["channel", "author"])` could not be used for this since it would first sort the messages by author.
+
+## Use argument validators for all public functions
+
+### Why?
+Public functions can be called by anyone, including potentially malicious attackers trying to break your app. Argument validators (as well as return value validators) help ensure you're getting the traffic you expect.
+
+### Example
+```typescript
+// ❌ -- could be used to update any document (not just `messages`)
 export const updateMessage = mutation({
-  handler: async (ctx, { id, update }) => { ... }
+  handler: async (ctx, { id, update }) => {
+    await ctx.db.patch(id, update);
+  },
 });
 
-// ✅ CORRECT - Proper validators
+// ✅ -- can only be called with an ID from the messages table, and can only update
+// the `body` and `author` fields
 export const updateMessage = mutation({
   args: {
     id: v.id("messages"),
@@ -94,135 +183,525 @@ export const updateMessage = mutation({
       author: v.optional(v.string()),
     }),
   },
-  handler: async (ctx, { id, update }) => { ... }
+  handler: async (ctx, { id, update }) => {
+    await ctx.db.patch(id, update);
+  },
 });
 ```
 
-## 6. Use access control for all public functions 🔒 SECURITY
+### How?
+Search for `query`, `mutation`, and `action` in your Convex codebase, and ensure that all of them have argument validators (and optionally return value validators). If you have `httpActions`, you may want to use something like zod to validate that the HTTP request is the shape you expect.
 
-**Why?** Prevent unauthorized access to your functions.
+## Use some form of access control for all public functions
 
-**Examples:**
+### Why?
+Public functions can be called by anyone, including potentially malicious attackers trying to break your app. If portions of your app should only be accessible when the user is signed in, make sure all these Convex functions check that `ctx.auth.getUserIdentity()` is set.
+
+You may also have specific checks, like only loading messages that were sent to or from the current user, which you'll want to apply in every relevant public function.
+
+Favoring more granular functions like `setTeamOwner` over `updateTeam` allows more granular checks for which users can do what.
+
+Access control checks should either use `ctx.auth.getUserIdentity()` or a function argument that is unguessable (e.g. a UUID, or a Convex ID, provided that this ID is never exposed to any client but the one user). In particular, don't use a function argument which could be spoofed (e.g. email) for access control checks.
+
+### Example
 ```typescript
-// ❌ WRONG - No access control
+// ❌ -- no checks! anyone can update any team if they get the ID
 export const updateTeam = mutation({
-  args: { id: v.id("teams"), update: v.object({...}) },
+  args: {
+    id: v.id("teams"),
+    update: v.object({
+      name: v.optional(v.string()),
+      owner: v.optional(v.id("users")),
+    }),
+  },
   handler: async (ctx, { id, update }) => {
-    await ctx.db.patch(id, update); // Anyone can update any team!
+    await ctx.db.patch(id, update);
   },
 });
 
-// ✅ CORRECT - Proper access control
+// ❌ -- checks access, but uses `email` which could be spoofed
 export const updateTeam = mutation({
-  args: { id: v.id("teams"), update: v.object({...}) },
+  args: {
+    id: v.id("teams"),
+    update: v.object({
+      name: v.optional(v.string()),
+      owner: v.optional(v.id("users")),
+    }),
+    email: v.string(),
+  },
+  handler: async (ctx, { id, update, email }) => {
+    const teamMembers = /* load team members */
+    if (!teamMembers.some((m) => m.email === email)) {
+      throw new Error("Unauthorized");
+    }
+    await ctx.db.patch(id, update);
+  },
+});
+
+// ✅ -- checks access, and uses `ctx.auth`, which cannot be spoofed
+export const updateTeam = mutation({
+  args: {
+    id: v.id("teams"),
+    update: v.object({
+      name: v.optional(v.string()),
+      owner: v.optional(v.id("users")),
+    }),
+  },
   handler: async (ctx, { id, update }) => {
     const user = await ctx.auth.getUserIdentity();
     if (user === null) {
       throw new Error("Unauthorized");
     }
-    const isTeamMember = /* check if user is a member */;
+    const isTeamMember = /* check if user is a member of the team */
     if (!isTeamMember) {
       throw new Error("Unauthorized");
     }
     await ctx.db.patch(id, update);
   },
 });
-```
 
-## 7. Only schedule internal functions 🔒 SECURITY
-
-**Why?** Public functions in schedulers can be exploited.
-
-**Examples:**
-```typescript
-// ❌ WRONG - Scheduling public function
-await ctx.scheduler.runAfter(1000, api.notifications.send, {});
-
-// ✅ CORRECT - Schedule internal function
-await ctx.scheduler.runAfter(1000, internal.notifications.send, {});
-```
-
-## 8. No direct ctx.db access in actions 🔒 ARCHITECTURE
-
-**Why?** Actions should not directly access the database.
-
-**Examples:**
-```typescript
-// ❌ WRONG - Direct db access in action
-export const processData = action({
-  handler: async (ctx, args) => {
-    const data = await ctx.db.get(id); // Not allowed!
+// ✅ -- separate functions which have different access control
+export const setTeamOwner = mutation({
+  args: {
+    id: v.id("teams"),
+    owner: v.id("users"),
+  },
+  handler: async (ctx, { id, owner }) => {
+    const user = await ctx.auth.getUserIdentity();
+    if (user === null) {
+      throw new Error("Unauthorized");
+    }
+    const isTeamOwner = /* check if user is the owner of the team */
+    if (!isTeamOwner) {
+      throw new Error("Unauthorized");
+    }
+    await ctx.db.patch(id, { owner: owner });
   },
 });
 
-// ✅ CORRECT - Use queries/mutations
-export const processData = action({
-  handler: async (ctx, args) => {
-    const data = await ctx.runQuery(internal.getData, { id });
+export const setTeamName = mutation({
+  args: {
+    id: v.id("teams"),
+    name: v.string(),
   },
-});
-```
-
-## 9. Minimize ctx.runAction() calls ⚡ PERFORMANCE
-
-**Why?** Use helper functions instead of unnecessary action calls.
-
-## 10. Avoid sequential ctx.runQuery/runMutation in actions ⚡ PERFORMANCE
-
-**Why?** Multiple calls can cause race conditions.
-
-## 11. Minimize ctx.runQuery/runMutation in queries/mutations ⚡ PERFORMANCE
-
-**Why?** Helper functions have less overhead.
-
-## 12. Always include returns validator ⚠️ QUALITY
-
-**Why?** Better type safety and documentation.
-
-**Examples:**
-```typescript
-// ❌ WRONG - Missing returns validator
-export const getUser = query({
-  args: { id: v.id("users") },
-  handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
-  },
-});
-
-// ✅ CORRECT - Include returns validator
-export const getUser = query({
-  args: { id: v.id("users") },
-  returns: v.union(v.object({...}), v.null()),
-  handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
+  handler: async (ctx, { id, name }) => {
+    const user = await ctx.auth.getUserIdentity();
+    if (user === null) {
+      throw new Error("Unauthorized");
+    }
+    const isTeamMember = /* check if user is a member of the team */
+    if (!isTeamMember) {
+      throw new Error("Unauthorized");
+    }
+    await ctx.db.patch(id, { name: name });
   },
 });
 ```
 
-## 13. Use v.int64() instead of deprecated v.bigint() ⚠️ QUALITY
+### How?
+Search for `query`, `mutation`, `action`, and `httpAction` in your Convex codebase, and ensure that all of them have some form of access control. Custom functions like `authenticatedQuery` can be helpful.
 
-## 14. Add "use node" directive for Node.js actions ⚠️ QUALITY
+Some apps use Row Level Security (RLS) to check access to each document automatically whenever it's loaded, as described in this article. Alternatively, you can check access in each Convex function instead of checking access for each document.
 
-**Examples:**
+Helper functions for common checks and common operations can also be useful -- e.g. `isTeamMember`, `isTeamAdmin`, `loadTeam` (which throws if the current user does not have access to the team).
+
+## Only schedule and ctx.run* internal functions
+
+### Why?
+Public functions can be called by anyone, including potentially malicious attackers trying to break your app, and should be carefully audited to ensure they can't be used maliciously. Functions that are only called within Convex can be marked as internal, and relax these checks since Convex will ensure that internal functions can only be called within Convex.
+
+### How?
+Search for `ctx.runQuery`, `ctx.runMutation`, and `ctx.runAction` in your Convex codebase. Also search for `ctx.scheduler` and check the `crons.ts` file. Ensure all of these use `internal.foo.bar` functions instead of `api.foo.bar` functions.
+
+If you have code you want to share between a public Convex function and an internal Convex function, create a helper function that can be called from both. The public function will likely have additional access control checks.
+
+Alternatively, make sure that `api` from `_generated/api.ts` is never used in your Convex functions directory.
+
+### Examples
 ```typescript
-// ✅ CORRECT - Node.js action
-"use node";
-import fs from "fs";
+// ❌ -- using `api`
+export const sendMessage = mutation({
+  args: {
+    body: v.string(),
+    author: v.string(),
+  },
+  handler: async (ctx, { body, author }) => {
+    // add message to the database
+  },
+});
 
-export const processFile = action({
-  handler: async (ctx, args) => {
-    // Node.js code here
+// crons.ts
+crons.daily(
+  "send daily reminder",
+  { hourUTC: 17, minuteUTC: 30 },
+  api.messages.sendMessage,
+  { author: "System", body: "Share your daily update!" },
+);
+
+// ✅ Using `internal`
+import { MutationCtx } from './_generated/server';
+async function sendMessageHelper(
+  ctx: MutationCtx,
+  args: { body: string; author: string },
+) {
+  // add message to the database
+}
+
+export const sendMessage = mutation({
+  args: {
+    body: v.string(),
+  },
+  handler: async (ctx, { body }) => {
+    const user = await ctx.auth.getUserIdentity();
+    if (user === null) {
+      throw new Error("Unauthorized");
+    }
+    await sendMessageHelper(ctx, { body, author: user.name ?? "Anonymous" });
+  },
+});
+
+export const sendInternalMessage = internalMutation({
+  args: {
+    body: v.string(),
+    // don't need to worry about `author` being spoofed since this is an internal function
+    author: v.string(),
+  },
+  handler: async (ctx, { body, author }) => {
+    await sendMessageHelper(ctx, { body, author });
+  },
+});
+
+// crons.ts
+crons.daily(
+  "send daily reminder",
+  { hourUTC: 17, minuteUTC: 30 },
+  internal.messages.sendInternalMessage,
+  { author: "System", body: "Share your daily update!" },
+);
+```
+
+## Use helper functions to write shared code
+
+### Why?
+Most logic should be written as plain TypeScript functions, with the `query`, `mutation`, and `action` wrapper functions being a thin wrapper around one or more helper function.
+
+Concretely, most of your code should live in a directory like `convex/model`, and your public API, which is defined with `query`, `mutation`, and `action`, should have very short functions that mostly just call into `convex/model`.
+
+Organizing your code this way makes several of the refactors mentioned in this list easier to do.
+
+See the TypeScript page for useful types.
+
+### Example
+
+**❌ Bad approach:**
+```typescript
+export const getCurrentUser = query({
+  args: {},
+  handler: async (ctx) => {
+    const userIdentity = await ctx.auth.getUserIdentity();
+    if (userIdentity === null) {
+      throw new Error("Unauthorized");
+    }
+    const user = /* query ctx.db to load the user */
+    const userSettings = /* load other documents related to the user */
+    return { user, settings: userSettings };
+  },
+});
+
+export const listMessages = query({
+  args: {
+    conversationId: v.id("conversations"),
+  },
+  handler: async (ctx, { conversationId }) => {
+    const user = await ctx.runQuery(api.users.getCurrentUser);
+    const conversation = await ctx.db.get(conversationId);
+    if (conversation === null || !conversation.members.includes(user._id)) {
+      throw new Error("Unauthorized");
+    }
+    const messages = /* query ctx.db to load the messages */
+    return messages;
+  },
+});
+
+export const summarizeConversation = action({
+  args: {
+    conversationId: v.id("conversations"),
+  },
+  handler: async (ctx, { conversationId }) => {
+    const messages = await ctx.runQuery(api.conversations.listMessages, {
+      conversationId,
+    });
+    const summary = /* call some external service to summarize the conversation */
+    await ctx.runMutation(api.conversations.addSummary, {
+      conversationId,
+      summary,
+    });
   },
 });
 ```
 
-## 15. Use proper TypeScript types for Convex IDs ⚠️ QUALITY
-
-**Examples:**
+**✅ Good approach:**
 ```typescript
-// ❌ WRONG - Using string
-function getUser(userId: string) { ... }
+// convex/model/users.ts
+import { QueryCtx } from '../_generated/server';
 
-// ✅ CORRECT - Using proper ID type
-function getUser(userId: Id<"users">) { ... }
+export async function getCurrentUser(ctx: QueryCtx) {
+  const userIdentity = await ctx.auth.getUserIdentity();
+  if (userIdentity === null) {
+    throw new Error("Unauthorized");
+  }
+  const user = /* query ctx.db to load the user */
+  const userSettings = /* load other documents related to the user */
+  return { user, settings: userSettings };
+}
+
+// convex/model/conversations.ts
+import { QueryCtx, MutationCtx } from '../_generated/server';
+import * as Users from './users';
+
+export async function ensureHasAccess(
+  ctx: QueryCtx,
+  { conversationId }: { conversationId: Id<"conversations"> },
+) {
+  const user = await Users.getCurrentUser(ctx);
+  const conversation = await ctx.db.get(conversationId);
+  if (conversation === null || !conversation.members.includes(user._id)) {
+    throw new Error("Unauthorized");
+  }
+  return conversation;
+}
+
+export async function listMessages(
+  ctx: QueryCtx,
+  { conversationId }: { conversationId: Id<"conversations"> },
+) {
+  await ensureHasAccess(ctx, { conversationId });
+  const messages = /* query ctx.db to load the messages */
+  return messages;
+}
+
+export async function addSummary(
+  ctx: MutationCtx,
+  {
+    conversationId,
+    summary,
+  }: { conversationId: Id<"conversations">; summary: string },
+) {
+  await ensureHasAccess(ctx, { conversationId });
+  await ctx.db.patch(conversationId, { summary });
+}
+
+export async function generateSummary(
+  messages: Doc<"messages">[],
+  conversationId: Id<"conversations">,
+) {
+  const summary = /* call some external service to summarize the conversation */
+  return summary;
+}
+
+// convex/conversations.ts
+import * as Conversations from './model/conversations';
+
+export const addSummary = internalMutation({
+  args: {
+    conversationId: v.id("conversations"),
+    summary: v.string(),
+  },
+  handler: async (ctx, { conversationId, summary }) => {
+    await Conversations.addSummary(ctx, { conversationId, summary });
+  },
+});
+
+export const listMessages = internalQuery({
+  args: {
+    conversationId: v.id("conversations"),
+  },
+  handler: async (ctx, { conversationId }) => {
+    return Conversations.listMessages(ctx, { conversationId });
+  },
+});
+
+export const summarizeConversation = action({
+  args: {
+    conversationId: v.id("conversations"),
+  },
+  handler: async (ctx, { conversationId }) => {
+    const messages = await ctx.runQuery(internal.conversations.listMessages, {
+      conversationId,
+    });
+    const summary = await Conversations.generateSummary(
+      messages,
+      conversationId,
+    );
+    await ctx.runMutation(internal.conversations.addSummary, {
+      conversationId,
+      summary,
+    });
+  },
+});
+```
+
+## Use runAction only when using a different runtime
+
+### Why?
+Calling `runAction` has more overhead than calling a plain TypeScript function. It counts as an extra function call with its own memory and CPU usage, while the parent action is doing nothing except waiting for the result. Therefore, `runAction` should almost always be replaced with calling a plain TypeScript function. However, if you want to call code that requires Node.js from a function in the Convex runtime (e.g. using a library that requires Node.js), then you can use `runAction` to call the Node.js code.
+
+### Example
+```typescript
+// ❌ -- using `runAction`
+export const scrapeWebsite = action({
+  args: {
+    siteMapUrl: v.string(),
+  },
+  handler: async (ctx, { siteMapUrl }) => {
+    const siteMap = await fetch(siteMapUrl);
+    const pages = /* parse the site map */
+    await Promise.all(
+      pages.map((page) =>
+        ctx.runAction(internal.scrape.scrapeSinglePage, { url: page }),
+      ),
+    );
+  },
+});
+
+// ✅ -- using a plain TypeScript function
+// convex/model/scrape.ts
+import { ActionCtx } from '../_generated/server';
+
+export async function scrapeSinglePage(
+  ctx: ActionCtx,
+  { url }: { url: string },
+) {
+  const page = await fetch(url);
+  const text = /* parse the page */
+  await ctx.runMutation(internal.scrape.addPage, { url, text });
+}
+
+// convex/scrape.ts
+import * as Scrape from './model/scrape';
+
+export const scrapeWebsite = action({
+  args: {
+    siteMapUrl: v.string(),
+  },
+  handler: async (ctx, { siteMapUrl }) => {
+    const siteMap = await fetch(siteMapUrl);
+    const pages = /* parse the site map */
+    await Promise.all(
+      pages.map((page) => Scrape.scrapeSinglePage(ctx, { url: page })),
+    );
+  },
+});
+```
+
+### How?
+Search for `runAction` in your Convex codebase, and see if the function it calls uses the same runtime as the parent function. If so, replace the `runAction` with a plain TypeScript function. You may want to structure your functions so the Node.js functions are in a separate directory so it's easier to spot these.
+
+## Avoid sequential ctx.runMutation / ctx.runQuery calls from actions
+
+### Why?
+Each `ctx.runMutation` or `ctx.runQuery` runs in its own transaction, which means if they're called separately, they may not be consistent with each other. If instead we call a single `ctx.runQuery` or `ctx.runMutation`, we're guaranteed that the results we get are consistent.
+
+### How?
+Audit your calls to `ctx.runQuery` and `ctx.runMutation` in actions. If you see multiple in a row with no other code between them, replace them with a single `ctx.runQuery` or `ctx.runMutation` that handles both things. Refactoring your code to use helper functions will make this easier.
+
+### Example: Queries
+```typescript
+// ❌ -- this assertion could fail if the team changed between running the two queries
+const team = await ctx.runQuery(internal.teams.getTeam, { teamId });
+const teamOwner = await ctx.runQuery(internal.teams.getTeamOwner, { teamId });
+assert(team.owner === teamOwner._id);
+
+// ✅ -- this will always pass
+const teamAndOwner = await ctx.runQuery(internal.teams.getTeamAndOwner, {
+  teamId,
+});
+assert(teamAndOwner.team.owner === teamAndOwner.owner._id);
+
+export const getTeamAndOwner = internalQuery({
+  args: {
+    teamId: v.id("teams"),
+  },
+  handler: async (ctx, { teamId }) => {
+    const team = await Teams.load(ctx, { teamId });
+    const owner = await Users.load(ctx, { userId: team.owner });
+    return { team, owner };
+  },
+});
+```
+
+### Example: Loops
+```typescript
+// ❌ This will run a separate mutation for inserting each user,
+// which means you lose transaction guarantees like atomicity.
+export const importTeams = action({
+  args: {
+    teamId: v.id("teams"),
+  },
+  handler: async (ctx, { teamId }) => {
+    const teamMembers = await fetchTeamMemberData(teamId);
+    for (const member of teamMembers) {
+      await ctx.runMutation(internal.teams.insertUser, member);
+    }
+  },
+});
+
+// ✅ This action runs a single mutation that inserts all users in the same transaction.
+export const importTeams = action({
+  args: {
+    teamId: v.id("teams"),
+  },
+  handler: async (ctx, { teamId }) => {
+    const teamMembers = await fetchTeamMemberData(teamId);
+    await ctx.runMutation(internal.teams.insertUsers, teamMembers);
+  },
+});
+
+export const insertUsers = internalMutation({
+  args: { users: v.array(v.object({ name: v.string(), email: v.string() })) },
+  handler: async (ctx, { users }) => {
+    for (const { name, email } of users) {
+      await Users.insert(ctx, { name, email });
+    }
+  },
+});
+```
+
+### Exceptions
+If you're intentionally trying to process more data than fits in a single transaction, like running a migration or aggregating data, then it makes sense to have multiple sequential `ctx.runMutation` / `ctx.runQuery` calls.
+
+Multiple `ctx.runQuery` / `ctx.runMutation` calls are often necessary because the action does a side effect in between them. For example, reading some data, feeding it to an external service, and then writing the result back to the database.
+
+## Use ctx.runQuery and ctx.runMutation sparingly in queries and mutations
+
+### Why?
+While these queries and mutations run in the same transaction, and will give consistent results, they have extra overhead compared to plain TypeScript functions. Wanting a TypeScript helper function is much more common than needing `ctx.runQuery` or `ctx.runMutation`.
+
+### How?
+Audit your calls to `ctx.runQuery` and `ctx.runMutation` in queries and mutations. Unless one of the exceptions below applies, replace them with a plain TypeScript function.
+
+### Exceptions
+- If you're using components, these require `ctx.runQuery` or `ctx.runMutation`.
+- If you want partial rollback on an error, you will want `ctx.runMutation` instead of a plain TypeScript function.
+
+```typescript
+export const trySendMessage = mutation({
+  args: {
+    body: v.string(),
+    author: v.string(),
+  },
+  handler: async (ctx, { body, author }) => {
+    try {
+      await ctx.runMutation(internal.messages.sendMessage, { body, author });
+    } catch (e) {
+      // Record the failure, but rollback any writes from `sendMessage`
+      await ctx.db.insert("failures", {
+        kind: "MessageFailed",
+        body,
+        author,
+        error: `Error: ${e}`,
+      });
+    }
+  },
+});
 ```
