@@ -18,11 +18,9 @@ function InterviewAnalysis() {
   const hasTriggeredAnalysisRef = useRef(false);
   const [retryCount, setRetryCount] = useState(0);
 
-  // Convex hooks
   const session = useQuery(api.sessions.getSession, { sessionId });
   const analyzeAction = useConvexAction(api.sessions.analyzeSession);
 
-  // Handle session validation and trigger analysis - moved from useEffect
   const triggerAnalysis = async () => {
     if (hasTriggeredAnalysisRef.current) return;
 
@@ -31,9 +29,9 @@ function InterviewAnalysis() {
 
     try {
       await analyzeAction({ sessionId });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to analyze session:", error);
-      hasTriggeredAnalysisRef.current = false; // Reset for retry
+      hasTriggeredAnalysisRef.current = false;
 
       if (retryCount < 1) {
         toast.error("Failed to analyze interview", {
@@ -52,7 +50,6 @@ function InterviewAnalysis() {
     }
   };
 
-  // Use useEffect for session validation and navigation to prevent infinite renders
   useEffect(() => {
     if (session === undefined) return;
 
@@ -64,12 +61,10 @@ function InterviewAnalysis() {
       return;
     }
 
-    // Trigger analysis if session is ready and not already triggered
     if (session.status === "analyzing" && !hasTriggeredAnalysisRef.current) {
       triggerAnalysis();
     }
 
-    // Navigate when analysis is complete
     if (session.status === "complete") {
       navigate({
         to: "/interview/report/$sessionId",
@@ -78,7 +73,6 @@ function InterviewAnalysis() {
     }
   }, [session, navigate, sessionId]);
 
-  // Use useEffect for progress animation to prevent infinite renders
   useEffect(() => {
     if (!session || session.status !== "analyzing") return;
 
@@ -93,7 +87,7 @@ function InterviewAnalysis() {
 
       const stepIndex = Math.floor(Date.now() / 2000) % analysisSteps.length;
       setAnalysisStep(analysisSteps[stepIndex]);
-      setAnalysisProgress((prev) => Math.min(prev + 3, 100));
+      setAnalysisProgress((prev) => Math.min(prev + 1, 100));
     }, 100);
 
     return () => clearInterval(interval);
@@ -132,7 +126,6 @@ function InterviewAnalysis() {
       : []),
   ];
 
-  // Loading state
   if (session === undefined) {
     return (
       <LoadingTerminal
@@ -147,7 +140,6 @@ function InterviewAnalysis() {
     );
   }
 
-  // Not found: let the effect handle navigation without rendering a flicker
   if (session === null) {
     return null;
   }

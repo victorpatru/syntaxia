@@ -7,15 +7,15 @@ import { toast } from "sonner";
 import { validateSetupRoute } from "@/utils/route-guards";
 
 export const Route = createFileRoute("/_authed/interview/setup")({
-  beforeLoad: ({ search }) => {
-    const sessionId = (search as any).sessionId;
+  beforeLoad: ({ search }: { search: { sessionId: string } }) => {
+    const sessionId = search.sessionId;
     if (!sessionId) {
       throw redirect({ to: "/interview" });
     }
   },
   component: InterviewSetup,
-  validateSearch: (search): { sessionId: string } => ({
-    sessionId: (search.sessionId as string) || "",
+  validateSearch: (search: { sessionId: string }): { sessionId: string } => ({
+    sessionId: search.sessionId,
   }),
 });
 
@@ -27,14 +27,12 @@ function InterviewSetup() {
   const hasStartedSetupRef = useRef(false);
   const [retryCount, setRetryCount] = useState(0);
 
-  // Convex hooks
   const startSetupAction = useAction(api.sessions.startSetup);
   const session = useQuery(
     api.sessions.getSession,
     sessionId ? { sessionId } : "skip",
   );
 
-  // Start setup process - moved from useEffect to improve performance and follow React patterns
   const startSetupProcess = async () => {
     if (hasStartedSetupRef.current) return;
 
@@ -43,9 +41,9 @@ function InterviewSetup() {
 
     try {
       await startSetupAction({ sessionId });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to start setup:", error);
-      hasStartedSetupRef.current = false; // Reset for retry
+      hasStartedSetupRef.current = false;
 
       if (retryCount < 1) {
         toast.error("Failed to process job description", {
@@ -66,14 +64,12 @@ function InterviewSetup() {
     }
   };
 
-  // Use useEffect for setup initialization to prevent infinite renders
   useEffect(() => {
     if (!hasStartedSetupRef.current && sessionId) {
       startSetupProcess();
     }
   }, [sessionId, startSetupProcess]);
 
-  // Use useEffect for navigation to prevent infinite renders
   useEffect(() => {
     if (session === undefined) return;
 
@@ -83,7 +79,6 @@ function InterviewSetup() {
     }
   }, [session, session?.status, session?.questions, navigate]);
 
-  // Use useEffect for progress animation to prevent infinite renders
   useEffect(() => {
     if (!session || session.status !== "setup" || session.questions) return;
 
@@ -98,7 +93,7 @@ function InterviewSetup() {
 
       const stepIndex = Math.floor(Date.now() / 1000) % loadingSteps.length;
       setLoadingStep(loadingSteps[stepIndex]);
-      setLoadingProgress((prev) => Math.min(prev + 4, 100));
+      setLoadingProgress((prev) => Math.min(prev + 1, 100));
     }, 200);
 
     return () => clearInterval(interval);
@@ -119,7 +114,6 @@ function InterviewSetup() {
       : []),
   ];
 
-  // Only render setup UI when in loading or setup states to avoid flicker
   if (session === undefined) {
     return (
       <LoadingTerminal
@@ -139,7 +133,6 @@ function InterviewSetup() {
     session.status === "analyzing" ||
     session.status === "complete"
   ) {
-    // Let the effect handle navigation without rendering the setup UI
     return null;
   }
 
