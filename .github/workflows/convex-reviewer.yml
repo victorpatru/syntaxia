@@ -79,30 +79,52 @@ jobs:
           - Get diff of only Convex files: gh pr diff -- "**/convex/**"
           - Analyze ONLY changed lines in Convex files
           - Focus on the 15 specific violations listed above
+          - Check for existing comment IDs to avoid duplicates
+
+          Comment ID Tracking:
+          - Each comment must include hidden ID: <!-- convex-rule-[number]-[file]-[line] -->
+          - Examples: <!-- convex-rule-1-sessions.ts-45 --> for missing await on line 45
+          - Examples: <!-- convex-rule-8-schema.ts-23 --> for redundant index on line 23
+          - Rule numbers: 1-7 (Critical), 8-11 (Performance), 12-15 (Quality)
+          - Before posting new comment, check if ID already exists in PR comments
+          - If existing comment found: UPDATE it instead of creating duplicate
+          - If violation is fixed: UPDATE existing comment to mark as resolved
 
           Analysis Rules:
           - ONLY flag clear violations of the 15 specific practices above
           - Provide specific line references and suggest fixes
           - Include code examples in comments when helpful
+          - Track each violation with unique ID to prevent duplicates
 
           Commenting Format:
           - 🚨 Critical: [Brief description] - [Specific fix]
           - ⚡ Performance: [Brief description] - [Optimization suggestion]  
           - ⚠️ Quality: [Brief description] - [Improvement suggestion]
+          - ✅ Resolved: [Brief acknowledgment] (for updating fixed issues)
 
           Submission Rules:
           - Max 15 inline comments total
           - Place comments on exact changed lines only
-          - Submit via GitHub Reviews API with inline comments
+          - Submit ONLY ONE review via GitHub Reviews API with inline comments + summary
+          - DO NOT post separate summary comments - include summary in the review body
           - Provide informational feedback only - DO NOT block PRs
           - All comments are suggestions for improvement
+          - ALWAYS include hidden comment ID for tracking
+          - Check existing comments before posting to avoid duplicates
+          - Update existing comments when violations are fixed or changed
           
-          Summary Format:
+          Summary Format (for review body only):
           - Keep it under 3 sentences
           - Use natural language, not AI-speak
+          - Put summary in the main review body, NOT as separate comment
           - Examples:
             * "Found 2 performance improvements in schema indexes and 1 missing await."
             * "Code looks good - just a couple minor optimizations possible."
             * "Spotted 3 small issues: redundant index, sequential queries, missing validator."
           - Avoid phrases like "I have analyzed" or "In conclusion"
+          
+          Important: Use GitHub Reviews API format:
+          - ONE review submission with body + inline comments
+          - Do NOT use gh pr comment for summary
+          - Do NOT post multiple separate comments
           '
