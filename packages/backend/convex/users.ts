@@ -13,7 +13,7 @@ import { computePrimaryEmail } from "./utils/clerk";
 export const currentUser = query({
   args: {},
   returns: v.union(v.null(), v.any()),
-  handler: async (ctx) => {
+  handler: async (ctx): Promise<Doc<"users"> | null> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return null;
 
