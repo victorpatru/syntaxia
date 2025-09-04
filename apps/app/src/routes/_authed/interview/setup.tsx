@@ -4,6 +4,7 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useAction, useQuery } from "convex/react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
 import { validateSetupRoute } from "@/utils/route-guards";
 
 export const Route = createFileRoute("/_authed/interview/setup")({
@@ -40,7 +41,15 @@ function InterviewSetup() {
     setLoadingStep("Parsing job description...");
 
     try {
-      await startSetupAction({ sessionId });
+      const result = await startSetupAction({ sessionId });
+      if (isRateLimitFailure(result)) {
+        showRateLimitToast(
+          result.retryAfterMs,
+          "Failed to process job description",
+        );
+        hasStartedSetupRef.current = false;
+        return;
+      }
     } catch (error: unknown) {
       console.error("Failed to start setup:", error);
       hasStartedSetupRef.current = false;
