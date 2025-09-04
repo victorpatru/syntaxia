@@ -9,7 +9,7 @@ import {
   useQuery,
 } from "convex/react";
 import { Clock } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { env } from "@/env";
 import {
   Question,
@@ -82,40 +82,15 @@ function InterviewSession() {
     connectionStatus: "disconnected",
   });
 
-  // Compute voice state directly - replaced useEffect with useMemo for better performance
-  const computedVoiceState = useMemo(
-    () => ({
-      ...voiceState,
-      isPlaying: conversation.isSpeaking || false,
-      connectionStatus: (conversation.status === "connected"
-        ? "connected"
-        : conversation.status === "disconnected"
-          ? "disconnected"
-          : "connecting") as VoiceSessionState["connectionStatus"],
-    }),
-    [
-      conversation.status,
-      conversation.isSpeaking,
-      voiceState.isRecording,
-      voiceState.currentAudioLevel,
-      voiceState.lastError,
-    ],
-  );
-
-  // Use useEffect for voice state updates to prevent infinite renders
-  useEffect(() => {
-    if (
-      computedVoiceState.isPlaying !== voiceState.isPlaying ||
-      computedVoiceState.connectionStatus !== voiceState.connectionStatus
-    ) {
-      setVoiceState(computedVoiceState);
-    }
-  }, [
-    computedVoiceState.isPlaying,
-    computedVoiceState.connectionStatus,
-    voiceState.isPlaying,
-    voiceState.connectionStatus,
-  ]);
+  const derivedVoiceState = {
+    ...voiceState,
+    isPlaying: conversation.isSpeaking || false,
+    connectionStatus: (conversation.status === "connected"
+      ? "connected"
+      : conversation.status === "disconnected"
+        ? "disconnected"
+        : "connecting") as VoiceSessionState["connectionStatus"],
+  };
 
   const startVoiceConnection = useCallback(async () => {
     if (
@@ -384,7 +359,7 @@ function InterviewSession() {
                 currentQuestion={currentQuestion}
                 isRecording={isRecording}
                 onToggleRecording={toggleRecording}
-                voiceState={voiceState}
+                voiceState={derivedVoiceState}
               />
             )}
 
