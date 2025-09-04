@@ -1,8 +1,0 @@
-{
-    "agents": [
-        {
-            "name": "Interview Agent",
-            "config": "agent_configs/interview_agent.json"
-        }
-    ]
-}
