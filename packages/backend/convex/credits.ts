@@ -129,7 +129,7 @@ export const creditAccount = internalMutation({
     await ctx.db.insert("credits_log", {
       userId: user._id,
       amount: credits,
-      reason: "polar:order.paid",
+      reason: "polar:purchase",
       orderId,
     });
 
@@ -170,7 +170,7 @@ export const debitAccount = internalMutation({
     const existingCharge = await ctx.db
       .query("credits_log")
       .withIndex("by_session_reason", (q) =>
-        q.eq("sessionId", sessionId).eq("reason", "session:debit"),
+        q.eq("sessionId", sessionId).eq("reason", "session:usage"),
       )
       .unique();
 
@@ -187,7 +187,7 @@ export const debitAccount = internalMutation({
     await ctx.db.insert("credits_log", {
       userId: user._id,
       amount: -amount,
-      reason: "session:debit",
+      reason: "session:usage",
       sessionId,
     });
 

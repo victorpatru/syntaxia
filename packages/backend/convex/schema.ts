@@ -27,7 +27,8 @@ export default defineSchema({
   credits_log: defineTable({
     userId: v.id("users"),
     amount: v.number(),
-    reason: v.string(),
+    // Source:Action Format for Reason Fields
+    reason: v.union(v.literal("polar:purchase"), v.literal("session:usage")),
     orderId: v.optional(v.string()),
     sessionId: v.optional(v.id("interview_sessions")),
   })
