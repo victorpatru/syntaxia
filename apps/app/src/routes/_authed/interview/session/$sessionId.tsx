@@ -278,7 +278,7 @@ function InterviewSession() {
         setIsInterviewActive(true);
       } catch (error: unknown) {
         console.error("Failed to start session:", error);
-        toast.error("Failed to end session. Please try again.", {
+        toast.error("Failed to start session. Please try again.", {
           action: { label: "Retry", onClick: () => endInterview() },
         });
         setHasStartedActive(false);

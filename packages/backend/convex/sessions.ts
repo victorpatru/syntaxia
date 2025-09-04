@@ -672,12 +672,22 @@ export const startActive = mutation({
       throw new Error("Session not ready to start");
 
     const now = Date.now();
-    await ctx.db.patch(sessionId, {
+    const updateData: {
+      status: "active";
+      startedAt: number;
+      updatedAt: number;
+      micOnAt?: number;
+    } = {
       status: "active",
       startedAt: micOnAt || now,
-      micOnAt,
       updatedAt: now,
-    });
+    };
+
+    if (micOnAt !== undefined) {
+      updateData.micOnAt = micOnAt;
+    }
+
+    await ctx.db.patch(sessionId, updateData);
 
     await ctx.scheduler.runAfter(120 * 1000, internal.sessions.ensureCharge, {
       sessionId,
@@ -804,12 +814,22 @@ export const endSession = mutation({
       ? Math.floor((now - session.startedAt) / 1000)
       : 0;
 
-    await ctx.db.patch(sessionId, {
+    const updateData: {
+      status: "analyzing";
+      duration: number;
+      updatedAt: number;
+      elevenlabsConversationId?: string;
+    } = {
       status: "analyzing",
       duration,
-      elevenlabsConversationId,
       updatedAt: now,
-    });
+    };
+
+    if (elevenlabsConversationId !== undefined) {
+      updateData.elevenlabsConversationId = elevenlabsConversationId;
+    }
+
+    await ctx.db.patch(sessionId, updateData);
 
     await ctx.scheduler.runAfter(0, internal.sessions.ensureCharge, {
       sessionId,
@@ -846,10 +866,20 @@ export const getConversationToken = action({
       };
     }
 
-    const session = await ctx.runQuery(internal.sessions.getInternal, {
-      sessionId,
-    });
+    const { session, resolvedUserId } = await ctx.runQuery(
+      internal.sessions.getSessionDataForSetup,
+      {
+        sessionId,
+        clerkUserId: identity.subject,
+      },
+    );
     if (!session) throw new Error("Session not found");
+    if (!resolvedUserId || session.userId !== resolvedUserId) {
+      return {
+        success: false as const,
+        error: "Unauthorized access to session",
+      };
+    }
 
     try {
       const response = await fetch(
@@ -896,7 +926,7 @@ export const analyzeSession = action({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
 
-    const limit = await checkRateLimit(ctx, "analyzeSession", sessionId);
+    const limit = await checkRateLimit(ctx, "analyzeSession", identity.subject);
     if (!limit.ok) {
       return {
         success: false as const,
