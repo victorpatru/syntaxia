@@ -4,6 +4,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useAction as useConvexAction, useQuery } from "convex/react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
 import { validateAnalysisRoute } from "@/utils/route-guards";
 
 export const Route = createFileRoute("/_authed/interview/analysis/$sessionId")({
@@ -28,7 +29,12 @@ function InterviewAnalysis() {
     setAnalysisStep("Processing audio transcript...");
 
     try {
-      await analyzeAction({ sessionId });
+      const result = await analyzeAction({ sessionId });
+      if (isRateLimitFailure(result)) {
+        showRateLimitToast(result.retryAfterMs, "Failed to analyze interview");
+        hasTriggeredAnalysisRef.current = false;
+        return;
+      }
     } catch (error: unknown) {
       console.error("Failed to analyze session:", error);
       hasTriggeredAnalysisRef.current = false;

@@ -16,6 +16,7 @@ import {
   TranscriptEntry,
   VoiceSessionState,
 } from "@/types/interview";
+import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
 import { validateSessionRoute } from "@/utils/route-guards";
 
 export const Route = createFileRoute("/_authed/interview/session/$sessionId")({
@@ -144,6 +145,14 @@ function InterviewSession() {
 
     try {
       const tokenResponse = await getConversationTokenAction({ sessionId });
+      if (isRateLimitFailure(tokenResponse)) {
+        showRateLimitToast(
+          tokenResponse.retryAfterMs,
+          "Failed to initialize voice conversation",
+        );
+        setHasStartedActive(false);
+        return;
+      }
       await conversation.startSession({
         agentId: env.VITE_ELEVENLABS_AGENT_ID,
         conversationToken: tokenResponse.conversationToken,
@@ -230,7 +239,14 @@ function InterviewSession() {
 
     // Call Convex end mutation
     endMutation({ sessionId, elevenlabsConversationId: conversationId })
-      .then(() => {
+      .then((res: any) => {
+        if (isRateLimitFailure(res)) {
+          showRateLimitToast(
+            res.retryAfterMs,
+            "Failed to end session. Please try again.",
+          );
+          return;
+        }
         // Navigate to analysis
         navigate({
           to: "/interview/analysis/$sessionId",
@@ -286,7 +302,20 @@ function InterviewSession() {
 
       try {
         // Start Convex session
-        await startActiveMutation({ sessionId, micOnAt: micStartTime });
+        const res = await startActiveMutation({
+          sessionId,
+          micOnAt: micStartTime,
+        });
+        if (isRateLimitFailure(res)) {
+          showRateLimitToast(
+            res.retryAfterMs,
+            "Failed to start interview session",
+          );
+          setHasStartedActive(false);
+          setIsRecording(false);
+          setIsInterviewActive(false);
+          return;
+        }
         setIsInterviewActive(true);
 
         // Voice connection will be started automatically when session becomes active

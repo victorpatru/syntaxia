@@ -10,19 +10,24 @@ import {
 import { computePrimaryEmail } from "./utils/clerk";
 
 /** Get the current user (null if not authenticated) */
-export const currentUser = query(async (ctx: QueryCtx) => {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) return null;
+export const currentUser = query({
+  args: {},
+  returns: v.union(v.null(), v.any()),
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
 
-  return await ctx.db
-    .query("users")
-    .withIndex("by_clerk_id", (q) => q.eq("clerkUserId", identity.subject))
-    .unique();
+    return await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkUserId", identity.subject))
+      .unique();
+  },
 });
 
 /** Webhook: Create or update user from Clerk */
 export const updateOrCreateUser = internalMutation({
   args: { clerkUser: v.any() },
+  returns: v.null(),
   async handler(ctx, { clerkUser }: { clerkUser: UserJSON }) {
     const existing = await ctx.db
       .query("users")
@@ -47,12 +52,14 @@ export const updateOrCreateUser = internalMutation({
         credits: 0,
       });
     }
+    return null;
   },
 });
 
 /** Webhook: Delete user from Clerk */
 export const deleteUser = internalMutation({
   args: { id: v.string() },
+  returns: v.null(),
   async handler(ctx, { id }) {
     const user = await ctx.db
       .query("users")
@@ -62,6 +69,7 @@ export const deleteUser = internalMutation({
     if (user) {
       await ctx.db.delete(user._id);
     }
+    return null;
   },
 });
 
@@ -95,15 +103,3 @@ export async function requireUser(ctx: QueryCtx): Promise<Doc<"users">> {
 
   return user;
 }
-
-export const letsFilterUsers = internalQuery({
-  args: {},
-  returns: v.number(),
-  handler: async (ctx) => {
-    const users = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("firstName"), "Test"))
-      .collect();
-    return users.length;
-  },
-});

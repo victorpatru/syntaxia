@@ -55,7 +55,7 @@ export const handleWebhook = internalAction({
 
       if (clerkUserId && productId && orderId) {
         if (productId === env.POLAR_PRODUCT_ID_CREDITS_15) {
-          await ctx.runMutation(internal.credits.addCredits, {
+          await ctx.runMutation(internal.credits.creditAccount, {
             clerkUserId,
             orderId,
             credits: 15,

@@ -10,6 +10,7 @@ import { useAction } from "convex/react";
 import { Play } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
 import { getSessionRoute } from "@/utils/route-guards";
 
 export const Route = createFileRoute("/_authed/interview/")({
@@ -60,9 +61,16 @@ function InterviewStart() {
       });
 
       if (!result.success) {
-        toast.error(
-          "We are not able to start the interview. Please try again with a different description.",
-        );
+        if (isRateLimitFailure(result)) {
+          showRateLimitToast(
+            result.retryAfterMs,
+            "We are not able to start the interview. Please try again with a different description.",
+          );
+        } else {
+          toast.error(
+            "We are not able to start the interview. Please try again with a different description.",
+          );
+        }
         return;
       }
 

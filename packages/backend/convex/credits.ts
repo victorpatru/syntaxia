@@ -1,14 +1,13 @@
 import { Polar } from "@polar-sh/sdk";
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
 import {
   type ActionCtx,
   action,
   internalMutation,
-  type QueryCtx,
   query,
 } from "./_generated/server";
 import { env } from "./env";
+import { checkRateLimit } from "./rate_limit/helpers";
 import { requireUser } from "./users";
 
 export const getBalance = query({
@@ -53,10 +52,26 @@ export const getAvailablePackages = query({
 
 export const createCheckout = action({
   args: { packageId: v.string() },
-  returns: v.object({ url: v.string() }),
+  returns: v.union(
+    v.object({ url: v.string() }),
+    v.object({
+      success: v.literal(false),
+      error: v.string(),
+      retryAfterMs: v.optional(v.number()),
+    }),
+  ),
   handler: async (ctx: ActionCtx, { packageId }) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
+
+    const limit = await checkRateLimit(ctx, "createCheckout", identity.subject);
+    if (!limit.ok) {
+      return {
+        success: false as const,
+        error: "Too many attempts. Please try again later.",
+        retryAfterMs: limit.retryAfterMs,
+      };
+    }
 
     const polar = new Polar({
       accessToken: env.POLAR_ORGANIZATION_TOKEN,
