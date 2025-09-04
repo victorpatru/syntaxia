@@ -161,6 +161,12 @@ export const debitAccount = internalMutation({
       return null;
     }
 
+    const now = Date.now();
+    await ctx.db.patch(sessionId, {
+      chargeCommittedAt: now,
+      updatedAt: now,
+    });
+
     const existingCharge = await ctx.db
       .query("credits_log")
       .withIndex("by_session_reason", (q) =>
@@ -187,12 +193,6 @@ export const debitAccount = internalMutation({
 
     await ctx.db.patch(user._id, {
       credits: currentBalance - amount,
-    });
-
-    const now = Date.now();
-    await ctx.db.patch(sessionId, {
-      chargeCommittedAt: now,
-      updatedAt: now,
     });
 
     console.log(
