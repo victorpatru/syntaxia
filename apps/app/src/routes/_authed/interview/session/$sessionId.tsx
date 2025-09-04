@@ -10,6 +10,7 @@ import {
 } from "convex/react";
 import { Clock } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { env } from "@/env";
 import {
   Question,
@@ -32,7 +33,6 @@ function InterviewSession() {
   const [hasStartedActive, setHasStartedActive] = useState(false);
   const [micOnAt, setMicOnAt] = useState<number | null>(null);
 
-  // Convex hooks
   const session = useQuery(api.sessions.getSession, { sessionId });
   const startActiveMutation = useConvexMutation(api.sessions.startActive);
   const endMutation = useConvexMutation(api.sessions.endSession);
@@ -40,12 +40,10 @@ function InterviewSession() {
     api.sessions.getConversationToken,
   );
 
-  // ElevenLabs conversation hook
   const conversation = useConversation({
     onConnect: () => {
       setVoiceState((prev) => ({ ...prev, connectionStatus: "connected" }));
 
-      // Auto-start recording when connection is established
       if (!isRecording) {
         toggleRecording();
       }
@@ -53,10 +51,8 @@ function InterviewSession() {
     onDisconnect: () => {
       setVoiceState((prev) => ({ ...prev, connectionStatus: "disconnected" }));
     },
-    onMessage: () => {
-      // Handle transcript or other messages if needed
-    },
-    onError: (error) => {
+    onMessage: () => {},
+    onError: (error: unknown) => {
       console.error("ElevenLabs error:", error);
       setVoiceState((prev) => ({
         ...prev,
@@ -66,7 +62,6 @@ function InterviewSession() {
     },
   });
 
-  // Get current question from session data safely
   const idxRaw = session?.currentQuestionIndex;
   const idx = typeof idxRaw === "number" ? idxRaw : -1;
   const questions = session?.questions ?? [];
@@ -101,7 +96,6 @@ function InterviewSession() {
       return;
     }
 
-    // Require questions before starting; if missing, fail setup and navigate back
     if (!session?.questions || session.questions.length === 0) {
       navigate({ to: "/interview" });
       return;
@@ -136,7 +130,6 @@ function InterviewSession() {
         dynamicVariables,
       });
     } catch (error) {
-      // If token fetch fails, fail the setup and navigate out
       console.error("Failed to start WebRTC session:", error);
       setHasStartedActive(false);
       navigate({ to: "/interview" });
@@ -150,7 +143,6 @@ function InterviewSession() {
     navigate,
   ]);
 
-  // Use useEffect for session validation and state updates to prevent infinite renders
   useEffect(() => {
     if (session === undefined) return;
 
@@ -160,16 +152,15 @@ function InterviewSession() {
       return;
     }
 
-    // Update interview state based on session status
     const shouldBeActive = session.status === "active" && session.startedAt;
     if (shouldBeActive && !isInterviewActive) {
       setIsInterviewActive(true);
-      // Calculate elapsed time from when session started
-      const elapsed = Math.floor((Date.now() - session.startedAt!) / 1000);
+      const elapsed = session.startedAt
+        ? Math.floor((Date.now() - session.startedAt) / 1000)
+        : 0;
       setInterviewTime(elapsed);
     }
 
-    // Auto-start voice connection logic
     const shouldAutoStart =
       session.status === "active" &&
       session.experienceLevel &&
@@ -201,7 +192,6 @@ function InterviewSession() {
   const endInterview = useCallback(async () => {
     setIsInterviewActive(false);
 
-    // End ElevenLabs conversation and get conversation ID
     let conversationId: string | undefined;
     try {
       if (conversation.status === "connected") {
@@ -212,7 +202,6 @@ function InterviewSession() {
       console.error("Failed to end ElevenLabs conversation:", error);
     }
 
-    // Call Convex end mutation
     endMutation({ sessionId, elevenlabsConversationId: conversationId })
       .then((res: any) => {
         if (isRateLimitFailure(res)) {
@@ -222,26 +211,25 @@ function InterviewSession() {
           );
           return;
         }
-        // Navigate to analysis
         navigate({
           to: "/interview/analysis/$sessionId",
           params: { sessionId },
         });
       })
-      .catch((error: any) => {
+      .catch((error: unknown) => {
         console.error("Failed to end session:", error);
-        alert("Failed to end session. Please try again.");
+        toast.error("Failed to end session. Please try again.", {
+          action: { label: "Retry", onClick: () => endInterview() },
+        });
       });
   }, [sessionId, endMutation, navigate, conversation]);
 
-  // Timer effect - separate from session loading
   useEffect(() => {
     if (!isInterviewActive) return;
 
     const timer = setInterval(() => {
       setInterviewTime((prev) => {
         if (prev >= 900) {
-          // 15 minutes max
           clearInterval(timer);
           endInterview();
           return 900;
@@ -259,8 +247,6 @@ function InterviewSession() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // startVoiceConnection function moved earlier in the component to avoid hoisting issues
-
   const toggleRecording = async () => {
     const newRecordingState = !isRecording;
     setIsRecording(newRecordingState);
@@ -269,14 +255,12 @@ function InterviewSession() {
       isRecording: newRecordingState,
     }));
 
-    // On first mic-ON for setup sessions, trigger startActive
     if (newRecordingState && session?.status === "setup") {
       setHasStartedActive(true);
       const micStartTime = Date.now();
       setMicOnAt(micStartTime);
 
       try {
-        // Start Convex session
         const res = await startActiveMutation({
           sessionId,
           micOnAt: micStartTime,
@@ -292,11 +276,11 @@ function InterviewSession() {
           return;
         }
         setIsInterviewActive(true);
-
-        // Voice connection will be started automatically when session becomes active
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Failed to start session:", error);
-        alert("Failed to start interview session. Please try again.");
+        toast.error("Failed to end session. Please try again.", {
+          action: { label: "Retry", onClick: () => endInterview() },
+        });
         setHasStartedActive(false);
         setIsRecording(false);
         setIsInterviewActive(false);
@@ -304,7 +288,6 @@ function InterviewSession() {
     }
   };
 
-  // Loading state
   if (session === undefined) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center font-mono">
@@ -316,7 +299,6 @@ function InterviewSession() {
     );
   }
 
-  // Not found: let the effect handle navigation without rendering a flicker
   if (session === null) {
     return null;
   }
