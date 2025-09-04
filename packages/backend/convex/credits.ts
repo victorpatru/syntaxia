@@ -53,7 +53,10 @@ export const getAvailablePackages = query({
 export const createCheckout = action({
   args: { packageId: v.string() },
   returns: v.union(
-    v.object({ url: v.string() }),
+    v.object({
+      success: v.literal(true),
+      url: v.string(),
+    }),
     v.object({
       success: v.literal(false),
       error: v.string(),
@@ -63,6 +66,16 @@ export const createCheckout = action({
   handler: async (ctx: ActionCtx, { packageId }) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
+
+    const ALLOWED_PACKAGE_IDS = new Set(
+      [env.POLAR_PRODUCT_ID_CREDITS_15].filter(Boolean),
+    );
+    if (!ALLOWED_PACKAGE_IDS.has(packageId)) {
+      return {
+        success: false as const,
+        error: "Invalid packageId",
+      };
+    }
 
     const limit = await checkRateLimit(ctx, "createCheckout", identity.subject);
     if (!limit.ok) {
@@ -86,7 +99,10 @@ export const createCheckout = action({
       successUrl: `${env.APP_URL}/credits?checkout_id={CHECKOUT_ID}`,
     });
 
-    return { url: checkout.url };
+    return {
+      success: true as const,
+      url: checkout.url,
+    };
   },
 });
 
