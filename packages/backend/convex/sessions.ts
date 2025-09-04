@@ -391,11 +391,17 @@ export const getUserBalance = query({
   args: { sessionId: v.id("interview_sessions") },
   returns: v.number(),
   handler: async (ctx, { sessionId }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
     const session = await ctx.db.get(sessionId);
     if (!session) throw new Error("Session not found");
 
-    const user = await ctx.db.get(session.userId);
-    if (!user) throw new Error("User not found");
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkUserId", identity.subject))
+      .unique();
+    if (!user || session.userId !== user._id) throw new Error("Unauthorized");
 
     return user.credits ?? 0;
   },
