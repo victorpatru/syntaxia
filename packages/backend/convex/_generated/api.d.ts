@@ -14,6 +14,8 @@ import type * as http_clerk from "../http/clerk.js";
 import type * as http_polar from "../http/polar.js";
 import type * as http from "../http.js";
 import type * as index from "../index.js";
+import type * as rate_limit_config from "../rate_limit/config.js";
+import type * as rate_limit_helpers from "../rate_limit/helpers.js";
 import type * as sessions from "../sessions.js";
 import type * as types_webhooks from "../types/webhooks.js";
 import type * as users from "../users.js";
@@ -44,6 +46,8 @@ declare const fullApi: ApiFromModules<{
   "http/polar": typeof http_polar;
   http: typeof http;
   index: typeof index;
+  "rate_limit/config": typeof rate_limit_config;
+  "rate_limit/helpers": typeof rate_limit_helpers;
   sessions: typeof sessions;
   "types/webhooks": typeof types_webhooks;
   users: typeof users;
