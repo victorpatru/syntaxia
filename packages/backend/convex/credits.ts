@@ -1,11 +1,9 @@
 import { Polar } from "@polar-sh/sdk";
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
 import {
   type ActionCtx,
   action,
   internalMutation,
-  type QueryCtx,
   query,
 } from "./_generated/server";
 import { env } from "./env";
