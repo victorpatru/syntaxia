@@ -87,6 +87,10 @@ function InterviewStart() {
 
   const startInterview = () => {
     if (!jobDescription.trim()) return;
+    if (jobDescription.trim().length < 50) {
+      toast.error("Job description must be at least 50 characters.");
+      return;
+    }
     if (balance < 15) {
       toast.error("You need at least 15 credits to start an interview.", {
         action: {
@@ -180,13 +184,22 @@ function InterviewStart() {
                   </div>
                 </div>
                 <div className="mt-6 flex items-center justify-between">
-                  <span className="text-terminal-green/60 text-sm font-mono">
-                    {jobDescription.length} chars
+                  <span
+                    className={`text-sm font-mono ${
+                      jobDescription.length > 0 && jobDescription.length < 50
+                        ? "text-terminal-amber"
+                        : "text-terminal-green/60"
+                    }`}
+                  >
+                    {jobDescription.length}/50 chars minimum
                   </span>
                   <Button
                     onClick={startInterview}
                     disabled={
-                      !jobDescription.trim() || isCreating || balance < 15
+                      !jobDescription.trim() ||
+                      jobDescription.trim().length < 50 ||
+                      isCreating ||
+                      balance < 15
                     }
                     className="font-mono text-sm bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-4 py-2 transition-colors h-10 min-w-28"
                   >

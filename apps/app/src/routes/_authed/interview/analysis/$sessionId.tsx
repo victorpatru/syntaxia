@@ -60,10 +60,14 @@ function InterviewAnalysis() {
     if (session === undefined) return;
 
     if (session === null) {
-      const validation = validateAnalysisRoute(session);
-      if (!validation.isValid && validation.redirectTo) {
-        navigate({ to: validation.redirectTo });
-      }
+      toast.error("Session not found.");
+      navigate({ to: "/interview" });
+      return;
+    }
+
+    const validation = validateAnalysisRoute(session);
+    if (!validation.isValid && validation.redirectTo) {
+      navigate({ to: validation.redirectTo });
       return;
     }
 
@@ -144,10 +148,6 @@ function InterviewAnalysis() {
         ]}
       />
     );
-  }
-
-  if (session === null) {
-    return null;
   }
 
   return (
