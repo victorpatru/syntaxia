@@ -2,7 +2,7 @@ import { api } from "@syntaxia/backend/convex/_generated/api";
 import { LoadingTerminal } from "@syntaxia/ui/interview";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useAction, useQuery } from "convex/react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
 import { validateSetupRoute } from "@/utils/route-guards";
@@ -34,7 +34,7 @@ function InterviewSetup() {
     sessionId ? { sessionId } : "skip",
   );
 
-  const startSetupProcess = async () => {
+  const startSetupProcess = useCallback(async () => {
     if (hasStartedSetupRef.current) return;
 
     hasStartedSetupRef.current = true;
@@ -71,7 +71,14 @@ function InterviewSetup() {
         setTimeout(() => navigate({ to: "/interview" }), 2000);
       }
     }
-  };
+  }, [
+    sessionId,
+    retryCount,
+    startSetupAction,
+    setLoadingStep,
+    setRetryCount,
+    navigate,
+  ]);
 
   useEffect(() => {
     if (!hasStartedSetupRef.current && sessionId) {
