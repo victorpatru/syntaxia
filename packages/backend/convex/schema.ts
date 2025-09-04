@@ -48,6 +48,18 @@ export default defineSchema({
     updatedAt: v.number(),
     completedAt: v.optional(v.number()),
     jobDescription: v.string(),
+    failureCode: v.optional(
+      v.union(
+        v.literal("AUTH"),
+        v.literal("UNAUTHORIZED"),
+        v.literal("NOT_FOUND"),
+        v.literal("CREDITS"),
+        v.literal("RATE_LIMIT"),
+        v.literal("PARSE"),
+        v.literal("UNKNOWN"),
+      ),
+    ),
+    failureMessage: v.optional(v.string()),
     experienceLevel: v.optional(
       v.union(v.literal("mid"), v.literal("senior"), v.literal("staff")),
     ),

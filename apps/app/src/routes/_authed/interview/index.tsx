@@ -1,5 +1,6 @@
 import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@syntaxia/backend/convex/_generated/api";
+import { Id } from "@syntaxia/backend/convex/_generated/dataModel";
 import { JD_PRESETS, PRIMARY_PRESET_COUNT } from "@syntaxia/shared";
 import { Button } from "@syntaxia/ui/button";
 import { Textarea } from "@syntaxia/ui/textarea";
@@ -8,12 +9,15 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useAction } from "convex/react";
 import { Play } from "lucide-react";
-import { startTransition, useRef, useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
 import { getSessionRoute } from "@/utils/route-guards";
 
 export const Route = createFileRoute("/_authed/interview/")({
+  validateSearch: (search: { sessionId?: Id<"interview_sessions"> } = {}) => ({
+    sessionId: search.sessionId,
+  }),
   loader: async (opts) => {
     const [, currentSession] = await Promise.all([
       opts.context.queryClient.ensureQueryData(
@@ -33,12 +37,21 @@ export const Route = createFileRoute("/_authed/interview/")({
 function InterviewStart() {
   const navigate = useNavigate();
   const [jobDescription, setJobDescription] = useState("");
+  const { sessionId } = Route.useSearch() as {
+    sessionId?: Id<"interview_sessions">;
+  };
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [showAllPresets, setShowAllPresets] = useState(false);
 
   const { data: balance } = useSuspenseQuery(
     convexQuery(api.credits.getBalance, {}),
+  );
+
+  const { data: maybeSession } = useSuspenseQuery(
+    sessionId
+      ? convexQuery(api.sessions.getSession, { sessionId })
+      : convexQuery(api.sessions.getCurrentSession, {}),
   );
 
   const convexCreateSession = useAction(api.sessions.createSessionValidated);

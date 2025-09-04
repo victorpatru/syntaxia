@@ -5,13 +5,22 @@
 
 export interface SessionData {
   _id: string;
-  status: "setup" | "active" | "analyzing" | "complete";
+  status: "setup" | "active" | "analyzing" | "complete" | "failed";
   questions?: any[];
   experienceLevel?: string;
   domainTrack?: string;
   startedAt?: number;
   duration?: number;
   jobDescription?: string;
+  failureCode?:
+    | "AUTH"
+    | "UNAUTHORIZED"
+    | "NOT_FOUND"
+    | "CREDITS"
+    | "RATE_LIMIT"
+    | "PARSE"
+    | "UNKNOWN";
+  failureMessage?: string;
 }
 
 /**
@@ -27,6 +36,8 @@ export function getSessionRoute(session: SessionData): string {
       return `/interview/analysis/${session._id}`;
     case "complete":
       return `/interview/report/${session._id}`;
+    case "failed":
+      return `/interview/setup-failed?sessionId=${session._id}`;
     default:
       return "/interview";
   }
@@ -59,6 +70,12 @@ export function validateSetupRoute(session: SessionData | null): {
 } {
   if (!session) {
     return { isValid: false, redirectTo: "/interview" };
+  }
+  if (session.status === "failed") {
+    return {
+      isValid: false,
+      redirectTo: `/interview/setup-failed?sessionId=${session._id}`,
+    };
   }
   // If questions are ready, redirect to session (session route accepts 'setup' or 'active')
   if (session.questions && session.questions.length > 0) {

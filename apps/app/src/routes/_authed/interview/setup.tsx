@@ -1,4 +1,5 @@
 import { api } from "@syntaxia/backend/convex/_generated/api";
+import { Id } from "@syntaxia/backend/convex/_generated/dataModel";
 import { LoadingTerminal } from "@syntaxia/ui/interview";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useAction, useQuery } from "convex/react";
@@ -9,7 +10,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { toast } from "sonner";
 import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
 import { validateSetupRoute } from "@/utils/route-guards";
 
@@ -17,22 +17,26 @@ export const Route = createFileRoute("/_authed/interview/setup")({
   beforeLoad: ({ search }: { search: { sessionId: string } }) => {
     const sessionId = search.sessionId;
     if (!sessionId) {
-      throw redirect({ to: "/interview" });
+      throw redirect({ to: "/interview", search: { sessionId: undefined } });
     }
   },
   component: InterviewSetup,
-  validateSearch: (search: { sessionId: string }): { sessionId: string } => ({
+  validateSearch: (search: {
+    sessionId: Id<"interview_sessions">;
+  }): { sessionId: Id<"interview_sessions"> } => ({
     sessionId: search.sessionId,
   }),
 });
 
 function InterviewSetup() {
   const navigate = useNavigate();
-  const { sessionId } = Route.useSearch() as { sessionId: string };
+  const { sessionId } = Route.useSearch() as {
+    sessionId: Id<"interview_sessions">;
+  };
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingStep, setLoadingStep] = useState("Preparing session...");
   const hasStartedSetupRef = useRef(false);
-  const [retryCount, setRetryCount] = useState(0);
+  // removed unused retryCount state
 
   const startSetupAction = useAction(api.sessions.startSetup);
   const session = useQuery(
@@ -54,37 +58,24 @@ function InterviewSetup() {
           "Failed to process job description",
         );
         hasStartedSetupRef.current = false;
+        navigate({ to: "/interview/setup-failed", search: { sessionId } });
+        return;
+      }
+      if (
+        result &&
+        typeof result === "object" &&
+        (result as any).success === false
+      ) {
+        hasStartedSetupRef.current = false;
+        navigate({ to: "/interview/setup-failed", search: { sessionId } });
         return;
       }
     } catch (error: unknown) {
       console.error("Failed to start setup:", error);
       hasStartedSetupRef.current = false;
-
-      if (retryCount < 1) {
-        toast.error("Failed to process job description", {
-          action: {
-            label: "Retry",
-            onClick: () => {
-              setRetryCount((prev) => prev + 1);
-              startSetupProcess();
-            },
-          },
-        });
-      } else {
-        toast.error(
-          "Failed to process job description. Returning to start page.",
-        );
-        setTimeout(() => navigate({ to: "/interview" }), 2000);
-      }
+      navigate({ to: "/interview/setup-failed", search: { sessionId } });
     }
-  }, [
-    sessionId,
-    retryCount,
-    startSetupAction,
-    setLoadingStep,
-    setRetryCount,
-    navigate,
-  ]);
+  }, [sessionId, startSetupAction, setLoadingStep, navigate]);
 
   useEffect(() => {
     if (!hasStartedSetupRef.current && sessionId) {
@@ -97,7 +88,11 @@ function InterviewSetup() {
 
     const validation = validateSetupRoute(session);
     if (!validation.isValid && validation.redirectTo) {
-      navigate({ to: validation.redirectTo });
+      const url = new URL(validation.redirectTo, window.location.origin);
+      navigate({
+        to: url.pathname as any,
+        search: Object.fromEntries(url.searchParams) as any,
+      });
     }
   }, [session, navigate]);
 

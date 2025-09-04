@@ -37,6 +37,6 @@ export function isRateLimitFailure(
     !!result &&
     typeof result === "object" &&
     (result as any).success === false &&
-    typeof (result as any).error === "string"
+    typeof (result as any).retryAfterMs === "number"
   );
 }

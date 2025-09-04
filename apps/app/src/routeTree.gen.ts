@@ -15,6 +15,7 @@ import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthedCreditsRouteImport } from './routes/_authed/credits'
 import { Route as AuthedInterviewIndexRouteImport } from './routes/_authed/interview/index'
+import { Route as AuthedInterviewSetupFailedRouteImport } from './routes/_authed/interview/setup-failed'
 import { Route as AuthedInterviewSetupRouteImport } from './routes/_authed/interview/setup'
 import { Route as AuthedInterviewReportsRouteImport } from './routes/_authed/interview/reports'
 import { Route as AuthedInterviewSessionSessionIdRouteImport } from './routes/_authed/interview/session/$sessionId'
@@ -50,6 +51,12 @@ const AuthedInterviewIndexRoute = AuthedInterviewIndexRouteImport.update({
   path: '/interview/',
   getParentRoute: () => AuthedRouteRoute,
 } as any)
+const AuthedInterviewSetupFailedRoute =
+  AuthedInterviewSetupFailedRouteImport.update({
+    id: '/interview/setup-failed',
+    path: '/interview/setup-failed',
+    getParentRoute: () => AuthedRouteRoute,
+  } as any)
 const AuthedInterviewSetupRoute = AuthedInterviewSetupRouteImport.update({
   id: '/interview/setup',
   path: '/interview/setup',
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/credits': typeof AuthedCreditsRoute
   '/interview/reports': typeof AuthedInterviewReportsRoute
   '/interview/setup': typeof AuthedInterviewSetupRoute
+  '/interview/setup-failed': typeof AuthedInterviewSetupFailedRoute
   '/interview': typeof AuthedInterviewIndexRoute
   '/interview/analysis/$sessionId': typeof AuthedInterviewAnalysisSessionIdRoute
   '/interview/report/$sessionId': typeof AuthedInterviewReportSessionIdRoute
@@ -98,6 +106,7 @@ export interface FileRoutesByTo {
   '/credits': typeof AuthedCreditsRoute
   '/interview/reports': typeof AuthedInterviewReportsRoute
   '/interview/setup': typeof AuthedInterviewSetupRoute
+  '/interview/setup-failed': typeof AuthedInterviewSetupFailedRoute
   '/interview': typeof AuthedInterviewIndexRoute
   '/interview/analysis/$sessionId': typeof AuthedInterviewAnalysisSessionIdRoute
   '/interview/report/$sessionId': typeof AuthedInterviewReportSessionIdRoute
@@ -112,6 +121,7 @@ export interface FileRoutesById {
   '/_authed/credits': typeof AuthedCreditsRoute
   '/_authed/interview/reports': typeof AuthedInterviewReportsRoute
   '/_authed/interview/setup': typeof AuthedInterviewSetupRoute
+  '/_authed/interview/setup-failed': typeof AuthedInterviewSetupFailedRoute
   '/_authed/interview/': typeof AuthedInterviewIndexRoute
   '/_authed/interview/analysis/$sessionId': typeof AuthedInterviewAnalysisSessionIdRoute
   '/_authed/interview/report/$sessionId': typeof AuthedInterviewReportSessionIdRoute
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/credits'
     | '/interview/reports'
     | '/interview/setup'
+    | '/interview/setup-failed'
     | '/interview'
     | '/interview/analysis/$sessionId'
     | '/interview/report/$sessionId'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/credits'
     | '/interview/reports'
     | '/interview/setup'
+    | '/interview/setup-failed'
     | '/interview'
     | '/interview/analysis/$sessionId'
     | '/interview/report/$sessionId'
@@ -151,6 +163,7 @@ export interface FileRouteTypes {
     | '/_authed/credits'
     | '/_authed/interview/reports'
     | '/_authed/interview/setup'
+    | '/_authed/interview/setup-failed'
     | '/_authed/interview/'
     | '/_authed/interview/analysis/$sessionId'
     | '/_authed/interview/report/$sessionId'
@@ -208,6 +221,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedInterviewIndexRouteImport
       parentRoute: typeof AuthedRouteRoute
     }
+    '/_authed/interview/setup-failed': {
+      id: '/_authed/interview/setup-failed'
+      path: '/interview/setup-failed'
+      fullPath: '/interview/setup-failed'
+      preLoaderRoute: typeof AuthedInterviewSetupFailedRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
     '/_authed/interview/setup': {
       id: '/_authed/interview/setup'
       path: '/interview/setup'
@@ -250,6 +270,7 @@ interface AuthedRouteRouteChildren {
   AuthedCreditsRoute: typeof AuthedCreditsRoute
   AuthedInterviewReportsRoute: typeof AuthedInterviewReportsRoute
   AuthedInterviewSetupRoute: typeof AuthedInterviewSetupRoute
+  AuthedInterviewSetupFailedRoute: typeof AuthedInterviewSetupFailedRoute
   AuthedInterviewIndexRoute: typeof AuthedInterviewIndexRoute
   AuthedInterviewAnalysisSessionIdRoute: typeof AuthedInterviewAnalysisSessionIdRoute
   AuthedInterviewReportSessionIdRoute: typeof AuthedInterviewReportSessionIdRoute
@@ -260,6 +281,7 @@ const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
   AuthedCreditsRoute: AuthedCreditsRoute,
   AuthedInterviewReportsRoute: AuthedInterviewReportsRoute,
   AuthedInterviewSetupRoute: AuthedInterviewSetupRoute,
+  AuthedInterviewSetupFailedRoute: AuthedInterviewSetupFailedRoute,
   AuthedInterviewIndexRoute: AuthedInterviewIndexRoute,
   AuthedInterviewAnalysisSessionIdRoute: AuthedInterviewAnalysisSessionIdRoute,
   AuthedInterviewReportSessionIdRoute: AuthedInterviewReportSessionIdRoute,
