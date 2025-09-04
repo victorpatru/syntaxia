@@ -13,6 +13,7 @@ import {
   query,
 } from "./_generated/server";
 import { env } from "./env";
+import { checkRateLimit } from "./rate_limit/helpers";
 import { requireUser } from "./users";
 
 const GATEWAY_MODELS = {
@@ -283,9 +284,26 @@ export const createSessionValidated = action({
       success: v.literal(true),
       sessionId: v.id("interview_sessions"),
     }),
-    v.object({ success: v.literal(false), error: v.string() }),
+    v.object({
+      success: v.literal(false),
+      error: v.string(),
+      retryAfterMs: v.optional(v.number()),
+    }),
   ),
   handler: async (ctx, { jobDescription }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return { success: false as const, error: "Not authenticated" };
+    }
+    const limit = await checkRateLimit(ctx, "createSession", identity.subject);
+    if (!limit.ok) {
+      return {
+        success: false as const,
+        error: "Too many attempts. Please try again later.",
+        retryAfterMs: limit.retryAfterMs,
+      };
+    }
+
     const { object: guard } = await generateObject({
       model: GATEWAY_MODELS.CLASSIFICATION,
       schema: JDGuardSchema,
@@ -312,17 +330,23 @@ export const createSessionValidated = action({
 
 export const startSetup = action({
   args: { sessionId: v.id("interview_sessions") },
-  returns: v.object({
-    questions: v.array(QuestionValidator),
-    detectedSkills: v.array(v.string()),
-    experienceLevel: ExperienceLevelValidator,
-    domainTrack: DomainTrackValidator,
-  }),
+  returns: v.union(
+    v.object({
+      questions: v.array(QuestionValidator),
+      detectedSkills: v.array(v.string()),
+      experienceLevel: ExperienceLevelValidator,
+      domainTrack: DomainTrackValidator,
+    }),
+    v.object({
+      success: v.literal(false),
+      error: v.string(),
+      retryAfterMs: v.optional(v.number()),
+    }),
+  ),
   handler: async (ctx, { sessionId }) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
 
-    // Single query for transaction consistency
     const { session, resolvedUserId, balance } = await ctx.runQuery(
       internal.sessions.getSessionDataForSetup,
       {
@@ -339,6 +363,15 @@ export const startSetup = action({
       throw new Error(
         "Insufficient credits. Need at least 15 credits to start an interview.",
       );
+    }
+
+    const limit = await checkRateLimit(ctx, "startSetup", resolvedUserId);
+    if (!limit.ok) {
+      return {
+        success: false as const,
+        error: "Too many attempts. Please try again later.",
+        retryAfterMs: limit.retryAfterMs,
+      };
     }
 
     try {
@@ -494,12 +527,28 @@ export const startActive = mutation({
     sessionId: v.id("interview_sessions"),
     micOnAt: v.optional(v.number()),
   },
-  returns: v.object({
-    sessionId: v.id("interview_sessions"),
-    startedAt: v.number(),
-  }),
+  returns: v.union(
+    v.object({
+      sessionId: v.id("interview_sessions"),
+      startedAt: v.number(),
+    }),
+    v.object({
+      success: v.literal(false),
+      error: v.string(),
+      retryAfterMs: v.optional(v.number()),
+    }),
+  ),
   handler: async (ctx, { sessionId, micOnAt }) => {
     const user = await requireUser(ctx);
+
+    const limit = await checkRateLimit(ctx, "startActive", user._id);
+    if (!limit.ok) {
+      return {
+        success: false as const,
+        error: "Too many attempts. Please try again later.",
+        retryAfterMs: limit.retryAfterMs,
+      };
+    }
 
     const session = await ctx.db.get(sessionId);
     if (!session) throw new Error("Session not found");
@@ -590,12 +639,28 @@ export const endSession = mutation({
     sessionId: v.id("interview_sessions"),
     elevenlabsConversationId: v.optional(v.string()),
   },
-  returns: v.object({
-    sessionId: v.id("interview_sessions"),
-    duration: v.number(),
-  }),
+  returns: v.union(
+    v.object({
+      sessionId: v.id("interview_sessions"),
+      duration: v.number(),
+    }),
+    v.object({
+      success: v.literal(false),
+      error: v.string(),
+      retryAfterMs: v.optional(v.number()),
+    }),
+  ),
   handler: async (ctx, { sessionId, elevenlabsConversationId }) => {
     const user = await requireUser(ctx);
+
+    const limit = await checkRateLimit(ctx, "endSession", user._id);
+    if (!limit.ok) {
+      return {
+        success: false as const,
+        error: "Too many attempts. Please try again later.",
+        retryAfterMs: limit.retryAfterMs,
+      };
+    }
 
     const session = await ctx.db.get(sessionId);
     if (!session) throw new Error("Session not found");
@@ -624,10 +689,30 @@ export const endSession = mutation({
 
 export const getConversationToken = action({
   args: { sessionId: v.id("interview_sessions") },
-  returns: v.object({ conversationToken: v.string() }),
+  returns: v.union(
+    v.object({ conversationToken: v.string() }),
+    v.object({
+      success: v.literal(false),
+      error: v.string(),
+      retryAfterMs: v.optional(v.number()),
+    }),
+  ),
   handler: async (ctx, { sessionId }) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
+
+    const limit = await checkRateLimit(
+      ctx,
+      "getConversationToken",
+      identity.subject,
+    );
+    if (!limit.ok) {
+      return {
+        success: false as const,
+        error: "Too many attempts. Please try again later.",
+        retryAfterMs: limit.retryAfterMs,
+      };
+    }
 
     const session = await ctx.runQuery(internal.sessions.getInternal, {
       sessionId,
@@ -653,7 +738,10 @@ export const getConversationToken = action({
       return { conversationToken: data.token };
     } catch (error) {
       console.error("Failed to get ElevenLabs conversation token:", error);
-      throw new Error("Failed to initialize voice conversation");
+      return {
+        success: false as const,
+        error: "Failed to initialize voice conversation",
+      };
     }
   },
 });
@@ -666,10 +754,24 @@ export const analyzeSession = action({
       scores: ScoresValidator,
       highlights: v.array(HighlightValidator),
     }),
+    v.object({
+      success: v.literal(false),
+      error: v.string(),
+      retryAfterMs: v.optional(v.number()),
+    }),
   ),
   handler: async (ctx, { sessionId }) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
+
+    const limit = await checkRateLimit(ctx, "analyzeSession", sessionId);
+    if (!limit.ok) {
+      return {
+        success: false as const,
+        error: "Too many attempts. Please try again later.",
+        retryAfterMs: limit.retryAfterMs,
+      };
+    }
 
     const session = await ctx.runQuery(internal.sessions.getInternal, {
       sessionId,
@@ -749,7 +851,10 @@ Focus on:
     } catch (error) {
       console.error("Failed to analyze session:", error);
       await ctx.runMutation(internal.sessions.markFailed, { sessionId });
-      throw new Error("Failed to analyze interview. Please try again.");
+      return {
+        success: false as const,
+        error: "Failed to analyze interview. Please try again.",
+      };
     }
   },
 });
