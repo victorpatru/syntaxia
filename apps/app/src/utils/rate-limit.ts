@@ -12,14 +12,21 @@ export function showRateLimitToast(
 ) {
   if (typeof retryAfterMs === "number") {
     const seconds = Math.max(1, Math.ceil(retryAfterMs / 1000));
-    const minutes = Math.ceil(seconds / 60);
-    toast.error(
-      minutes > 1
-        ? `Too many attempts. Try again in ~${minutes} minutes.`
-        : `Too many attempts. Try again in ~${seconds}s.`,
-    );
+    if (seconds >= 60) {
+      const minutes = Math.ceil(seconds / 60);
+      const unit = minutes === 1 ? "minute" : "minutes";
+      toast.error(`Too many attempts. Try again in ~${minutes} ${unit}.`, {
+        id: "rate-limit",
+      });
+    } else {
+      toast.error(`Too many attempts. Try again in ~${seconds}s.`, {
+        id: "rate-limit",
+      });
+    }
   } else if (fallbackMessage) {
-    toast.error(fallbackMessage);
+    toast.error(fallbackMessage, { id: "rate-limit" });
+  } else {
+    toast.error("Too many attempts. Try again later.", { id: "rate-limit" });
   }
 }
 
