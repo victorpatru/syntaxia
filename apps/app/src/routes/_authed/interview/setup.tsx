@@ -2,7 +2,13 @@ import { api } from "@syntaxia/backend/convex/_generated/api";
 import { LoadingTerminal } from "@syntaxia/ui/interview";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useAction, useQuery } from "convex/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { toast } from "sonner";
 import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
 import { validateSetupRoute } from "@/utils/route-guards";
@@ -93,7 +99,7 @@ function InterviewSetup() {
     if (!validation.isValid && validation.redirectTo) {
       navigate({ to: validation.redirectTo });
     }
-  }, [session, session?.status, session?.questions, navigate]);
+  }, [session, navigate]);
 
   useEffect(() => {
     if (!session || session.status !== "setup" || session.questions) return;
@@ -108,8 +114,10 @@ function InterviewSetup() {
       ];
 
       const stepIndex = Math.floor(Date.now() / 1000) % loadingSteps.length;
-      setLoadingStep(loadingSteps[stepIndex]);
-      setLoadingProgress((prev) => Math.min(prev + 1, 100));
+      startTransition(() => {
+        setLoadingStep(loadingSteps[stepIndex]);
+        setLoadingProgress((prev) => Math.min(prev + 1, 95));
+      });
     }, 200);
 
     return () => clearInterval(interval);

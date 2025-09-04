@@ -8,14 +8,14 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useAction } from "convex/react";
 import { Play } from "lucide-react";
-import { useRef, useState } from "react";
+import { startTransition, useRef, useState } from "react";
 import { toast } from "sonner";
 import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
 import { getSessionRoute } from "@/utils/route-guards";
 
 export const Route = createFileRoute("/_authed/interview/")({
   loader: async (opts) => {
-    await Promise.all([
+    const [, currentSession] = await Promise.all([
       opts.context.queryClient.ensureQueryData(
         convexQuery(api.credits.getBalance, {}),
       ),
@@ -23,11 +23,6 @@ export const Route = createFileRoute("/_authed/interview/")({
         convexQuery(api.sessions.getCurrentSession, {}),
       ),
     ]);
-
-    const currentSession = await opts.context.queryClient.ensureQueryData(
-      convexQuery(api.sessions.getCurrentSession, {}),
-    );
-
     if (currentSession) {
       throw redirect({ to: getSessionRoute(currentSession) });
     }
@@ -44,10 +39,6 @@ function InterviewStart() {
 
   const { data: balance } = useSuspenseQuery(
     convexQuery(api.credits.getBalance, {}),
-  );
-
-  const { data: currentSession } = useSuspenseQuery(
-    convexQuery(api.sessions.getCurrentSession, {}),
   );
 
   const convexCreateSession = useAction(api.sessions.createSessionValidated);
@@ -157,9 +148,10 @@ function InterviewStart() {
                             <button
                               type="button"
                               onClick={() => {
-                                setJobDescription(preset.description.trim());
-                                if (textareaRef.current)
-                                  textareaRef.current.focus();
+                                startTransition(() => {
+                                  setJobDescription(preset.description.trim());
+                                });
+                                textareaRef.current?.focus();
                               }}
                               className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20"
                             >

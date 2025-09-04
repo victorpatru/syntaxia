@@ -2,7 +2,7 @@ import { api } from "@syntaxia/backend/convex/_generated/api";
 import { LoadingTerminal } from "@syntaxia/ui/interview";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useAction as useConvexAction, useQuery } from "convex/react";
-import { useEffect, useRef, useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
 import { validateAnalysisRoute } from "@/utils/route-guards";
@@ -96,8 +96,10 @@ function InterviewAnalysis() {
       ];
 
       const stepIndex = Math.floor(Date.now() / 2000) % analysisSteps.length;
-      setAnalysisStep(analysisSteps[stepIndex]);
-      setAnalysisProgress((prev) => Math.min(prev + 1, 100));
+      startTransition(() => {
+        setAnalysisStep(analysisSteps[stepIndex]);
+        setAnalysisProgress((prev) => Math.min(prev + 1, 95));
+      });
     }, 100);
 
     return () => clearInterval(interval);
