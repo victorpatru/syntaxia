@@ -54,11 +54,15 @@ export const handleWebhook = internalAction({
       const clerkUserId = metadata?.clerkUserId;
 
       if (clerkUserId && productId && orderId) {
-        if (productId === env.POLAR_PRODUCT_ID_CREDITS_15) {
+        const productCredits: Record<string, number> = {
+          [env.POLAR_PRODUCT_ID_CREDITS_15]: 15,
+        };
+        const credits = productCredits[productId];
+        if (credits) {
           await ctx.runMutation(internal.credits.creditAccount, {
             clerkUserId,
             orderId,
-            credits: 15,
+            credits,
           });
         } else {
           console.log("Product ID does not match expected value");
