@@ -23,7 +23,6 @@ function SetupFailed() {
     api.sessions.getSession,
     sessionId ? { sessionId } : "skip",
   );
-  const resetSetup = useMutation(api.sessions.resetSetup);
 
   const failureCode = session?.failureCode || "UNKNOWN";
   const failureMessage = session?.failureMessage || "Setup failed.";
@@ -43,16 +42,12 @@ function SetupFailed() {
     return (
       <Button
         variant="outline"
-        onClick={async () => {
-          if (!sessionId) return;
-          const res = await resetSetup({ sessionId });
-          if (res?.success) {
-            navigate({ to: "/interview/setup", search: { sessionId } });
-          }
-        }}
+        onClick={() =>
+          navigate({ to: "/interview", search: { sessionId: undefined } })
+        }
         className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20"
       >
-        ./retry-setup
+        ./start-new
       </Button>
     );
   };

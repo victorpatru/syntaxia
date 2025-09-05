@@ -618,23 +618,6 @@ export const markFailed = internalMutation({
   },
 });
 
-export const resetSetup = mutation({
-  args: { sessionId: v.id("interview_sessions") },
-  returns: v.object({ success: v.literal(true) }),
-  handler: async (ctx, { sessionId }) => {
-    const user = await requireUser(ctx);
-    const session = await ctx.db.get(sessionId);
-    if (!session) throw new Error("Session not found");
-    if (session.userId !== user._id) throw new Error("Unauthorized");
-
-    await ctx.db.patch(sessionId, {
-      status: "setup",
-      updatedAt: Date.now(),
-    });
-    return { success: true as const };
-  },
-});
-
 export const startActive = mutation({
   args: {
     sessionId: v.id("interview_sessions"),
