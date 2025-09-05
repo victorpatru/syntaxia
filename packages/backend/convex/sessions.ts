@@ -485,9 +485,7 @@ Guidelines:
     } catch (error: unknown) {
       console.error("Failed to parse job description:", error);
       const message =
-        typeof error === "object" && error && "message" in error
-          ? String((error as any).message)
-          : "Failed to analyze job description. Please try again.";
+        "The AI is unavailable to parse your job description. Please try again later.";
       await ctx.runMutation(internal.sessions.markFailed, {
         sessionId,
         code: "PARSE",
