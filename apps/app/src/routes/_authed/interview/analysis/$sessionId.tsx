@@ -51,7 +51,11 @@ function InterviewAnalysis() {
         });
       } else {
         toast.error("Failed to analyze interview. Returning to start page.");
-        setTimeout(() => navigate({ to: "/interview" }), 2000);
+        setTimeout(
+          () =>
+            navigate({ to: "/interview", search: { sessionId: undefined } }),
+          2000,
+        );
       }
     }
   };
@@ -61,7 +65,7 @@ function InterviewAnalysis() {
 
     if (session === null) {
       toast.error("Session not found.");
-      navigate({ to: "/interview" });
+      navigate({ to: "/interview", search: { sessionId: undefined } });
       return;
     }
 
