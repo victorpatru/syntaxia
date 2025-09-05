@@ -303,29 +303,18 @@ export const createSessionValidated = action({
     }),
   ),
   handler: async (ctx, { jobDescription }) => {
-    console.log(
-      `[SESSION] createSessionValidated called with JD length: ${jobDescription.length}`,
-    );
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      console.log(`[SESSION] No identity found - returning auth error`);
       return { success: false as const, error: "Not authenticated" };
     }
-    console.log(`[SESSION] User authenticated: ${identity.subject}`);
     const limit = await checkRateLimit(ctx, "createSession", identity.subject);
     if (!limit.ok) {
-      console.log(
-        `[SESSION] Rate limited! retryAfterMs: ${limit.retryAfterMs}`,
-      );
       return {
         success: false as const,
         error: "Too many attempts. Please try again later.",
         retryAfterMs: limit.retryAfterMs,
       };
     }
-    console.log(
-      `[SESSION] Rate limit passed, proceeding with session creation`,
-    );
 
     const { object: guard } = await generateObject({
       model: GATEWAY_MODELS.CLASSIFICATION,
@@ -334,7 +323,6 @@ export const createSessionValidated = action({
     });
 
     if (!guard.isValidJD || guard.injectionRisk) {
-      console.log("Invalid job description rejected:", guard.reason);
       return {
         success: false as const,
         error: "Invalid job description. Please paste a real JD.",
@@ -369,17 +357,14 @@ export const startSetup = action({
     }),
   ),
   handler: async (ctx, { sessionId }) => {
-    console.log(`[SETUP] startSetup called for sessionId: ${sessionId}`);
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      console.log(`[SETUP] No identity found - returning auth error`);
       return {
         success: false as const,
         code: "AUTH" as const,
         error: "Not authenticated",
       };
     }
-    console.log(`[SETUP] User authenticated: ${identity.subject}`);
 
     const { session, resolvedUserId, balance } = await ctx.runQuery(
       internal.sessions.getSessionDataForSetup,
@@ -388,12 +373,8 @@ export const startSetup = action({
         clerkUserId: identity.subject,
       },
     );
-    console.log(
-      `[SETUP] Session data retrieved - session: ${!!session}, resolvedUserId: ${resolvedUserId}, balance: ${balance}`,
-    );
 
     if (!session) {
-      console.log(`[SETUP] Session not found`);
       return {
         success: false as const,
         code: "NOT_FOUND" as const,
@@ -401,7 +382,6 @@ export const startSetup = action({
       };
     }
     if (!resolvedUserId) {
-      console.log(`[SETUP] User not found`);
       return {
         success: false as const,
         code: "AUTH" as const,
@@ -409,9 +389,6 @@ export const startSetup = action({
       };
     }
     if (session.userId !== resolvedUserId) {
-      console.log(
-        `[SETUP] Unauthorized - session user: ${session.userId}, resolved user: ${resolvedUserId}`,
-      );
       return {
         success: false as const,
         code: "UNAUTHORIZED" as const,
@@ -419,9 +396,7 @@ export const startSetup = action({
       };
     }
 
-    console.log(`[SETUP] Checking balance: ${balance} >= 15`);
     if (balance < 15) {
-      console.log(`[SETUP] Insufficient credits: ${balance}`);
       await ctx.runMutation(internal.sessions.markFailed, {
         sessionId,
         code: "CREDITS",
@@ -436,10 +411,8 @@ export const startSetup = action({
       };
     }
 
-    console.log(`[SETUP] Balance check passed, checking rate limit`);
     const limit = await checkRateLimit(ctx, "startSetup", resolvedUserId);
     if (!limit.ok) {
-      console.log(`[SETUP] Rate limited! retryAfterMs: ${limit.retryAfterMs}`);
       return {
         success: false as const,
         code: "RATE_LIMIT" as const,
@@ -447,7 +420,6 @@ export const startSetup = action({
         retryAfterMs: limit.retryAfterMs,
       };
     }
-    console.log(`[SETUP] Rate limit passed, proceeding with setup`);
 
     try {
       const { object: parseResult } = await generateObject({
@@ -483,7 +455,6 @@ Guidelines:
       });
       return { success: true as const, ...parseResult };
     } catch (error: unknown) {
-      console.error("Failed to parse job description:", error);
       const message =
         "The AI is unavailable to parse your job description. Please try again later.";
       await ctx.runMutation(internal.sessions.markFailed, {
@@ -531,13 +502,11 @@ export const getSessionDataForSetup = internalQuery({
     balance: v.number(),
   }),
   handler: async (ctx, { sessionId, clerkUserId }) => {
-    // Get session
     const session = await ctx.db.get(sessionId);
     if (!session) {
       return { session: null, resolvedUserId: null, balance: 0 };
     }
 
-    // Get user by Clerk ID
     const user = await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkUserId", clerkUserId))
@@ -547,7 +516,6 @@ export const getSessionDataForSetup = internalQuery({
       return { session, resolvedUserId: null, balance: 0 };
     }
 
-    // Get balance
     const balance = user.credits ?? 0;
 
     return {
