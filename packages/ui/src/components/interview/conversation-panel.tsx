@@ -3,8 +3,6 @@ import { Button } from "@syntaxia/ui/button";
 import { AlertCircle, Mic, MicOff, Wifi, WifiOff } from "lucide-react";
 
 export function ConversationPanel({
-  transcript,
-  currentQuestion,
   isRecording,
   onToggleRecording,
   voiceState,
@@ -22,14 +20,12 @@ export function ConversationPanel({
     }
   };
 
-  const getLatestResponse = () => {
-    const candidateResponses = transcript.filter(
-      (entry) => entry.speaker === "candidate",
-    );
-    return candidateResponses[candidateResponses.length - 1];
+  const getSimpleStatus = () => {
+    if (voiceState.connectionStatus !== "connected") {
+      return "Connecting...";
+    }
+    return "Interview in progress";
   };
-
-  const latestResponse = getLatestResponse();
 
   return (
     <div className="border border-terminal-green/30 bg-background mb-6">
@@ -62,28 +58,26 @@ export function ConversationPanel({
       </div>
 
       <div className="p-6">
-        {/* Current Question */}
-        {currentQuestion && (
-          <div className="mb-6">
-            <div className="flex items-center mb-3">
-              <div className="w-2 h-2 bg-terminal-amber mr-3"></div>
-              <span className="text-terminal-green/60 font-mono text-sm">
-                INTERVIEWER
-              </span>
-              <span className="text-terminal-green/40 font-mono text-xs ml-2">
-                [{currentQuestion.type.toUpperCase()}]
-              </span>
-            </div>
-            <p className="text-lg leading-relaxed text-terminal-green">
-              {currentQuestion.text}
-            </p>
-            {currentQuestion.context && (
-              <p className="text-sm text-terminal-green/60 mt-2 italic">
-                {currentQuestion.context}
-              </p>
-            )}
+        {/* Dynamic Conversation Status */}
+        <div className="mb-6">
+          <div className="flex items-center mb-3">
+            <div
+              className={`w-2 h-2 mr-3 ${
+                voiceState.isPlaying
+                  ? "bg-terminal-amber animate-pulse"
+                  : voiceState.connectionStatus === "connected"
+                    ? "bg-terminal-green"
+                    : "bg-terminal-green/40"
+              }`}
+            ></div>
+            <span className="text-terminal-green/60 font-mono text-sm">
+              STATUS
+            </span>
           </div>
-        )}
+          <div className="text-lg leading-relaxed text-terminal-green font-mono">
+            {getSimpleStatus()}
+          </div>
+        </div>
 
         {/* Response Area */}
         <div className="border-t border-terminal-green/30 pt-4">
@@ -102,40 +96,9 @@ export function ConversationPanel({
 
           <div className="min-h-16">
             {isRecording ? (
-              <div className="flex items-center">
-                <span className="text-terminal-green">
-                  Recording your response...
-                </span>
-                {/* Audio level indicator */}
-                <div className="ml-4 flex items-center space-x-1">
-                  {Array.from({ length: 10 }, (_, i) => (
-                    <div
-                      key={i}
-                      className={`w-1 h-6 ${
-                        i < Math.floor(voiceState.currentAudioLevel * 10)
-                          ? "bg-terminal-green"
-                          : "bg-terminal-green/20"
-                      } transition-colors duration-100`}
-                    ></div>
-                  ))}
-                </div>
-              </div>
-            ) : latestResponse ? (
-              <div className="space-y-2">
-                <div className="text-terminal-green text-sm">
-                  {latestResponse.text}
-                </div>
-                <div className="text-terminal-green/40 font-mono text-xs">
-                  Recorded{" "}
-                  {new Date(latestResponse.timestamp).toLocaleTimeString()}
-                  {latestResponse.confidence && (
-                    <span className="ml-2">
-                      (Confidence: {Math.round(latestResponse.confidence * 100)}
-                      %)
-                    </span>
-                  )}
-                </div>
-              </div>
+              <span className="text-terminal-green">
+                Recording your response...
+              </span>
             ) : (
               <span className="text-terminal-green/60">
                 Press REC to respond
