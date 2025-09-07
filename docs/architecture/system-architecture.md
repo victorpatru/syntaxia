@@ -1,76 +1,54 @@
-# 🎯 **Syntaxia - Main Flow**
+# Syntaxia System Architecture
 
-Job description → AI parsing → Voice interview → Analysis → Report
-
----
-
-## 🏗️ **Complete Application Flow**
+## Interview Flow Sequence
 
 ```mermaid
-flowchart TD
-    A[Interview Start] --> B{Check Existing Session?}
-    B -->|Has Active| C[Redirect to Current Phase]
-    B -->|No Active| D[Job Description Input]
+sequenceDiagram
+  autonumber
+  actor User
+  participant App as "Frontend App"
+  participant Convex as "Convex (sessions/credits)"
+  participant RL as "RateLimiter"
+  participant Eleven as "ElevenLabs"
+  participant Gemini as "Gemini (AI Gateway)"
 
-    D --> E{Credits ≥ 15?}
-    E -->|No| F[Buy Credits]
-    E -->|Yes| G[Create Session]
-
-    G --> H[Setup Phase]
-    H --> I[AI Parses JD]
-    I --> J[Generates Questions]
-    J --> K[Navigate to Session]
-
-    K --> L[Active Interview]
-    L --> M[ElevenLabs Voice]
-    M --> N[15-Minute Timer]
-    N --> O[Voice Q&A]
-    O --> P{End Interview}
-
-    P --> Q[End Session]
-    Q --> R[Analysis Phase]
-    R --> S[AI Analyzes Transcript]
-    S --> T[Generate Scores]
-    T --> U[Final Report]
-
-    C -->|setup| H
-    C -->|active| L
-    C -->|analyzing| R
-    C -->|complete| U
-
-    classDef phase fill:#1a1a1a,stroke:#00ff41,stroke-width:2px
-    classDef decision fill:#3a3a1a,stroke:#ffb000,stroke-width:2px
-
-    class A,D,G,H,I,J,K,L,M,N,O,Q,R,S,T,U phase
-    class B,E,P decision
+  User->>App: Open /interview
+  App->>Convex: sessions.getCurrentSession()
+  alt Has active/setup/analyzing
+    Convex-->>App: session
+    App->>App: Redirect via route-guards
+  else None
+    User->>App: Enter Job Description
+    App->>RL: check(createSession)
+    RL-->>App: ok / retryAfter
+    alt ok
+      App->>Convex: sessions.createSession()
+      Convex-->>App: sessionId
+      App->>Convex: sessions.startSetup(sessionId)
+      Convex->>Gemini: Parse JD -> questions/skills
+      Gemini-->>Convex: parsed data
+      Convex-->>App: setup ready
+      App->>Convex: sessions.startActive(sessionId)
+      Convex-->>App: startedAt
+      App->>Eleven: Start conversation (token)
+      Note over App,Eleven: 15-min live interview
+      App->>Convex: sessions.endSession(sessionId, convId)
+      Convex->>Convex: schedule ensureCharge(+120s)
+      Convex->>Eleven: Fetch transcript
+      Convex->>Gemini: Analyze transcript
+      Gemini-->>Convex: scores/highlights
+      Convex-->>App: status=complete
+      App->>App: Navigate to /interview/report/$sessionId
+    else rate-limited
+      App->>User: Show rate-limit toast
+    end
+  end
 ```
 
----
+## System Components
 
-## 🔄 **Session States**
-
-```mermaid
-stateDiagram-v2
-    [*] --> setup
-    setup --> active: User starts
-    active --> analyzing: Interview ends
-    analyzing --> complete: AI analysis done
-    complete --> [*]
-```
-
----
-
-## 💰 **Credit Flow**
-
-```mermaid
-flowchart TD
-    A[Start Interview] --> B[15-Minute Timer]
-    B --> C[2-Minute Mark]
-    C --> D[Auto Charge 15 Credits]
-    D --> E[Log Transaction]
-    E --> F[Continue Interview]
-```
-
----
-
-*That's the system. Code tells the rest.* 🎯
+- **Frontend App**: TanStack Router application handling user interface
+- **Convex**: Backend handling sessions, credits, and data persistence
+- **RateLimiter**: Request throttling and abuse prevention
+- **ElevenLabs**: Conversational AI for conducting interviews
+- **Gemini (AI Gateway)**: Job description parsing and transcript analysis
