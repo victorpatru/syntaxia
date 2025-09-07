@@ -58,7 +58,7 @@
   <lexeme><grapheme>GUI</grapheme><alias>gooey</alias></lexeme>
  
   <!-- Additional acronyms and general terms -->
-  <lexeme><grapheme>API</grapheme><alias>A P I</alias></lexeme>
+  <lexeme><grapheme>API</grapheme><phoneme>/ˌeɪ.piː.ˈaɪ/</phoneme></lexeme>
   <lexeme><grapheme>SDK</grapheme><alias>S D K</alias></lexeme>
   <lexeme><grapheme>LLM</grapheme><alias>L L M</alias></lexeme>
   <lexeme><grapheme>RAG</grapheme><alias>R A G</alias></lexeme>
