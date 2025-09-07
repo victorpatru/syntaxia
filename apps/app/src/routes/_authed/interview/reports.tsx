@@ -48,7 +48,7 @@ function InterviewReports() {
     if (!scores || !scores.overall) {
       return "N/A";
     }
-    return `${scores.overall}/4`;
+    return `${scores.overall}/10`;
   };
 
   return (
@@ -103,7 +103,7 @@ function InterviewReports() {
               <p className="text-terminal-green/50 font-mono text-sm mt-2">
                 Complete your first interview to see reports here.
               </p>
-              <Link to="/interview">
+              <Link to="/interview" search={{ sessionId: undefined }}>
                 <Button className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20 mt-4">
                   ./start-interview
                 </Button>
