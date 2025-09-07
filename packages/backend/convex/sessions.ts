@@ -940,8 +940,8 @@ Questions Asked:
 ${session.questions?.map((q: any) => `- ${q.text}`).join("\n")}
 
 Provide:
-1. Scores (1-4 scale): overall, technical depth, communication clarity, problem-solving approach
-2. 3-5 specific highlights with timestamps (strengths and improvements)
+1. Scores (1-10 scale): overall, technical depth, communication clarity, problem-solving approach
+2. Up to 10 specific highlights with timestamps (strengths and improvements)
 3. Actionable next steps for improvement
 
 Focus on:
