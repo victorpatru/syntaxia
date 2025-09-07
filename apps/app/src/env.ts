@@ -12,6 +12,7 @@ export const env = createEnv({
 
   client: {
     VITE_CONVEX_URL: z.url(),
+    VITE_ELEVENLABS_AGENT_ID: z.string().min(1).optional(),
   },
 
   /**

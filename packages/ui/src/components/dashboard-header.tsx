@@ -10,7 +10,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { TerminalUserMenu } from "./terminal-user-menu";
 import { ThemeToggle } from "./theme-toggle";
 
-// const navigationLinks = [{ href: "/interview", label: "~/start-interview" }];
+const navigationLinks = [
+  { href: "/interview", label: "~/interview" },
+  { href: "/interview/reports", label: "~/reports" },
+];
 
 interface DashboardHeaderProps {
   credits?: number;
@@ -60,7 +63,7 @@ export function DashboardHeader({ credits }: DashboardHeaderProps) {
                 <span className="sr-only">Toggle navigation</span>
               </Button>
             </PopoverTrigger>
-            {/* <PopoverContent
+            <PopoverContent
               align="start"
               className="w-48 p-1 md:hidden bg-terminal-dark border-terminal-green/30 rounded-sm shadow-lg"
             >
@@ -78,7 +81,7 @@ export function DashboardHeader({ credits }: DashboardHeaderProps) {
                   ))}
                 </NavigationMenuList>
               </NavigationMenu>
-            </PopoverContent> */}
+            </PopoverContent>
           </Popover>
 
           {/* Main nav */}
@@ -97,7 +100,7 @@ export function DashboardHeader({ credits }: DashboardHeaderProps) {
             </a>
 
             {/* Navigation menu */}
-            {/* <NavigationMenu className="max-md:hidden">
+            <NavigationMenu className="max-md:hidden">
               <NavigationMenuList className="gap-2">
                 {navigationLinks.map((link) => (
                   <NavigationMenuItem key={link.href}>
@@ -110,7 +113,7 @@ export function DashboardHeader({ credits }: DashboardHeaderProps) {
                   </NavigationMenuItem>
                 ))}
               </NavigationMenuList>
-            </NavigationMenu> */}
+            </NavigationMenu>
           </div>
         </div>
 

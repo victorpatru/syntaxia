@@ -1,12 +1,13 @@
 import { convexQuery } from "@convex-dev/react-query";
-import { api } from "@syntaxia/backend";
+import { api } from "@syntaxia/backend/convex/_generated/api";
 import { Button } from "@syntaxia/ui/button";
 import { Card } from "@syntaxia/ui/card";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useAction } from "convex/react";
-
 import { CreditCard, Sparkles } from "lucide-react";
+import { toast } from "sonner";
+import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
 
 interface CreditPackage {
   id: string;
@@ -21,10 +22,10 @@ export const Route = createFileRoute("/_authed/credits")({
 
 function Credits() {
   const { data: balance } = useSuspenseQuery(
-    convexQuery(api.credits.balance, {}),
+    convexQuery(api.credits.getBalance, {}),
   );
   const { data: availablePackages } = useSuspenseQuery(
-    convexQuery(api.credits.availablePackages, {}),
+    convexQuery(api.credits.getAvailablePackages, {}),
   );
 
   const convexCreateCheckout = useAction(api.credits.createCheckout);
@@ -32,14 +33,41 @@ function Credits() {
   const createCheckoutMutation = useMutation({
     mutationFn: async (packageId: string) => {
       const result = await convexCreateCheckout({ packageId });
+
+      if (!result.success) {
+        // Handle specific error cases with proper toast notifications
+        if (isRateLimitFailure(result)) {
+          showRateLimitToast(
+            result.retryAfterMs,
+            "Too many purchase attempts. Please try again later.",
+          );
+          return; // Don't throw, just show toast and exit
+        }
+
+        // Handle invalid packageId and other errors
+        if (result.error === "Invalid packageId") {
+          toast.error(
+            "This credit package is no longer available. Please refresh the page.",
+          );
+          return;
+        }
+
+        // Handle any other server errors
+        toast.error(
+          result.error || "Failed to start purchase process. Please try again.",
+        );
+        return;
+      }
+
       return result;
     },
     onSuccess: (data) => {
       window.location.href = data.url;
     },
     onError: (error) => {
+      // This will only catch network errors or unexpected issues
       console.error("Purchase error:", error);
-      alert("Failed to start purchase process. Please try again.");
+      toast.error("Network error. Please check your connection and try again.");
     },
   });
 

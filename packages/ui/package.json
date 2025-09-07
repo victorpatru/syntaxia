@@ -48,7 +48,9 @@
     "./voice-orb": "./src/components/voice-orb.tsx",
     "./icons": "./src/components/icons/index.ts",
     "./auth": "./src/components/auth/index.ts",
-    "./interview": "./src/components/interview/index.ts"
+    "./interview": "./src/components/interview/index.ts",
+    "./sonner": "./src/components/sonner.tsx",
+    "./table": "./src/components/table.tsx"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

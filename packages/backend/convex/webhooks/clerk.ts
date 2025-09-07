@@ -9,10 +9,11 @@ export const handleWebhook = internalMutation({
   async handler(ctx, { event }: { event: WebhookEvent }) {
     const eventId = (event.data as any).id as string;
 
-    const alreadyProcessed = await ctx.runQuery(
-      internal.webhooks.events.isEventProcessed,
-      { eventId },
-    );
+    const existingEvent = await ctx.db
+      .query("webhook_events")
+      .withIndex("by_event_id", (q) => q.eq("eventId", eventId))
+      .unique();
+    const alreadyProcessed = existingEvent !== null;
 
     if (alreadyProcessed) {
       console.log("Event already processed, skipping:", eventId, event.type);
@@ -23,10 +24,11 @@ export const handleWebhook = internalMutation({
       case "user.created":
       case "user.updated": {
         const subject = (event.data as any).id as string;
-        const existingUser = await ctx.runQuery(internal.users.getUser, {
-          subject,
-        });
-        if (existingUser && event.type === "user.created") {
+        const existingUserId = await ctx.runQuery(
+          internal.users.getUserIdByClerk,
+          { clerkUserId: subject },
+        );
+        if (existingUserId && event.type === "user.created") {
           console.warn("Overwriting user", subject, "with", event.data);
         }
         await ctx.runMutation(internal.users.updateOrCreateUser, {

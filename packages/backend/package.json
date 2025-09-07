@@ -2,12 +2,20 @@
   "name": "@syntaxia/backend",
   "version": "1.0.0",
   "description": "",
+  "types": "./convex/_generated/api.d.ts",
   "exports": {
     ".": {
-      "types": "./convex/index.ts",
-      "default": "./convex/index.ts"
+      "types": "./convex/_generated/api.d.ts",
+      "default": "./convex/_generated/api.js"
     },
-    "./convex/*": "./convex/*"
+    "./convex/_generated/api": {
+      "types": "./convex/_generated/api.d.ts",
+      "default": "./convex/_generated/api.js"
+    },
+    "./convex/_generated/dataModel": {
+      "types": "./convex/_generated/dataModel.d.ts",
+      "default": "./convex/_generated/dataModel.js"
+    }
   },
   "scripts": {
     "dev": "convex dev --tail-logs",
@@ -18,11 +26,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@ai-sdk/google": "^2.0.11",
     "@clerk/backend": "^2.7.0",
+    "@convex-dev/rate-limiter": "^0.2.12",
     "@notionhq/client": "^4.0.2",
     "@polar-sh/sdk": "^0.34.12",
     "@syntaxia/shared": "workspace:*",
     "@t3-oss/env-core": "catalog:shared",
+    "ai": "^5.0.26",
     "convex": "^1.25.4",
     "convex-helpers": "^0.1.101",
     "svix": "^1.71.0",

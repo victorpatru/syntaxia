@@ -1,0 +1,10 @@
+---
+description: Forbid starting local dev servers without explicit user instruction to avoid interfering with the user's environment.
+alwaysApply: true
+---
+
+# User Approval Required
+
+Always clarify requirements and get explicit user approval before writing any code.
+
+No code changes without user consent.

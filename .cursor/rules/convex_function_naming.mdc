@@ -1,0 +1,75 @@
+---
+description: Enforces consistent naming conventions for Convex queries, mutations, and actions
+globs: **/convex/**/*.ts,**/convex/**/*.tsx,**/convex/**/*.js,**/convex/**/*.jsx
+alwaysApply: true
+---
+
+- **Query Function Naming**
+  - Pattern: `get{Resource}` or `get{Resource}{Qualifier}`
+  - Purpose: Read operations that don't modify data
+  - Examples from [credits.ts](mdc:packages/backend/convex/credits.ts):
+    ```typescript
+    // ✅ DO: Use 'get' prefix for queries
+    export const getBalance = query({ ... });
+    export const getAvailablePackages = query({ ... });
+    export const getUserById = query({ ... });
+    
+    // ❌ DON'T: Omit 'get' prefix
+    export const balance = query({ ... });
+    export const userById = query({ ... });
+    ```
+
+- **Mutation Function Naming**
+  - Pattern: `{verb}{Resource}` using domain-specific verbs
+  - Purpose: Operations that modify data
+  - Financial operations use `credit`/`debit` terminology:
+    ```typescript
+    // ✅ DO: Use domain-specific verbs
+    export const creditAccount = internalMutation({ ... });
+    export const debitAccount = internalMutation({ ... });
+    export const createUser = mutation({ ... });
+    export const updateProfile = mutation({ ... });
+    
+    // ❌ DON'T: Use inconsistent or generic verbs
+    export const addCredits = mutation({ ... });     // Inconsistent with 'debit'
+    export const debit = mutation({ ... });          // Missing 'Account' suffix
+    ```
+
+- **Action Function Naming**
+  - Pattern: `{verb}{Resource}` using descriptive action verbs
+  - Purpose: Side effects, external API calls, complex operations
+  - Examples:
+    ```typescript
+    // ✅ DO: Use descriptive action verbs
+    export const createCheckout = action({ ... });
+    export const sendNotification = action({ ... });
+    export const processWebhook = action({ ... });
+    
+    // ❌ DON'T: Use vague or unclear verbs
+    export const handleCheckout = action({ ... });
+    export const doNotification = action({ ... });
+    ```
+
+- **Internal Function Conventions**
+  - Pattern: Same naming as above but use internal function types
+  - Maintain consistency with public equivalents:
+    ```typescript
+    // ✅ DO: Consistent naming across internal/public functions
+    export const creditAccount = internalMutation({ ... });
+    export const processPayment = internalAction({ ... });
+    export const getUserStats = internalQuery({ ... });
+    ```
+
+- **Variable and Parameter Naming**
+  - Use full descriptive names: `packages` not `packs`
+  - Use camelCase for consistency with TypeScript conventions
+  - Avoid abbreviations unless domain-standard (e.g., `id`, `url`)
+
+- **File-Level Consistency Requirements**
+  - All functions in a file must follow the same naming pattern
+  - Use domain-specific terminology consistently (e.g., financial operations)
+  - Maintain parallel structure for related operations within the same file
+
+- **Cross-Reference**
+  - See [convex_rules.mdc](mdc:.cursor/rules/convex_rules.mdc) for broader Convex development guidelines
+  - This rule enforces API consistency across the backend in [packages/backend/convex/](mdc:packages/backend/convex/)

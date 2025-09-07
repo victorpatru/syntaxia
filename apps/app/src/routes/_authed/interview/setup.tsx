@@ -1,90 +1,125 @@
+import { api } from "@syntaxia/backend/convex/_generated/api";
+import { Id } from "@syntaxia/backend/convex/_generated/dataModel";
 import { LoadingTerminal } from "@syntaxia/ui/interview";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { useAction, useQuery } from "convex/react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
+import { validateSetupRoute } from "@/utils/route-guards";
 
 export const Route = createFileRoute("/_authed/interview/setup")({
+  beforeLoad: ({ search }: { search: { sessionId: string } }) => {
+    const sessionId = search.sessionId;
+    if (!sessionId) {
+      throw redirect({ to: "/interview", search: { sessionId: undefined } });
+    }
+  },
   component: InterviewSetup,
-  validateSearch: (search): { sessionId: string; jobDescription: string } => ({
-    sessionId: (search.sessionId as string) || "",
-    jobDescription: (search.jobDescription as string) || "",
+  validateSearch: (search: {
+    sessionId: Id<"interview_sessions">;
+  }): { sessionId: Id<"interview_sessions"> } => ({
+    sessionId: search.sessionId,
   }),
 });
 
 function InterviewSetup() {
   const navigate = useNavigate();
-  const { sessionId, jobDescription } = Route.useSearch();
+  const { sessionId } = Route.useSearch() as {
+    sessionId: Id<"interview_sessions">;
+  };
   const [loadingProgress, setLoadingProgress] = useState(0);
-  const [loadingStep, setLoadingStep] = useState("");
+  const [loadingStep, setLoadingStep] = useState("Preparing session...");
+  const hasStartedSetupRef = useRef(false);
+  // removed unused retryCount state
+
+  const startSetupAction = useAction(api.sessions.startSetup);
+  const session = useQuery(
+    api.sessions.getSession,
+    sessionId ? { sessionId } : "skip",
+  );
+
+  const startSetupProcess = useCallback(async () => {
+    if (hasStartedSetupRef.current) return;
+
+    hasStartedSetupRef.current = true;
+    setLoadingStep("Parsing job description...");
+
+    try {
+      const result = await startSetupAction({ sessionId });
+      if (isRateLimitFailure(result)) {
+        showRateLimitToast(
+          result.retryAfterMs,
+          "Failed to process job description",
+        );
+        hasStartedSetupRef.current = false;
+        navigate({ to: "/interview/setup-failed", search: { sessionId } });
+        return;
+      }
+      if (
+        result &&
+        typeof result === "object" &&
+        (result as any).success === false
+      ) {
+        hasStartedSetupRef.current = false;
+        navigate({ to: "/interview/setup-failed", search: { sessionId } });
+        return;
+      }
+    } catch (error: unknown) {
+      console.error("Failed to start setup:", error);
+      hasStartedSetupRef.current = false;
+      navigate({ to: "/interview/setup-failed", search: { sessionId } });
+    }
+  }, [sessionId, startSetupAction, setLoadingStep, navigate]);
 
   useEffect(() => {
-    if (!sessionId || !jobDescription) {
-      navigate({ to: "/interview" });
-      return;
+    if (!hasStartedSetupRef.current && sessionId) {
+      startSetupProcess();
     }
+  }, [sessionId, startSetupProcess]);
 
-    // TODO: Replace with actual Gemini API call
-    // const processJobDescription = async () => {
-    //   try {
-    //     const response = await fetch('/api/interview/parse-job', {
-    //       method: 'POST',
-    //       headers: { 'Content-Type': 'application/json' },
-    //       body: JSON.stringify({
-    //         jobDescription: decodeURIComponent(jobDescription),
-    //         sessionId
-    //       })
-    //     });
-    //     const result = await response.json();
-    //     // Navigate to interview session with processed data
-    //   } catch (error) {
-    //     console.error('Failed to process job description:', error);
-    //   }
-    // };
+  useEffect(() => {
+    if (session === undefined) return;
 
-    // Mock loading sequence - replace with actual API processing
-    const loadingSteps = [
-      "Parsing job description...",
-      "Analyzing required skills...",
-      "Generating technical questions...",
-      "Calibrating difficulty level...",
-      "Preparing interview session...",
-    ];
-
-    let stepIndex = 0;
-    const loadingInterval = setInterval(() => {
-      setLoadingProgress((prev) => {
-        const newProgress = prev + 2; // Increment by 2% each 100ms
-
-        // Update loading step based on progress
-        const stepProgress = Math.floor(newProgress / 20); // Each step is 20%
-        if (stepProgress < loadingSteps.length && stepProgress !== stepIndex) {
-          stepIndex = stepProgress;
-          setLoadingStep(loadingSteps[stepIndex]);
-        }
-
-        // Complete loading after processing
-        if (newProgress >= 100) {
-          clearInterval(loadingInterval);
-          // Navigate to interview session
-          navigate({
-            to: "/interview/session/$sessionId",
-            params: { sessionId },
-          });
-          return 100;
-        }
-
-        return newProgress;
+    const validation = validateSetupRoute(session);
+    if (!validation.isValid && validation.redirectTo) {
+      const url = new URL(validation.redirectTo, window.location.origin);
+      navigate({
+        to: url.pathname as any,
+        search: Object.fromEntries(url.searchParams) as any,
       });
-    }, 100); // Update every 100ms for smooth progress
+    }
+  }, [session, navigate]);
 
-    return () => clearInterval(loadingInterval);
-  }, [sessionId, jobDescription, navigate]);
+  useEffect(() => {
+    if (!session || session.status !== "setup" || session.questions) return;
 
-  const decodedJobDescription = jobDescription
-    ? decodeURIComponent(jobDescription)
-    : "";
+    const interval = setInterval(() => {
+      const loadingSteps = [
+        "Parsing job description...",
+        "Analyzing required skills...",
+        "Generating technical questions...",
+        "Calibrating difficulty level...",
+        "Preparing interview session...",
+      ];
+
+      const stepIndex = Math.floor(Date.now() / 1000) % loadingSteps.length;
+      startTransition(() => {
+        setLoadingStep(loadingSteps[stepIndex]);
+        setLoadingProgress((prev) => Math.min(prev + 1, 95));
+      });
+    }, 200);
+
+    return () => clearInterval(interval);
+  }, [session?.status, session?.questions]);
 
   const additionalInfo = [
-    `<span class="text-terminal-green font-mono">[INFO]</span> Job description length: ${decodedJobDescription.length} chars`,
+    `<span class="text-terminal-green font-mono">[INFO]</span> Job description length: ${session?.jobDescription?.length || 0} chars`,
     `<span class="text-terminal-amber">[AI]</span> Extracting technical requirements...`,
     ...(loadingProgress > 40
       ? [
@@ -97,6 +132,28 @@ function InterviewSetup() {
         ]
       : []),
   ];
+
+  if (session === undefined) {
+    return (
+      <LoadingTerminal
+        progress={0}
+        currentStep="Loading session..."
+        title="syntaxia@ai-parser"
+        subtitle="~/processing"
+        additionalInfo={[
+          `<span class=\"text-terminal-green font-mono\">[INFO]</span> Retrieving session data...`,
+        ]}
+      />
+    );
+  }
+
+  if (
+    session === null ||
+    session.status === "analyzing" ||
+    session.status === "complete"
+  ) {
+    return null;
+  }
 
   return (
     <LoadingTerminal

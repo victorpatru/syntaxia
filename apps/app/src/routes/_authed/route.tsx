@@ -1,5 +1,5 @@
 import { convexQuery } from "@convex-dev/react-query";
-import { api } from "@syntaxia/backend";
+import { api } from "@syntaxia/backend/convex/_generated/api";
 import { DashboardHeader } from "@syntaxia/ui/dashboard-header";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
@@ -12,7 +12,7 @@ function AuthedLayout() {
     location.pathname.includes("/interview/session/") ||
     location.pathname.includes("/interview/analysis/");
   const { data: balance } = useSuspenseQuery(
-    convexQuery(api.credits.balance, {}),
+    convexQuery(api.credits.getBalance, {}),
   );
 
   return (

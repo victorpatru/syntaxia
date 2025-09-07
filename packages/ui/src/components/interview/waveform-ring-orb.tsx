@@ -14,7 +14,8 @@ export function WaveformRingOrb({
   const sizeConfig = {
     small: { orb: 16, container: 32 },
     medium: { orb: 24, container: 48 },
-    large: { orb: 32, container: 64 },
+    large: { orb: 48, container: 120 },
+    xlarge: { orb: 64, container: 160 },
   };
 
   const { orb: orbSize, container: containerSize } = sizeConfig[size];

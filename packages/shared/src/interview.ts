@@ -31,11 +31,11 @@ export interface TranscriptEntry {
 }
 
 export interface InterviewScores {
-  communication: number; // 1-4 scale
-  debugging: number; // 1-4 scale
-  breadth: number; // 1-4 scale
-  operationalization: number; // 1-4 scale
-  productSense: number; // 1-4 scale
+  communication: number; // 1-10 scale
+  debugging: number; // 1-10 scale
+  breadth: number; // 1-10 scale
+  operationalization: number; // 1-10 scale
+  productSense: number; // 1-10 scale
   overall: number; // Calculated overall score
   comments: {
     strengths: string[];
@@ -175,12 +175,10 @@ export interface LoadingTerminalProps {
 export interface WaveformOrbProps {
   isActive: boolean;
   audioLevel?: number;
-  size?: "small" | "medium" | "large";
+  size?: "small" | "medium" | "large" | "xlarge";
 }
 
 export interface ConversationPanelProps {
-  transcript: TranscriptEntry[];
-  currentQuestion?: Question;
   isRecording: boolean;
   onToggleRecording: () => void;
   voiceState: VoiceSessionState;

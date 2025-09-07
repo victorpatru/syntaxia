@@ -4,22 +4,33 @@ import {
   type ActionCtx,
   action,
   internalMutation,
-  type QueryCtx,
   query,
 } from "./_generated/server";
 import { env } from "./env";
+import { checkRateLimit } from "./rate_limit/helpers";
 import { requireUser } from "./users";
 
-export const balance = query(async (ctx: QueryCtx): Promise<number> => {
-  const user = await requireUser(ctx);
-  return user.credits ?? 0;
+export const getBalance = query({
+  args: {},
+  returns: v.number(),
+  handler: async (ctx) => {
+    const user = await requireUser(ctx);
+    return user.credits ?? 0;
+  },
 });
 
-export const availablePackages = query(
-  async (): Promise<
-    Array<{ id: string; credits: number; price: string; description: string }>
-  > => {
-    const packs: Array<{
+export const getAvailablePackages = query({
+  args: {},
+  returns: v.array(
+    v.object({
+      id: v.string(),
+      credits: v.number(),
+      price: v.string(),
+      description: v.string(),
+    }),
+  ),
+  handler: async () => {
+    const packages: Array<{
       id: string;
       credits: number;
       price: string;
@@ -27,7 +38,7 @@ export const availablePackages = query(
     }> = [];
 
     if (env.POLAR_PRODUCT_ID_CREDITS_15) {
-      packs.push({
+      packages.push({
         id: env.POLAR_PRODUCT_ID_CREDITS_15,
         credits: 15,
         price: "39.99 USD",
@@ -35,16 +46,45 @@ export const availablePackages = query(
       });
     }
 
-    return packs;
+    return packages;
   },
-);
+});
 
 export const createCheckout = action({
   args: { packageId: v.string() },
-  returns: v.object({ url: v.string() }),
+  returns: v.union(
+    v.object({
+      success: v.literal(true),
+      url: v.string(),
+    }),
+    v.object({
+      success: v.literal(false),
+      error: v.string(),
+      retryAfterMs: v.optional(v.number()),
+    }),
+  ),
   handler: async (ctx: ActionCtx, { packageId }) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
+
+    const ALLOWED_PACKAGE_IDS = new Set(
+      [env.POLAR_PRODUCT_ID_CREDITS_15].filter(Boolean),
+    );
+    if (!ALLOWED_PACKAGE_IDS.has(packageId)) {
+      return {
+        success: false as const,
+        error: "Invalid packageId",
+      };
+    }
+
+    const limit = await checkRateLimit(ctx, "createCheckout", identity.subject);
+    if (!limit.ok) {
+      return {
+        success: false as const,
+        error: "Too many attempts. Please try again later.",
+        retryAfterMs: limit.retryAfterMs,
+      };
+    }
 
     const polar = new Polar({
       accessToken: env.POLAR_ORGANIZATION_TOKEN,
@@ -59,11 +99,14 @@ export const createCheckout = action({
       successUrl: `${env.APP_URL}/credits?checkout_id={CHECKOUT_ID}`,
     });
 
-    return { url: checkout.url };
+    return {
+      success: true as const,
+      url: checkout.url,
+    };
   },
 });
 
-export const addCredits = internalMutation({
+export const creditAccount = internalMutation({
   args: {
     clerkUserId: v.string(),
     orderId: v.string(),
@@ -86,15 +129,75 @@ export const addCredits = internalMutation({
     await ctx.db.insert("credits_log", {
       userId: user._id,
       amount: credits,
-      reason: "polar:order.paid",
+      reason: "polar:purchase",
       orderId,
     });
 
-    // Update user's balance
     await ctx.db.patch(user._id, {
       credits: (user.credits ?? 0) + credits,
     });
 
+    return null;
+  },
+});
+
+export const debitAccount = internalMutation({
+  args: {
+    sessionId: v.id("interview_sessions"),
+    amount: v.optional(v.number()),
+  },
+  returns: v.null(),
+  handler: async (ctx, { sessionId, amount = 15 }) => {
+    const session = await ctx.db.get(sessionId);
+    if (!session) throw new Error("Session not found");
+
+    const user = await ctx.db.get(session.userId);
+    if (!user) throw new Error("User not found");
+
+    if (session.chargeCommittedAt) {
+      console.log(
+        `Session ${sessionId} already charged at ${session.chargeCommittedAt}`,
+      );
+      return null;
+    }
+
+    const now = Date.now();
+    await ctx.db.patch(sessionId, {
+      chargeCommittedAt: now,
+      updatedAt: now,
+    });
+
+    const existingCharge = await ctx.db
+      .query("credits_log")
+      .withIndex("by_session_reason", (q) =>
+        q.eq("sessionId", sessionId).eq("reason", "session:usage"),
+      )
+      .unique();
+
+    if (existingCharge) {
+      console.log(`Session ${sessionId} already charged`);
+      return null;
+    }
+
+    const currentBalance = user.credits ?? 0;
+    if (currentBalance < amount) {
+      throw new Error(`Insufficient credits: ${currentBalance} < ${amount}`);
+    }
+
+    await ctx.db.insert("credits_log", {
+      userId: user._id,
+      amount: -amount,
+      reason: "session:usage",
+      sessionId,
+    });
+
+    await ctx.db.patch(user._id, {
+      credits: currentBalance - amount,
+    });
+
+    console.log(
+      `Debited ${amount} credits from user ${user._id} for session ${sessionId}`,
+    );
     return null;
   },
 });
