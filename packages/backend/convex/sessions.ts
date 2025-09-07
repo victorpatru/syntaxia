@@ -139,10 +139,10 @@ const JDGuardSchema = z.object({
 
 const AnalysisResponseSchema = z.object({
   scores: z.object({
-    overall: z.number().min(1).max(4),
-    technical: z.number().min(1).max(4),
-    communication: z.number().min(1).max(4),
-    problemSolving: z.number().min(1).max(4),
+    overall: z.number().min(1).max(10),
+    technical: z.number().min(1).max(10),
+    communication: z.number().min(1).max(10),
+    problemSolving: z.number().min(1).max(10),
     comments: z.object({
       strengths: z.array(z.string()),
       improvements: z.array(z.string()),

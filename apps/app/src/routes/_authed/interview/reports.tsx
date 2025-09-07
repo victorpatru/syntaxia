@@ -155,9 +155,9 @@ function InterviewReports() {
                           className={
                             session.duration && session.duration < 120
                               ? "text-orange-400"
-                              : session.scores?.overall >= 3
+                              : session.scores?.overall >= 7
                                 ? "text-terminal-amber"
-                                : session.scores?.overall >= 2
+                                : session.scores?.overall >= 4
                                   ? "text-terminal-green"
                                   : session.scores?.overall
                                     ? "text-red-400"
