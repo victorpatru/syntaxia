@@ -53,7 +53,6 @@ function InterviewSession() {
     },
     onMessage: () => {},
     onError: (error: unknown) => {
-      console.error("ElevenLabs error:", error);
       setVoiceState((prev) => ({
         ...prev,
         connectionStatus: "error",
@@ -97,7 +96,7 @@ function InterviewSession() {
     }
 
     if (!session?.questions || session.questions.length === 0) {
-      navigate({ to: "/interview" });
+      navigate({ to: "/interview", search: { sessionId: undefined } });
       return;
     }
 
@@ -132,7 +131,7 @@ function InterviewSession() {
     } catch (error) {
       console.error("Failed to start WebRTC session:", error);
       setHasStartedActive(false);
-      navigate({ to: "/interview" });
+      navigate({ to: "/interview", search: { sessionId: undefined } });
     }
   }, [
     session,
@@ -325,33 +324,21 @@ function InterviewSession() {
       </div>
 
       <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4">
-        <div className="flex items-center justify-center py-8">
+        <div className="flex items-center justify-center py-12">
           <WaveformRingOrb
             isActive={isInterviewActive}
             audioLevel={voiceState.currentAudioLevel}
-            size="medium"
+            size="large"
           />
         </div>
 
         <div className="flex-1 pt-4">
           <div className="max-w-2xl mx-auto w-full">
-            {currentQuestion && (
-              <ConversationPanel
-                transcript={transcript}
-                currentQuestion={currentQuestion}
-                isRecording={isRecording}
-                onToggleRecording={toggleRecording}
-                voiceState={derivedVoiceState}
-              />
-            )}
-
-            {!currentQuestion && (
-              <div className="text-center py-8">
-                <span className="text-terminal-green/60 font-mono">
-                  Loading interview questions...
-                </span>
-              </div>
-            )}
+            <ConversationPanel
+              isRecording={isRecording}
+              onToggleRecording={toggleRecording}
+              voiceState={derivedVoiceState}
+            />
 
             <div className="text-center">
               <Button

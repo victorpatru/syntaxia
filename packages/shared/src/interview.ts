@@ -175,12 +175,10 @@ export interface LoadingTerminalProps {
 export interface WaveformOrbProps {
   isActive: boolean;
   audioLevel?: number;
-  size?: "small" | "medium" | "large";
+  size?: "small" | "medium" | "large" | "xlarge";
 }
 
 export interface ConversationPanelProps {
-  transcript: TranscriptEntry[];
-  currentQuestion?: Question;
   isRecording: boolean;
   onToggleRecording: () => void;
   voiceState: VoiceSessionState;
