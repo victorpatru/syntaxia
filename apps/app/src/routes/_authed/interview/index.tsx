@@ -66,14 +66,9 @@ function InterviewStart() {
 
       if (!result.success) {
         if (isRateLimitFailure(result)) {
-          showRateLimitToast(
-            result.retryAfterMs,
-            "We are not able to start the interview. Please try again with a different description.",
-          );
+          showRateLimitToast(result.retryAfterMs);
         } else {
-          toast.error(
-            "We are not able to start the interview. Please try again with a different description.",
-          );
+          toast.error(result.error);
         }
         return;
       }
