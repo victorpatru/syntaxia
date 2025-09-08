@@ -188,6 +188,21 @@ function InterviewSession() {
     startVoiceConnection,
   ]);
 
+  // Cleanup ElevenLabs connection when session is auto-ended by server
+  useEffect(() => {
+    if (
+      session?.status === "analyzing" &&
+      conversation.status === "connected"
+    ) {
+      setIsInterviewActive(false);
+
+      // Cleanup ElevenLabs connection
+      conversation.endSession().catch((error: unknown) => {
+        console.error("Failed to cleanup ElevenLabs connection:", error);
+      });
+    }
+  }, [session?.status, conversation]);
+
   const endInterview = useCallback(async () => {
     setIsInterviewActive(false);
 

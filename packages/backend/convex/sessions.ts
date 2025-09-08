@@ -645,6 +645,15 @@ export const startActive = mutation({
       sessionId,
     });
 
+    // Schedule automatic session termination after 15 minutes
+    await ctx.scheduler.runAfter(
+      15 * 60 * 1000,
+      internal.sessions.autoEndSession,
+      {
+        sessionId,
+      },
+    );
+
     return { sessionId, startedAt: micOnAt || now };
   },
 });
@@ -1006,6 +1015,37 @@ export const getCompletedSessions = query({
       )
       .order("desc")
       .paginate(args.paginationOpts);
+  },
+});
+
+export const autoEndSession = internalMutation({
+  args: { sessionId: v.id("interview_sessions") },
+  returns: v.null(),
+  handler: async (ctx, { sessionId }) => {
+    const session = await ctx.db.get(sessionId);
+    if (!session) return null;
+
+    if (session.status !== "active") return null;
+
+    const now = Date.now();
+    const duration = session.startedAt
+      ? Math.floor((now - session.startedAt) / 1000)
+      : 0;
+
+    await ctx.db.patch(sessionId, {
+      status: "analyzing",
+      duration,
+      updatedAt: now,
+    });
+
+    await ctx.scheduler.runAfter(0, internal.sessions.ensureCharge, {
+      sessionId,
+    });
+
+    console.log(
+      `Auto-ended session ${sessionId} after ${duration} seconds (server timeout)`,
+    );
+    return null;
   },
 });
 
