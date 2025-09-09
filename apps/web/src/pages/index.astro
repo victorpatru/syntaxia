@@ -1,6 +1,6 @@
-<!-- TODO: make sure that we generate the polar products programmatically -->
 ---
 import { Image } from "astro:assets";
+import CTAButton from "../components/CTAButton.astro";
 import { ThemeToggle } from "../components/ThemeToggle.tsx";
 import "../styles/global.css";
 ---
@@ -71,12 +71,9 @@ import "../styles/global.css";
 				
 				<div class="flex items-center gap-3">
 						<ThemeToggle client:idle />
-						<button
-						class="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20 cursor-pointer"
-						onclick="window.location.href = '/'"
-					>
-						./login
-					</button>
+						<CTAButton variant="secondary" size="sm" href="/">
+							./login
+						</CTAButton>
 				</div>
 			</div>
 		</header>
@@ -94,9 +91,9 @@ import "../styles/global.css";
 					</p>
 					<p class="text-terminal-green/60 text-sm md:text-base mt-3 font-mono">Try the first 15 minutes for $1</p>
 					<div class="mt-6">
-						<button id="start" class="bg-terminal-amber text-black light:text-white hover:bg-terminal-amber/80 font-mono px-3 py-1 transition-colors text-xs h-8 min-w-20 cursor-pointer">
-							./start-practice
-						</button>
+						<CTAButton size="lg" href="/login">
+							./start-practicing
+						</CTAButton>
 					</div>
 				</div>
 			</div>
@@ -225,9 +222,6 @@ import "../styles/global.css";
 						<h3 class="text-terminal-green font-semibold text-lg md:text-xl mb-3 mt-3">./1-session</h3>
 						<p class="text-4xl md:text-5xl text-terminal-amber font-mono">$12.99</p>
 						<p class="text-terminal-green/70 text-sm mt-3">15-minute interview session</p>
-						<div class="mt-10">
-							<button class="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20 cursor-pointer w-full">./buy</button>
-						</div>
 					</div>
 
 					<!-- 3 Sessions -->
@@ -238,9 +232,6 @@ import "../styles/global.css";
 						<h3 class="text-terminal-green font-semibold text-lg md:text-xl mb-3 mt-3">./3-sessions</h3>
 						<p class="text-4xl md:text-5xl text-terminal-amber font-mono">$34.99</p>
 						<p class="text-terminal-green/70 text-sm mt-3">3 × 15-minute interview sessions</p>
-						<div class="mt-6">
-							<button class="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20 cursor-pointer w-full">./buy</button>
-						</div>
 					</div>
 
 					<!-- 5 Sessions -->
@@ -251,10 +242,14 @@ import "../styles/global.css";
 						<h3 class="text-terminal-green font-semibold text-lg md:text-xl mb-3 mt-3">./5-sessions</h3>
 						<p class="text-4xl md:text-5xl text-terminal-amber font-mono">$54.99</p>
 						<p class="text-terminal-green/70 text-sm mt-3">5 × 15-minute interview sessions</p>
-						<div class="mt-6">
-							<button class="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20 cursor-pointer w-full">./buy</button>
-						</div>
 					</div>
+				</div>
+
+				<!-- Pricing info only - no CTA here -->
+				<div class="text-center mt-6">
+					<p class="text-terminal-green/60 text-sm font-mono">
+						No subscription • Pay per session
+					</p>
 				</div>
 			</div>
 
@@ -291,18 +286,18 @@ import "../styles/global.css";
 				</div>
 			</div>
 
-			<!-- Final CTA -->
+			<!-- Primary CTA -->
 			<div class="text-center mb-12">
-				<div class="border border-terminal-green/30 bg-card p-8 mx-auto">
-					<h2 class="text-xl font-bold text-terminal-green mb-4">$ ./start-your-journey</h2>
-					<p class="text-terminal-green/80 text-sm mb-6 font-mono">
+				<div class="border border-terminal-green/30 bg-card px-8 py-16 mx-auto">
+					<h2 class="text-2xl font-bold text-terminal-green mb-4">$ ./ready-to-practice</h2>
+					<p class="text-terminal-green/80 text-base mb-6 font-mono">
 						Stop failing phone screens. Start landing offers.
 					</p>
-					<button class="bg-terminal-amber text-black light:text-white hover:bg-terminal-amber/80 font-mono px-3 py-1 transition-colors text-xs h-8 min-w-20 cursor-pointer">
-						./start-practice
-					</button>
-					<p class="text-terminal-green/50 text-sm md:text-base mt-3 font-mono">
-						Try the first 15 minutes for $1
+					<CTAButton size="lg" href="/login">
+						./start-practicing
+					</CTAButton>
+					<p class="text-terminal-green/50 text-sm mt-3 font-mono">
+						Sign up free • Try first session for $1 • No subscription required
 					</p>
 				</div>
 			</div>
@@ -328,7 +323,6 @@ import "../styles/global.css";
 					<p class="text-terminal-green/50 text-sm">
 						Built for developers, by developers. Practice like you're already hired.
 					</p>
-					<div class="mt-2 text-xs text-terminal-green/30">$ git commit -m "ship syntaxia v1.0"</div>
 				</div>
 			</div>
 		</main>

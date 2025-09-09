@@ -1,0 +1,48 @@
+---
+export interface Props {
+  variant?: "primary" | "secondary";
+  size?: "sm" | "md" | "lg";
+  href?: string;
+  onClick?: string;
+  class?: string;
+}
+
+const {
+  variant = "primary",
+  size = "md",
+  href,
+  onClick,
+  class: additionalClasses = "",
+} = Astro.props;
+
+// Base classes for all buttons
+const baseClasses =
+  "font-mono transition-colors cursor-pointer inline-block text-center";
+
+// Variant styles
+const variantClasses = {
+  primary:
+    "bg-terminal-amber text-black light:text-white hover:bg-terminal-amber/80",
+  secondary:
+    "bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber",
+};
+
+// Size styles
+const sizeClasses = {
+  sm: "px-3 py-1 text-xs h-8 min-w-20",
+  md: "px-4 py-2 text-sm h-10 min-w-24",
+  lg: "px-6 py-3 text-base h-12 min-w-32",
+};
+
+const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${additionalClasses}`;
+
+const clickHandler =
+  onClick || (href ? `window.location.href = '${href}'` : "");
+---
+
+<button 
+  class={classes}
+  onclick={clickHandler}
+>
+  <slot />
+</button>
