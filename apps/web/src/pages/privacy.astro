@@ -1,0 +1,180 @@
+---
+import { ThemeToggle } from "../components/ThemeToggle.tsx";
+import "../styles/global.css";
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+		<link rel="manifest" href="/site.webmanifest" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		
+		<!-- Prevent dark mode flash -->
+		<script>
+			(function() {
+				function getSystemTheme() {
+					return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+				}
+				
+				const storedTheme = localStorage.getItem('theme') || 'system';
+				const theme = storedTheme === 'system' ? getSystemTheme() : storedTheme;
+				
+				if (theme === 'light') {
+					document.documentElement.classList.add('light');
+				}
+				// Dark mode is default, no class needed
+			})();
+		</script>
+		
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
+		
+		<title>Privacy Policy - Syntaxia</title>
+	</head>
+	<body class="min-h-screen bg-background text-foreground font-mono">
+		<header class="border-b border-terminal-green/30 bg-terminal-dark font-mono">
+			<div class="mx-auto max-w-6xl px-6 flex h-16 items-center justify-between">
+				<a href="/" class="flex items-center gap-1 hover:opacity-80 transition-opacity">
+					<span class="text-terminal-amber">$</span>
+					<span class="font-mono font-bold text-terminal-green">syntaxia</span>
+					<span class="text-terminal-green animate-pulse">_</span>
+				</a>
+				<div class="flex items-center gap-3">
+					<ThemeToggle client:idle />
+					<button
+						class="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20 cursor-pointer"
+						onclick="window.location.href = '/'"
+					>
+						./login
+					</button>
+				</div>
+			</div>
+		</header>
+
+		<main class="container mx-auto px-4 py-12 max-w-4xl">
+			<div class="mb-8">
+				<h1 class="text-3xl md:text-4xl font-bold text-terminal-green mb-4 font-mono">$ ./privacy-policy</h1>
+				<p class="text-terminal-green/70 text-sm font-mono">Last updated: {new Date().toLocaleDateString()}</p>
+			</div>
+
+			<div class="space-y-8 text-terminal-green/90 font-mono">
+				<section class="border border-terminal-green/30 p-6 bg-card">
+					<p class="leading-relaxed text-sm">
+						Your privacy is important to us. It is Syntaxia's policy to respect
+						your privacy regarding any information we may collect from you
+						across our website, and other sites we own and operate.
+					</p>
+				</section>
+
+				<section class="border border-terminal-green/30 p-6 bg-card">
+					<h2 class="text-xl font-bold text-terminal-green mb-4 font-mono">$ ./information-collection</h2>
+					<p class="leading-relaxed text-sm">
+						We only ask for personal information when we truly need it to
+						provide a service to you. We collect it by fair and lawful means,
+						with your knowledge and consent. We also let you know why we're
+						collecting it and how it will be used.
+					</p>
+				</section>
+
+				<section class="border border-terminal-green/30 p-6 bg-card">
+					<h2 class="text-xl font-bold text-terminal-green mb-4 font-mono">$ ./account-information</h2>
+					<p class="leading-relaxed text-sm">
+						You can sign up with your Google account so your Syntaxia account
+						username will be prefilled with your name and your public profile
+						picture.
+					</p>
+				</section>
+
+				<section class="border border-terminal-green/30 p-6 bg-card">
+					<h2 class="text-xl font-bold text-terminal-green mb-4 font-mono">$ ./data-retention</h2>
+					<p class="leading-relaxed text-sm">
+						We only retain collected information for as long as necessary to
+						provide you with your requested service. What data we store, we'll
+						protect within commercially acceptable means to prevent loss and
+						theft, as well as unauthorised access, disclosure, copying, use or
+						modification.
+					</p>
+				</section>
+
+				<section class="border border-terminal-green/30 p-6 bg-card">
+					<h2 class="text-xl font-bold text-terminal-green mb-4 font-mono">$ ./data-sharing</h2>
+					<p class="leading-relaxed text-sm">
+						We don't share any personally identifying information publicly or
+						with third-parties, except when required to by law.
+					</p>
+				</section>
+
+				<section class="border border-terminal-green/30 p-6 bg-card">
+					<h2 class="text-xl font-bold text-terminal-green mb-4 font-mono">$ ./gdpr-compliance</h2>
+					<p class="leading-relaxed text-sm">
+						We act in the capacity of a data controller and a data processor
+						with regard to the personal data processed through Syntaxia and the
+						services in terms of the applicable data protection laws, including
+						the EU General Data Protection Regulation (GDPR).
+					</p>
+				</section>
+
+				<section class="border border-terminal-green/30 p-6 bg-card">
+					<h2 class="text-xl font-bold text-terminal-green mb-4 font-mono">$ ./external-links</h2>
+					<p class="leading-relaxed text-sm">
+						Our website may link to external sites that are not operated by us.
+						Please be aware that we have no control over the content and
+						practices of these sites, and cannot accept responsibility or
+						liability for their respective privacy policies.
+					</p>
+				</section>
+
+				<section class="border border-terminal-green/30 p-6 bg-card">
+					<h2 class="text-xl font-bold text-terminal-green mb-4 font-mono">$ ./your-rights</h2>
+					<p class="leading-relaxed text-sm">
+						You are free to refuse our request for your personal information,
+						with the understanding that we may be unable to provide you with
+						some of your desired services.
+					</p>
+				</section>
+
+				<section class="border border-terminal-green/30 p-6 bg-card">
+					<h2 class="text-xl font-bold text-terminal-green mb-4 font-mono">$ ./acceptance</h2>
+					<p class="leading-relaxed text-sm">
+						Your continued use of our website will be regarded as acceptance of
+						our practices around privacy and personal information. If you have
+						any questions about how we handle user data and personal
+						information, feel free to contact us at{" "}
+						<a
+							href="mailto:victor@syntaxia.com"
+							class="text-terminal-amber hover:text-terminal-amber/80 underline"
+						>
+							victor@usesyntaxia.com
+						</a>
+					</p>
+				</section>
+			</div>
+
+			<!-- Back to home -->
+			<div class="mt-12 text-center">
+				<a
+					href="/"
+					class="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20 inline-flex items-center"
+				>
+					← ./home
+				</a>
+			</div>
+		</main>
+
+		<!-- Footer -->
+		<div class="mt-12 text-center pb-8">
+			<div class="border-t border-terminal-green/20 pt-6">
+				<p class="text-terminal-green/50 text-sm">
+					Built for developers, by developers. Practice like you're already hired.
+				</p>
+				<div class="mt-2 text-xs text-terminal-green/30">$ git commit -m "ship syntaxia v1.0"</div>
+			</div>
+		</div>
+	</body>
+</html>
