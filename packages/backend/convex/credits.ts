@@ -37,12 +37,30 @@ export const getAvailablePackages = query({
       description: string;
     }> = [];
 
-    if (env.POLAR_PRODUCT_ID_CREDITS_15) {
+    if (env.POLAR_PRODUCT_ID_1_SESSION) {
       packages.push({
-        id: env.POLAR_PRODUCT_ID_CREDITS_15,
+        id: env.POLAR_PRODUCT_ID_1_SESSION,
         credits: 15,
-        price: "39.99 USD",
-        description: "One-time pack",
+        price: "$12.99",
+        description: "1 interview session (15 credits)",
+      });
+    }
+
+    if (env.POLAR_PRODUCT_ID_3_SESSIONS) {
+      packages.push({
+        id: env.POLAR_PRODUCT_ID_3_SESSIONS,
+        credits: 45,
+        price: "$34.99",
+        description: "3 interview sessions (45 credits) - Save $3.98",
+      });
+    }
+
+    if (env.POLAR_PRODUCT_ID_5_SESSIONS) {
+      packages.push({
+        id: env.POLAR_PRODUCT_ID_5_SESSIONS,
+        credits: 75,
+        price: "$54.99",
+        description: "5 interview sessions (75 credits) - Save $9.96",
       });
     }
 
@@ -68,7 +86,11 @@ export const createCheckout = action({
     if (!identity) throw new Error("Not authenticated");
 
     const ALLOWED_PACKAGE_IDS = new Set(
-      [env.POLAR_PRODUCT_ID_CREDITS_15].filter(Boolean),
+      [
+        env.POLAR_PRODUCT_ID_1_SESSION,
+        env.POLAR_PRODUCT_ID_3_SESSIONS,
+        env.POLAR_PRODUCT_ID_5_SESSIONS,
+      ].filter(Boolean),
     );
     if (!ALLOWED_PACKAGE_IDS.has(packageId)) {
       return {
