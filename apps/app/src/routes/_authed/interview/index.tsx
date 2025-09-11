@@ -90,6 +90,8 @@ function InterviewStart() {
       toast.error("Job description must be at least 50 characters.");
       return;
     }
+    // TODO: Uncomment this when Polar payments are ready
+    /*
     if (balance < 15) {
       toast.error("You need at least 15 credits to start an interview.", {
         action: {
@@ -99,6 +101,7 @@ function InterviewStart() {
       });
       return;
     }
+    */
     createSession();
   };
 
