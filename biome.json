@@ -33,7 +33,7 @@
         "noForEach": "off"
       }
     },
-    "includes": ["!**/web/**"]
+    "includes": ["**/*", "!**/web/**"]
   },
   "formatter": {
     "indentStyle": "space"

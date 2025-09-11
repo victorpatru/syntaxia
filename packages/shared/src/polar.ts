@@ -32,7 +32,7 @@ interface Customer {
   id: string;
   createdAt: string;
   modifiedAt: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   externalId: string;
   email: string;
   emailVerified: boolean;
@@ -46,7 +46,7 @@ interface Customer {
 
 // Product interface
 interface Product {
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   createdAt: string;
   modifiedAt: string;
   id: string;
@@ -67,7 +67,7 @@ interface Discount {
   createdAt: string;
   modifiedAt: string;
   id: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   name: string;
   code: string;
   startsAt: string;
@@ -79,7 +79,7 @@ interface Discount {
 
 // Subscription interface
 interface Subscription {
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   createdAt: string;
   modifiedAt: string;
   id: string;
@@ -156,8 +156,8 @@ export interface OrderData {
   discountId: string | null;
   subscriptionId: string | null;
   checkoutId: string;
-  metadata: Record<string, any>;
-  customFieldData: Record<string, any>;
+  metadata: Record<string, unknown>;
+  customFieldData: Record<string, unknown>;
   customer: Customer;
   userId: string;
   product: Product;

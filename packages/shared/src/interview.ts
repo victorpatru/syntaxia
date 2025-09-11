@@ -1,6 +1,6 @@
 // Interview session types for the AI-powered technical interview system
 
-import { ExperienceLevel } from "./types";
+import type { ExperienceLevel } from "./types";
 
 export type InterviewStatus =
   | "setup"
@@ -153,7 +153,7 @@ export interface VoiceSessionState {
 export type InterviewApiError = {
   code: string;
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 };
 
 export type InterviewApiResponse<T> = {
