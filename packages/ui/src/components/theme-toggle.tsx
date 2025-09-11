@@ -2,7 +2,7 @@ import { Monitor, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export function ThemeToggle() {
-  const [theme, setThemeState] = useState<string>("system");
+  const [_, setThemeState] = useState<string>("system");
   const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 

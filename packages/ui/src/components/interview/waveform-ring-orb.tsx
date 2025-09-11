@@ -1,4 +1,4 @@
-import { WaveformOrbProps } from "@syntaxia/shared";
+import type { WaveformOrbProps } from "@syntaxia/shared";
 import { useEffect, useState } from "react";
 
 export function WaveformRingOrb({
@@ -59,7 +59,7 @@ export function WaveformRingOrb({
         {/* Animated waveform rings */}
         {waveformData.map((amplitude, index) => (
           <div
-            key={index}
+            key={`waveform-ring-${index.toString().padStart(2, "0")}`}
             className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 border border-terminal-green/60 transition-all duration-200"
             style={{
               width: `${containerSize + amplitude * containerSize}px`,

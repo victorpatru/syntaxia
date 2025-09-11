@@ -153,7 +153,7 @@ export interface VoiceSessionState {
 export type InterviewApiError = {
   code: string;
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 };
 
 export type InterviewApiResponse<T> = {

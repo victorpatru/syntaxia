@@ -457,7 +457,7 @@ Guidelines:
         domainTrack: parseResult.domainTrack,
       });
       return { success: true as const, ...parseResult };
-    } catch (error: unknown) {
+    } catch {
       const message =
         "The AI is unavailable to parse your job description. Please try again later.";
       await ctx.runMutation(internal.sessions.markFailed, {
@@ -949,7 +949,7 @@ Transcript:
 ${transcript}
 
 Questions Asked:
-${session.questions?.map((q: any) => `- ${q.text}`).join("\n")}
+${session.questions?.map((q: { text: string }) => `- ${q.text}`).join("\n")}
 
 Provide:
 1. Scores (1-10 scale): overall, technical depth, communication clarity, problem-solving approach

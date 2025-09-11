@@ -1,8 +1,8 @@
 import { api } from "@syntaxia/backend/convex/_generated/api";
-import { Id } from "@syntaxia/backend/convex/_generated/dataModel";
+import type { Id } from "@syntaxia/backend/convex/_generated/dataModel";
 import { Button } from "@syntaxia/ui/button";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 
 export const Route = createFileRoute("/_authed/interview/setup-failed")({
   component: SetupFailed,

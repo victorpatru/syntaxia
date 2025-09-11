@@ -2,12 +2,9 @@ import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@syntaxia/backend/convex/_generated/api";
 import { Button } from "@syntaxia/ui/button";
 import { Card } from "@syntaxia/ui/card";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useAction } from "convex/react";
 import { CreditCard, Sparkles } from "lucide-react";
-import { toast } from "sonner";
-import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
 
 interface CreditPackage {
   id: string;

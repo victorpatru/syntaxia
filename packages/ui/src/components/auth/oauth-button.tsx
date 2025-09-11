@@ -1,6 +1,6 @@
 import type { OAuthStrategy } from "@clerk/types";
 import { Button } from "@syntaxia/ui/button";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 interface OAuthButtonProps {
   provider: OAuthStrategy;

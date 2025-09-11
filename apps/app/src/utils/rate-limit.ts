@@ -36,7 +36,7 @@ export function isRateLimitFailure(
   return (
     !!result &&
     typeof result === "object" &&
-    (result as any).success === false &&
-    typeof (result as any).retryAfterMs === "number"
+    (result as RateLimitFailure).success === false &&
+    typeof (result as RateLimitFailure).retryAfterMs === "number"
   );
 }

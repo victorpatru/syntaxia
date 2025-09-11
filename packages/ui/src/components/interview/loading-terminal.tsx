@@ -1,4 +1,4 @@
-import { LoadingTerminalProps } from "@syntaxia/shared";
+import type { LoadingTerminalProps } from "@syntaxia/shared";
 
 export function LoadingTerminal({
   progress,
@@ -42,9 +42,9 @@ export function LoadingTerminal({
               </div>
               <div className="border border-terminal-green/30 bg-background p-1">
                 <div className="flex">
-                  {Array.from({ length: 50 }, (_, i) => (
+                  {Array.from({ length: 50 }).map((_, i) => (
                     <span
-                      key={i}
+                      key={`segment-${i.toString().padStart(2, "0")}`}
                       className={`text-xs ${
                         i < Math.floor(progress / 2)
                           ? "text-terminal-green"
@@ -62,10 +62,11 @@ export function LoadingTerminal({
             <div className="space-y-1 text-sm">
               {additionalInfo.map((info, index) => (
                 <div
-                  key={index}
+                  key={`terminal-info-${index}-${info.slice(0, 10)}`}
                   className="text-terminal-green/60"
-                  dangerouslySetInnerHTML={{ __html: info }}
-                />
+                >
+                  {info}
+                </div>
               ))}
             </div>
           </div>

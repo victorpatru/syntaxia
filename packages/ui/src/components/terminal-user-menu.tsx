@@ -79,6 +79,7 @@ export function TerminalUserMenu() {
         <div className="p-1">
           <button
             onClick={handleProfile}
+            type="button"
             className="flex items-center gap-2 px-3 py-2 text-terminal-green/90 hover:text-terminal-amber hover:bg-terminal-green/5 text-sm transition-colors w-full text-left"
           >
             <TerminalIcon />
@@ -87,6 +88,7 @@ export function TerminalUserMenu() {
           <div className="border-t border-terminal-green/30 my-1" />
           <button
             onClick={handleSignOut}
+            type="button"
             className="flex items-center gap-2 px-3 py-2 text-terminal-green/90 hover:text-terminal-amber hover:bg-terminal-green/5 text-sm transition-colors w-full text-left"
           >
             <TerminalIcon />

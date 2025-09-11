@@ -12,11 +12,7 @@ import { Clock } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { env } from "@/env";
-import {
-  Question,
-  TranscriptEntry,
-  VoiceSessionState,
-} from "@/types/interview";
+import type { VoiceSessionState } from "@/types/interview";
 import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
 import { validateSessionRoute } from "@/utils/route-guards";
 
@@ -31,7 +27,6 @@ function InterviewSession() {
   const [interviewTime, setInterviewTime] = useState(0);
   const [isInterviewActive, setIsInterviewActive] = useState(false);
   const [hasStartedActive, setHasStartedActive] = useState(false);
-  const [micOnAt, setMicOnAt] = useState<number | null>(null);
 
   const session = useQuery(api.sessions.getSession, { sessionId });
   const startActiveMutation = useConvexMutation(api.sessions.startActive);
@@ -52,7 +47,7 @@ function InterviewSession() {
       setVoiceState((prev) => ({ ...prev, connectionStatus: "disconnected" }));
     },
     onMessage: () => {},
-    onError: (error: unknown) => {
+    onError: (error) => {
       setVoiceState((prev) => ({
         ...prev,
         connectionStatus: "error",
@@ -60,14 +55,6 @@ function InterviewSession() {
       }));
     },
   });
-
-  const idxRaw = session?.currentQuestionIndex;
-  const idx = typeof idxRaw === "number" ? idxRaw : -1;
-  const questions = session?.questions ?? [];
-  const currentQuestion: Question | null =
-    idx >= 0 && idx < questions.length ? (questions[idx] ?? null) : null;
-
-  const [transcript] = useState<TranscriptEntry[]>([]);
 
   const [voiceState, setVoiceState] = useState<VoiceSessionState>({
     isRecording: false,
@@ -217,7 +204,7 @@ function InterviewSession() {
     }
 
     endMutation({ sessionId, elevenlabsConversationId: conversationId })
-      .then((res: any) => {
+      .then((res) => {
         if (isRateLimitFailure(res)) {
           showRateLimitToast(
             res.retryAfterMs,
@@ -272,7 +259,6 @@ function InterviewSession() {
     if (newRecordingState && session?.status === "setup") {
       setHasStartedActive(true);
       const micStartTime = Date.now();
-      setMicOnAt(micStartTime);
 
       try {
         const res = await startActiveMutation({
