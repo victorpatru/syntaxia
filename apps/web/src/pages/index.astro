@@ -3,6 +3,8 @@ import { Image } from "astro:assets";
 import CTAButton from "../components/CTAButton.astro";
 import { ThemeToggle } from "../components/ThemeToggle.tsx";
 import "../styles/global.css";
+
+const APP_URL = import.meta.env.PUBLIC_APP_URL;
 ---
 
 <html lang="en">
@@ -71,7 +73,7 @@ import "../styles/global.css";
 				
 				<div class="flex items-center gap-3">
 						<ThemeToggle client:idle />
-						<CTAButton variant="secondary" size="sm" href="/">
+						<CTAButton variant="secondary" size="sm" href={`${APP_URL}`}>
 							./login
 						</CTAButton>
 				</div>
@@ -91,7 +93,7 @@ import "../styles/global.css";
 					</p>
 					<p class="text-terminal-green/60 text-sm md:text-base mt-3 font-mono">Try the first 15 minutes for $1</p>
 					<div class="mt-6">
-						<CTAButton size="lg" href="/login">
+						<CTAButton size="lg" href={`${APP_URL}`}>
 							./start-practicing
 						</CTAButton>
 					</div>
@@ -293,7 +295,7 @@ import "../styles/global.css";
 					<p class="text-terminal-green/80 text-base mb-6 font-mono">
 						Stop failing phone screens. Start landing offers.
 					</p>
-					<CTAButton size="lg" href="/login">
+					<CTAButton size="lg" href={`${APP_URL}`}>
 						./start-practicing
 					</CTAButton>
 					<p class="text-terminal-green/50 text-sm mt-3 font-mono">
