@@ -9,7 +9,7 @@ function Home() {
   return (
     <div className="p-6">
       <SignedIn>
-        <Navigate to="/interview" />
+        <Navigate to="/interview" search={{ sessionId: undefined }} />
       </SignedIn>
       <SignedOut>
         <Navigate to="/login" />
