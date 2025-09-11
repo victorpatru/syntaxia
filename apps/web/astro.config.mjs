@@ -14,7 +14,7 @@ export default defineConfig({
         context: "client",
         access: "public",
       }),
-      PUBLIC_TURNSTILE_SITE_KEY: envField.string({
+      PUBLIC_APP_URL: envField.string({
         context: "client",
         access: "public",
       }),

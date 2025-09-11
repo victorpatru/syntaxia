@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@astrojs/react": "^4.3.0",
-    "@marsidev/react-turnstile": "^1.3.0",
     "@syntaxia/shared": "workspace:*",
     "@tailwindcss/vite": "catalog:frontend",
     "astro": "^5.13.2",

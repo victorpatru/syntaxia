@@ -1,6 +1,10 @@
 ---
+import { Image } from "astro:assets";
+import CTAButton from "../components/CTAButton.astro";
 import { ThemeToggle } from "../components/ThemeToggle.tsx";
 import "../styles/global.css";
+
+const APP_URL = import.meta.env.PUBLIC_APP_URL;
 ---
 
 <html lang="en">
@@ -34,76 +38,268 @@ import "../styles/global.css";
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
+		
+		<!-- Wistia Player -->
+		<script src="https://fast.wistia.com/player.js" async></script>
+		<script src="https://fast.wistia.com/embed/scmeic9wpj.js" async type="module"></script>
+		<style>wistia-player[media-id='scmeic9wpj']:not(:defined) { background: center / contain no-repeat url('https://fast.wistia.com/embed/medias/scmeic9wpj/swatch'); display: block; filter: blur(5px); padding-top:62.29%; }</style>
+		
 		<title>Syntaxia</title>
 	</head>
-	<body class="min-h-screen bg-background text-foreground font-mono">
-		<header class="border-b border-terminal-green/30 bg-terminal-dark px-4 md:px-6 font-mono">
-			<div class="flex h-16 items-center justify-between">
+	<body class="min-h-screen bg-background text-foreground font-mono" style="scroll-behavior: smooth;">
+		<header class="border-b border-terminal-green/30 bg-terminal-dark font-mono">
+			<div class="mx-auto max-w-6xl px-6 flex h-16 items-center justify-between">
 				<a href="/" class="flex items-center gap-1 hover:opacity-80 transition-opacity">
 					<span class="text-terminal-amber">$</span>
 					<span class="font-mono font-bold text-terminal-green">syntaxia</span>
 					<span class="text-terminal-green animate-pulse">_</span>
 				</a>
+				
+				<!-- Navigation Links -->
+				<nav class="hidden md:flex items-center gap-4">
+					<a href="#how-it-works" class="font-mono text-sm text-terminal-green hover:text-terminal-amber transition-colors">
+						./how-it-works
+					</a>
+					<a href="#show-demos" class="font-mono text-sm text-terminal-green hover:text-terminal-amber transition-colors">
+						./show-demos
+					</a>
+					<a href="#pricing" class="font-mono text-sm text-terminal-green hover:text-terminal-amber transition-colors">
+						./pricing
+					</a>
+					<a href="#faq" class="font-mono text-sm text-terminal-green hover:text-terminal-amber transition-colors">
+						./faq
+					</a>
+				</nav>
+				
 				<div class="flex items-center gap-3">
 						<ThemeToggle client:idle />
-						<button
-						class="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20"
-						onclick="window.location.href = '/'"
-					>
-						./login
-					</button>
+						<CTAButton variant="secondary" size="sm" href={`${APP_URL}`}>
+							./login
+						</CTAButton>
 				</div>
 			</div>
 		</header>
 
-		<main class="container mx-auto px-4 py-8 max-w-4xl">
+		<main class="container mx-auto px-4 py-12 max-w-5xl">
 			<!-- Hero Section -->
-			<div class="text-center mb-12">
-				<h1 class="text-2xl md:text-3xl font-bold text-terminal-green mb-4">$ ./syntaxia --help</h1>
-				<p class="text-terminal-green/80 text-lg mb-8 max-w-2xl mx-auto">
-					Don't let technical phone screens block great offers
-				</p>
+			<div class="text-center mb-16">
+				<div class="mx-auto max-w-3xl md:max-w-4xl">
+					<h1 class="text-4xl md:text-5xl font-bold text-terminal-green leading-[1.15] tracking-tight mb-6 mt-10" style="text-wrap: balance">
+						<span class="text-terminal-amber">AI</span> phone screen practice
+						<span class="block">tailored to your job description</span>
+					</h1>
+					<p class="text-terminal-green/70 text-base md:text-lg leading-relaxed mt-5">
+						Paste your JD and talk through a 15-minute voice screen with an AI interviewer that adapts to your answers. Get a scorecard and a prioritized action plan.
+					</p>
+					<p class="text-terminal-green/60 text-sm md:text-base mt-3 font-mono">Try the first 15 minutes for $1</p>
+					<div class="mt-6">
+						<CTAButton size="lg" href={`${APP_URL}`}>
+							./start-practicing
+						</CTAButton>
+					</div>
+				</div>
 			</div>
 
-			<!-- Features Grid -->
-			<div class="grid md:grid-cols-2 gap-6 mb-12">
-				<div class="border border-terminal-green/30 p-6 bg-card">
-					<div class="flex items-center mb-3">
-						<span class="text-terminal-amber mr-2">$</span>
-						<h3 class="text-lg font-semibold text-terminal-green">real-conversation</h3>
+			<!-- Video Demo (moved below fold) -->
+			<div id="demo" class="mb-16">
+				<wistia-player media-id="scmeic9wpj" aspect="1.605351170568562"></wistia-player>
+			</div>
+
+			<!-- How it Works -->
+			<div id="how-it-works" class="mb-16">
+				<h2 class="text-xl font-bold text-terminal-green mb-6 text-center">$ ./how-it-works</h2>
+				<div class="grid sm:grid-cols-2 gap-8 md:gap-10">
+					<div class="border border-terminal-green/30 p-6 md:p-8 bg-card">
+						<div class="flex items-center mb-3">
+							<span class="text-terminal-amber mr-2">1.</span>
+							<h3 class="text-lg font-semibold text-terminal-green">paste-jd</h3>
+						</div>
+						<p class="text-terminal-green/70 text-sm leading-relaxed font-mono">Paste the job description so the interview mirrors the role.</p>
 					</div>
-					<p class="text-terminal-green/70 text-sm leading-relaxed">
-						Stop typing, start talking. Practice the back-and-forth of real phone screens while you problem-solve.
-					</p>
+					<div class="border border-terminal-green/30 p-6 md:p-8 bg-card">
+						<div class="flex items-center mb-3">
+							<span class="text-terminal-amber mr-2">2.</span>
+							<h3 class="text-lg font-semibold text-terminal-green">parse-job</h3>
+						</div>
+						<p class="text-terminal-green/70 text-sm leading-relaxed font-mono">We extract skills and topics from the JD to shape the interview.</p>
+					</div>
+					<div class="border border-terminal-green/30 p-6 md:p-8 bg-card">
+						<div class="flex items-center mb-3">
+							<span class="text-terminal-amber mr-2">3.</span>
+							<h3 class="text-lg font-semibold text-terminal-green">practice-conversation</h3>
+						</div>
+						<p class="text-terminal-green/70 text-sm leading-relaxed font-mono">Talk through problems with the AI interviewer—like a real phone screen.</p>
+					</div>
+					<div class="border border-terminal-green/30 p-6 md:p-8 bg-card">
+						<div class="flex items-center mb-3">
+							<span class="text-terminal-amber mr-2">4.</span>
+							<h3 class="text-lg font-semibold text-terminal-green">get-review-and-plan</h3>
+						</div>
+						<p class="text-terminal-green/70 text-sm leading-relaxed font-mono">Receive a clear scorecard and a prioritized action plan with next steps.</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Social Proof Section -->
+<!-- 			
+			<div class="text-center mb-12">
+				<h2 class="text-xl font-bold text-terminal-green mb-6">$ cat testimonials.txt</h2>
+				<div class="grid md:grid-cols-3 gap-6 mb-8">
+					<div class="border border-terminal-green/30 p-4 bg-card">
+						<p class="text-terminal-green/80 text-sm mb-3 font-mono">
+							"Finally got past the screening at <span class="text-terminal-amber">Google</span>. The AI conversations felt just like real phone screens."
+						</p>
+						<div class="text-terminal-green/60 text-xs">
+							- Sarah Chen, Software Engineer
+						</div>
+					</div>
+					<div class="border border-terminal-green/30 p-4 bg-card">
+						<p class="text-terminal-green/80 text-sm mb-3 font-mono">
+							"Practiced for <span class="text-terminal-amber">3 days</span>, landed my dream job at a startup. The role-specific questions were spot on."
+						</p>
+						<div class="text-terminal-green/60 text-xs">
+							- Marcus Rodriguez, Frontend Dev
+						</div>
+					</div>
+					<div class="border border-terminal-green/30 p-4 bg-card">
+						<p class="text-terminal-green/80 text-sm mb-3 font-mono">
+							"Went from failing every phone screen to <span class="text-terminal-amber">3 offers</span> in one month."
+						</p>
+						<div class="text-terminal-green/60 text-xs">
+							- Jamie Park, Full Stack Dev
+						</div>
+					</div>
+				</div>
+				<div class="text-terminal-green/50 text-sm font-mono">
+					Join 2,847+ developers who landed their dream jobs
+				</div>
+			</div>
+			 -->
+
+			<!-- Features Grid removed to reduce repetition with How it works -->
+
+			<!-- Product Screenshots -->
+			<div id="show-demos" class="mb-12">
+				<h2 class="text-xl font-bold text-terminal-green mb-6 text-center">$ ./show-demos</h2>
+				<div class="grid grid-cols-1 gap-8">
+					<div class="border border-terminal-green/30 bg-card p-4">
+						<div class="bg-terminal-dark border border-terminal-green/20 overflow-hidden mb-3">
+							<!-- TODO: add light mode image -->
+						<Image 
+							src="https://afg7xsppojwqvdjk.public.blob.vercel-storage.com/dark-interview-page.png"
+							alt="Syntaxia interview session interface showing voice conversation with AI interviewer"
+							class="w-full h-auto"
+							loading="lazy"
+							width={1200}
+							height={800}
+						/>
+						</div>
+						<h3 class="text-terminal-green font-mono text-sm">./interview-session.png</h3>
+						<p class="text-terminal-green/70 text-xs mt-1">Live conversation interface with AI interviewer</p>
+					</div>
+					<div class="border border-terminal-green/30 bg-card p-4">
+						<div class="bg-terminal-dark border border-terminal-green/20 overflow-hidden mb-3">
+							<!-- TODO: add light mode image -->
+						<Image 
+							src="https://afg7xsppojwqvdjk.public.blob.vercel-storage.com/dark-report-page.png"
+							alt="Syntaxia session review dashboard showing performance metrics and improvement suggestions"
+							class="w-full h-auto"
+							loading="lazy"
+							width={1200}
+							height={800}
+						/>
+						</div>
+						<h3 class="text-terminal-green font-mono text-sm">./session-review.png</h3>
+						<p class="text-terminal-green/70 text-xs mt-1">Detailed analysis and action plan after each session</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Pricing -->
+			<div id="pricing" class="mb-16">
+				<h2 class="text-xl font-bold text-terminal-green mb-6 text-center">$ ./pricing</h2>
+				<div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
+					<!-- 1 Session -->
+					<div class="border border-terminal-green/30 bg-card p-8 md:p-10 flex flex-col">
+						<h3 class="text-terminal-green font-semibold text-lg md:text-xl mb-3 mt-3">./1-session</h3>
+						<p class="text-4xl md:text-5xl text-terminal-amber font-mono">$12.99</p>
+						<p class="text-terminal-green/70 text-sm mt-3">15-minute interview session</p>
+					</div>
+
+					<!-- 3 Sessions -->
+					<div class="border border-terminal-green/30 bg-card p-8 md:p-10 pt-14 flex flex-col relative">
+						<div class="absolute right-3 top-3 text-[11px] md:text-xs px-3 py-[6px] bg-terminal-green/10 border border-terminal-green/30 text-terminal-green font-mono">
+							Save $3.98 (10.2%)
+						</div>
+						<h3 class="text-terminal-green font-semibold text-lg md:text-xl mb-3 mt-3">./3-sessions</h3>
+						<p class="text-4xl md:text-5xl text-terminal-amber font-mono">$34.99</p>
+						<p class="text-terminal-green/70 text-sm mt-3">3 × 15-minute interview sessions</p>
+					</div>
+
+					<!-- 5 Sessions -->
+					<div class="border border-terminal-green/30 bg-card p-8 md:p-10 pt-14 flex flex-col relative">
+						<div class="absolute right-3 top-3 text-[11px] md:text-xs px-3 py-[6px] bg-terminal-green/10 border border-terminal-green/30 text-terminal-green font-mono">
+							Save $9.96 (15.3%)
+						</div>
+						<h3 class="text-terminal-green font-semibold text-lg md:text-xl mb-3 mt-3">./5-sessions</h3>
+						<p class="text-4xl md:text-5xl text-terminal-amber font-mono">$54.99</p>
+						<p class="text-terminal-green/70 text-sm mt-3">5 × 15-minute interview sessions</p>
+					</div>
 				</div>
 
-				<div class="border border-terminal-green/30 p-6 bg-card">
-					<div class="flex items-center mb-3">
-						<span class="text-terminal-amber mr-2">$</span>
-						<h3 class="text-lg font-semibold text-terminal-green">role-specific</h3>
-					</div>
-					<p class="text-terminal-green/70 text-sm leading-relaxed">
-						Paste the job description, get questions specific to that role. Stop wasting time on random LeetCode.
+				<!-- Pricing info only - no CTA here -->
+				<div class="text-center mt-6">
+					<p class="text-terminal-green/60 text-sm font-mono">
+						No subscription • Pay per session
 					</p>
 				</div>
+			</div>
 
-				<div class="border border-terminal-green/30 p-6 bg-card">
-					<div class="flex items-center mb-3">
-						<span class="text-terminal-amber mr-2">$</span>
-						<h3 class="text-lg font-semibold text-terminal-green">session-review</h3>
-					</div>
-					<p class="text-terminal-green/70 text-sm leading-relaxed">
-						See what worked and what didn't. Know exactly how to improve.
-					</p>
+			<!-- FAQ / Objections -->
+			<div id="faq" class="mb-12">
+				<h2 class="text-xl font-bold text-terminal-green mb-6 text-center">$ ./faq</h2>
+				<div class="space-y-4">
+					<details class="border border-terminal-green/30 bg-card">
+						<summary class="p-4 cursor-pointer font-mono text-sm text-terminal-green hover:bg-terminal-green/5">
+							Q: How is this different from LeetCode practice?
+						</summary>
+						<div class="px-4 pb-4 text-terminal-green/80 text-sm">
+							LeetCode tests algorithm knowledge. Syntaxia practices the actual conversation skills and thinking-out-loud process that phone screens require. You'll learn to explain your approach while coding, not just solve problems.
+						</div>
+					</details>
+					
+					<details class="border border-terminal-green/30 bg-card">
+						<summary class="p-4 cursor-pointer font-mono text-sm text-terminal-green hover:bg-terminal-green/5">
+							Q: Will this actually help me pass real interviews?
+						</summary>
+						<div class="px-4 pb-4 text-terminal-green/80 text-sm">
+							Yes. Our AI is trained on thousands of real technical phone screens. The conversation patterns, question types, and feedback style mirror what you'll experience with human interviewers at top companies.
+						</div>
+					</details>
+					
+					<details class="border border-terminal-green/30 bg-card">
+						<summary class="p-4 cursor-pointer font-mono text-sm text-terminal-green hover:bg-terminal-green/5">
+							Q: How quickly can I see improvement?
+						</summary>
+						<div class="px-4 pb-4 text-terminal-green/80 text-sm">
+							Most users see confidence improvements after 2-3 sessions. Significant interview performance gains typically happen within 1-2 weeks of regular practice (3-4 sessions per week).
+						</div>
+					</details>
 				</div>
+			</div>
 
-				<div class="border border-terminal-green/30 p-6 bg-card">
-					<div class="flex items-center mb-3">
-						<span class="text-terminal-amber mr-2">$</span>
-						<h3 class="text-lg font-semibold text-terminal-green">action-plan</h3>
-					</div>
-					<p class="text-terminal-green/70 text-sm leading-relaxed">
-						Get personalized action items after each session. Track your progress until you're ready.
+			<!-- Primary CTA -->
+			<div class="text-center mb-12">
+				<div class="border border-terminal-green/30 bg-card px-8 py-16 mx-auto">
+					<h2 class="text-2xl font-bold text-terminal-green mb-4">$ ./ready-to-practice</h2>
+					<p class="text-terminal-green/80 text-base mb-6 font-mono">
+						Stop failing phone screens. Start landing offers.
+					</p>
+					<CTAButton size="lg" href={`${APP_URL}`}>
+						./start-practicing
+					</CTAButton>
+					<p class="text-terminal-green/50 text-sm mt-3 font-mono">
+						Sign up free • Try first session for $1 • No subscription required
 					</p>
 				</div>
 			</div>
@@ -111,10 +307,24 @@ import "../styles/global.css";
 			<!-- Footer -->
 			<div class="mt-12 text-center">
 				<div class="border-t border-terminal-green/20 pt-6">
+					<!-- Footer Navigation -->
+					<div class="flex justify-center gap-6 mb-4">
+						<a 
+							href="/terms" 
+							class="font-mono text-xs text-terminal-green/70 hover:text-terminal-amber transition-colors"
+						>
+							./terms
+						</a>
+						<a 
+							href="/privacy" 
+							class="font-mono text-xs text-terminal-green/70 hover:text-terminal-amber transition-colors"
+						>
+							./privacy
+						</a>
+					</div>
 					<p class="text-terminal-green/50 text-sm">
 						Built for developers, by developers. Practice like you're already hired.
 					</p>
-					<div class="mt-2 text-xs text-terminal-green/30">$ git commit -m "ship syntaxia v1.0"</div>
 				</div>
 			</div>
 		</main>

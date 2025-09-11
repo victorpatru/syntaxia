@@ -55,7 +55,9 @@ export const handleWebhook = internalAction({
 
       if (clerkUserId && productId && orderId) {
         const productCredits: Record<string, number> = {
-          [env.POLAR_PRODUCT_ID_CREDITS_15]: 15,
+          [env.POLAR_PRODUCT_ID_1_SESSION]: 15,
+          [env.POLAR_PRODUCT_ID_3_SESSIONS]: 45,
+          [env.POLAR_PRODUCT_ID_5_SESSIONS]: 75,
         };
         const credits = productCredits[productId];
         if (credits) {

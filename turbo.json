@@ -40,5 +40,12 @@
       "outputs": ["node_modules/.cache/tsbuildinfo.json"]
     }
   },
-  "globalEnv": ["PUBLIC_CONVEX_URL", "PUBLIC_TURNSTILE_SITE_KEY"]
+  "globalEnv": [
+    "PUBLIC_CONVEX_URL",
+    "PUBLIC_APP_URL",
+    "VITE_CONVEX_URL",
+    "VITE_ELEVENLABS_AGENT_ID",
+    "VITE_CLERK_PUBLISHABLE_KEY",
+    "CLERK_SECRET_KEY"
+  ]
 }

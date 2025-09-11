@@ -90,6 +90,8 @@ function InterviewStart() {
       toast.error("Job description must be at least 50 characters.");
       return;
     }
+    // TODO: Uncomment this when Polar payments are ready
+    /*
     if (balance < 15) {
       toast.error("You need at least 15 credits to start an interview.", {
         action: {
@@ -99,6 +101,7 @@ function InterviewStart() {
       });
       return;
     }
+    */
     createSession();
   };
 
@@ -106,14 +109,6 @@ function InterviewStart() {
     <div className="min-h-screen bg-background font-mono">
       <section className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="font-mono font-bold text-3xl md:text-5xl mb-6 leading-tight">
-              <span className="text-muted-foreground">$ ./practice</span>{" "}
-              <span className="text-primary">--mode=technical</span>{" "}
-              <span className="text-accent">--feel=real</span>
-            </h1>
-          </div>
-
           <div className="max-w-3xl mx-auto">
             <div className="border border-terminal-green/30 bg-background">
               <div className="border-b border-terminal-green/30 px-6 py-3 bg-terminal-dark">

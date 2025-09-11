@@ -11,8 +11,8 @@ import { TerminalUserMenu } from "./terminal-user-menu";
 import { ThemeToggle } from "./theme-toggle";
 
 const navigationLinks = [
-  { href: "/interview", label: "~/interview" },
-  { href: "/interview/reports", label: "~/reports" },
+  { href: "/interview", label: "./interview" },
+  { href: "/interview/reports", label: "./reports" },
 ];
 
 interface DashboardHeaderProps {

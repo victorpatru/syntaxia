@@ -1,0 +1,218 @@
+---
+import { ThemeToggle } from "../components/ThemeToggle.tsx";
+import "../styles/global.css";
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+		<link rel="manifest" href="/site.webmanifest" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		
+		<!-- Prevent dark mode flash -->
+		<script>
+			(function() {
+				function getSystemTheme() {
+					return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+				}
+				
+				const storedTheme = localStorage.getItem('theme') || 'system';
+				const theme = storedTheme === 'system' ? getSystemTheme() : storedTheme;
+				
+				if (theme === 'light') {
+					document.documentElement.classList.add('light');
+				}
+				// Dark mode is default, no class needed
+			})();
+		</script>
+		
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
+		
+		<title>Terms of Service - Syntaxia</title>
+	</head>
+	<body class="min-h-screen bg-background text-foreground font-mono">
+		<header class="border-b border-terminal-green/30 bg-terminal-dark font-mono">
+			<div class="mx-auto max-w-6xl px-6 flex h-16 items-center justify-between">
+				<a href="/" class="flex items-center gap-1 hover:opacity-80 transition-opacity">
+					<span class="text-terminal-amber">$</span>
+					<span class="font-mono font-bold text-terminal-green">syntaxia</span>
+					<span class="text-terminal-green animate-pulse">_</span>
+				</a>
+				<div class="flex items-center gap-3">
+					<ThemeToggle client:idle />
+					<button
+						class="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20 cursor-pointer"
+						onclick="window.location.href = '/'"
+					>
+						./login
+					</button>
+				</div>
+			</div>
+		</header>
+
+		<main class="container mx-auto px-4 py-12 max-w-4xl">
+			<div class="mb-8">
+				<h1 class="text-3xl md:text-4xl font-bold text-terminal-green mb-4 font-mono">$ ./terms-of-service</h1>
+				<p class="text-terminal-green/70 text-sm font-mono">Last updated: {new Date().toLocaleDateString()}</p>
+			</div>
+
+			<div class="space-y-8 text-terminal-green/90 font-mono">
+				<section class="border border-terminal-green/30 p-6 bg-card">
+					<h2 class="text-xl font-bold text-terminal-green mb-4 font-mono">$ ./introduction</h2>
+					<p class="leading-relaxed text-sm">
+						These terms of use (the "Terms") apply to your access and use of Syntaxia
+						AI interview preparation service (the "Service"). By accessing or using
+						the Service, you agree to be bound by these Terms. If you do not
+						agree to these Terms, do not use the Service.
+					</p>
+				</section>
+
+				<section class="border border-terminal-green/30 p-6 bg-card">
+					<h2 class="text-xl font-bold text-terminal-green mb-4 font-mono">$ ./privacy</h2>
+					<p class="leading-relaxed text-sm">
+						We are committed to protecting your privacy and personal data. We
+						will only use your personal data in accordance with our privacy
+						policy, which is available on our website. Please review our Privacy
+						Policy carefully before using the Service.
+					</p>
+				</section>
+
+				<section class="border border-terminal-green/30 p-6 bg-card">
+					<h2 class="text-xl font-bold text-terminal-green mb-4 font-mono">$ ./license</h2>
+					<p class="leading-relaxed text-sm">
+						Subject to your compliance with these Terms, we grant you a limited,
+						non-exclusive, non-transferable, non-sublicensable license to access
+						and use the Service.
+					</p>
+				</section>
+
+				<section class="border border-terminal-green/30 p-6 bg-card">
+					<h2 class="text-xl font-bold text-terminal-green mb-4 font-mono">$ ./restrictions</h2>
+					<p class="leading-relaxed text-sm mb-3">You agree not to:</p>
+					<ul class="list-none space-y-2 text-sm">
+						<li class="flex items-start">
+							<span class="text-terminal-amber mr-2">•</span>
+							<span>Access the Service in a manner that could damage, disable, overburden, or impair the Service or interfere with any other party's use of the Service</span>
+						</li>
+						<li class="flex items-start">
+							<span class="text-terminal-amber mr-2">•</span>
+							<span>Use the Service for any illegal or unauthorized purpose</span>
+						</li>
+					</ul>
+				</section>
+
+				<section class="border border-terminal-green/30 p-6 bg-card">
+					<h2 class="text-xl font-bold text-terminal-green mb-4 font-mono">$ ./termination</h2>
+					<p class="leading-relaxed text-sm">
+						We reserve the right to terminate or suspend your access to the
+						Service at any time, for any reason, and without notice.
+					</p>
+				</section>
+
+				<section class="border border-terminal-green/30 p-6 bg-card">
+					<h2 class="text-xl font-bold text-terminal-green mb-4 font-mono">$ ./disclaimer</h2>
+					<p class="leading-relaxed text-sm">
+						The Service is provided "as is" and "as available" without
+						warranties of any kind. We do not guarantee that the Service will be
+						available at all times or that it will be error-free.
+					</p>
+				</section>
+
+				<section class="border border-terminal-green/30 p-6 bg-card">
+					<h2 class="text-xl font-bold text-terminal-green mb-4 font-mono">$ ./liability</h2>
+					<p class="leading-relaxed text-sm">
+						In no event shall we be liable for any damages arising out of or in
+						connection with the use of the Service.
+					</p>
+				</section>
+
+				<section class="border border-terminal-green/30 p-6 bg-card">
+					<h2 class="text-xl font-bold text-terminal-green mb-4 font-mono">$ ./changes</h2>
+					<p class="leading-relaxed text-sm">
+						We reserve the right to modify these Terms at any time. We will post
+						any changes on this page and encourage you to review the Terms
+						regularly. Your continued use of the Service after any changes have
+						been made will constitute your acceptance of the revised Terms.
+					</p>
+				</section>
+
+				<section class="border border-terminal-green/30 p-6 bg-card">
+					<h2 class="text-xl font-bold text-terminal-green mb-4 font-mono">$ ./entire-agreement</h2>
+					<p class="leading-relaxed text-sm">
+						These Terms constitute the entire agreement between you and us
+						regarding the use of the Service and supersede any prior agreements.
+					</p>
+				</section>
+
+				<section class="border border-terminal-green/30 p-6 bg-card">
+					<h2 class="text-xl font-bold text-terminal-green mb-4 font-mono">$ ./refunds</h2>
+					<p class="leading-relaxed text-sm mb-3">
+						Money-Back Guarantee: Syntaxia may offer a money-back guarantee
+						on specific purchases. If such a guarantee is offered, it is subject
+						to the following conditions:
+					</p>
+					<ul class="list-none space-y-2 text-sm mb-4">
+						<li class="flex items-start">
+							<span class="text-terminal-amber mr-2">•</span>
+							<span>You must request the refund within the timeframe specified in the particular offer, which shall not exceed thirty (30) days from the date of purchase.</span>
+						</li>
+						<li class="flex items-start">
+							<span class="text-terminal-amber mr-2">•</span>
+							<span>Each purchase grants usage credits, with the standard purchase providing three (3) credits, equivalent to three (3) hours of interview preparation time. You are ineligible for the money-back guarantee if you have consumed more than fifty percent (50%) of the usage allocation associated with the specific purchase (e.g., used the service for more than one hour and thirty minutes (1.5 hours) if 3 credits/hours were initially granted).</span>
+						</li>
+						<li class="flex items-start">
+							<span class="text-terminal-amber mr-2">•</span>
+							<span>You must not be in breach of any other provision of these Terms of Service. Eligibility for the guarantee is void if you have violated any part of these Terms.</span>
+						</li>
+					</ul>
+					<p class="leading-relaxed text-sm italic text-terminal-green/70">
+						Discretionary Refunds: Outside of any specific money-back
+						guarantee offered and accepted under the conditions above, certain
+						refund requests may be considered by Syntaxia on a case-by-case
+						basis and granted, modified, or denied at the sole discretion of
+						Syntaxia.
+					</p>
+				</section>
+
+				<section class="border border-terminal-green/30 p-6 bg-card">
+					<h2 class="text-xl font-bold text-terminal-green mb-4 font-mono">$ ./contact</h2>
+					<p class="leading-relaxed text-sm">
+						If you have any questions about these Terms, please contact us at{" "}
+						<a
+							href="mailto:victor@syntaxia.com"
+							class="text-terminal-amber hover:text-terminal-amber/80 underline"
+						>
+							victor@usesyntaxia.com
+						</a>
+					</p>
+				</section>
+			</div>
+
+			<!-- Back to home -->
+			<div class="mt-12 text-center">
+				<a
+					href="/"
+					class="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20 inline-flex items-center"
+				>
+					← ./home
+				</a>
+			</div>
+		</main>
+
+		<!-- Footer -->
+		<div class="mt-12 text-center pb-8">
+			<div class="border-t border-terminal-green/20 pt-6">
+				<p class="text-terminal-green/50 text-sm">
+					Built for developers, by developers. Practice like you're already hired.
+				</p>
+			</div>
+		</div>
+	</body>
+</html>
