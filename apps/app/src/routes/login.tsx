@@ -26,7 +26,8 @@ function LoginPage() {
         redirectUrl: "/sso-callback",
         redirectUrlComplete: "/",
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
+      console.error(err);
       setIsLoading(false);
     }
   };

@@ -18,6 +18,7 @@ import { getWebRequest } from "@tanstack/react-start/server";
 import type { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import type * as React from "react";
+import { MobileGuard } from "@/components/MobileGuard";
 import appCss from "@/styles/app.css?url";
 
 const fetchClerkAuth = createServerFn({ method: "GET" }).handler(async () => {
@@ -98,7 +99,9 @@ function RootComponent() {
     <ClerkProvider>
       <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
         <RootDocument>
-          <Outlet />
+          <MobileGuard>
+            <Outlet />
+          </MobileGuard>
         </RootDocument>
       </ConvexProviderWithClerk>
     </ClerkProvider>
