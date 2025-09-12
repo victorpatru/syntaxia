@@ -1,5 +1,6 @@
 import { Smartphone } from "lucide-react";
 import type React from "react";
+import { useEffect, useState } from "react";
 
 interface MobileGuardProps {
   children: React.ReactNode;
@@ -16,7 +17,16 @@ function getIsMobile(): boolean {
 }
 
 export function MobileGuard({ children }: MobileGuardProps) {
-  const isMobile = getIsMobile();
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setIsMobile(getIsMobile());
+  }, []);
+
+  // Show loading state during SSR/hydration to prevent mismatch
+  if (isMobile === null) {
+    return <>{children}</>;
+  }
   if (isMobile) {
     return (
       <div className="min-h-screen bg-background font-mono flex items-center justify-center p-4">
