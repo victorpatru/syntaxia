@@ -1,17 +1,3 @@
-export interface JobDescriptionPreset {
-  id: string;
-  label: string;
-  description: string;
-}
-
-export const PRIMARY_PRESET_COUNT = 3;
-
-export const JD_PRESETS: JobDescriptionPreset[] = [
-  {
-    id: "railway-fullstack-product",
-    label: "Railway — Full-Stack Engineer (Product Engineering)",
-    description: `Job description
-
 Our core mission at Railway is to make software engineers higher leverage. We believe that people should be given powerful tools so that they can spend less time setting up to do, and more time doing.
 
 At Railway, we believe that making tooling more accessible for build and deployment is one of the greatest possible productivity unlocks of our generation. We also believe that the major roadblock between us and our goal is strong interfacing paradigms.
@@ -72,24 +58,4 @@ Beyond compensation, there are a few things that we believe that make working at
 Autonomy: We have very few meetings. Just a Monday and a Friday to go over the Company Board. We think your time is sacred, whether it's at work, or outside of work.
 Ownership: We're a company with a high ownership, high autonomy culture. We hope that you'll come in, help us, and over the course of many years do the best work of your life. When we bring you onboard, we expect you to change the company.
 Novel problems/solutions: We're a startup that's well funded, with cool problems, which lets us implement novel solutions! We abhor "busywork" and think, whether it's community, engineering, operations, etc there's always opportunity for creative and high leverage solutions.
-Growth: We want you to grow with us, but we know that talent is loaned, so when you figure out what area you want to grow in next, whether it's at Railway or outside, we'll make sure you land there.`,
-  },
-  {
-    id: "vercel-platforms-fs",
-    label: "Vercel — Sr. Full-Stack Engineer (Platforms)",
-    description:
-      "Vercel builds developer-first platforms around Next.js and edge runtimes. We are hiring a Senior Full-Stack Engineer to deliver high-quality experiences across React/TypeScript, Node.js, serverless/edge functions, routing, caching/CDN layers, and performance tooling. You will collaborate with product and design to ship reliable, scalable features that improve DX and platform extensibility.",
-  },
-  {
-    id: "stripe-payments-reliability",
-    label: "Stripe — Sr. Backend Engineer (Payments Reliability)",
-    description:
-      "Stripe processes global payments at scale. We are looking for a Senior Backend Engineer to own distributed services with high availability and strong consistency guarantees. Experience with JVM or Go services, queueing, idempotency, data modeling, observability, SLOs/SLIs, and incident management is required. You will lead reliability initiatives and partner closely with product to improve resiliency.",
-  },
-  {
-    id: "openai-systems-production",
-    label: "OpenAI — Sr. Systems Engineer (Production)",
-    description:
-      "OpenAI operates large-scale systems for inference and training. We are hiring a Senior Systems Engineer to design, build, and operate production infrastructure with strong reliability and security. Experience with GPU scheduling, networking, infra-as-code, Linux systems, observability, and security best practices is required. You will improve performance, reduce latency, and maintain strict operational standards.",
-  },
-];
+Growth: We want you to grow with us, but we know that talent is loaned, so when you figure out what area you want to grow in next, whether it's at Railway or outside, we'll make sure you land there.

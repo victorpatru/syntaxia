@@ -1,7 +1,6 @@
 import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@syntaxia/backend/convex/_generated/api";
 import type { Id } from "@syntaxia/backend/convex/_generated/dataModel";
-import { JD_PRESETS, PRIMARY_PRESET_COUNT } from "@syntaxia/shared";
 import { Button } from "@syntaxia/ui/button";
 import { Textarea } from "@syntaxia/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@syntaxia/ui/tooltip";
@@ -11,6 +10,7 @@ import { useAction } from "convex/react";
 import { Play } from "lucide-react";
 import { startTransition, useRef, useState } from "react";
 import { toast } from "sonner";
+import { JD_PRESETS, PRIMARY_PRESET_COUNT } from "@/jd-presets";
 import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
 import { getSessionRoute } from "@/utils/route-guards";
 
