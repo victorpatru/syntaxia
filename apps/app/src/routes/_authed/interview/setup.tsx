@@ -1,5 +1,5 @@
 import { api } from "@syntaxia/backend/convex/_generated/api";
-import { Id } from "@syntaxia/backend/convex/_generated/dataModel";
+import type { Id } from "@syntaxia/backend/convex/_generated/dataModel";
 import { LoadingTerminal } from "@syntaxia/ui/interview";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useAction, useQuery } from "convex/react";
@@ -61,11 +61,7 @@ function InterviewSetup() {
         navigate({ to: "/interview/setup-failed", search: { sessionId } });
         return;
       }
-      if (
-        result &&
-        typeof result === "object" &&
-        (result as any).success === false
-      ) {
+      if (result && typeof result === "object" && result.success === false) {
         hasStartedSetupRef.current = false;
         navigate({ to: "/interview/setup-failed", search: { sessionId } });
         return;
@@ -90,8 +86,8 @@ function InterviewSetup() {
     if (!validation.isValid && validation.redirectTo) {
       const url = new URL(validation.redirectTo, window.location.origin);
       navigate({
-        to: url.pathname as any,
-        search: Object.fromEntries(url.searchParams) as any,
+        to: url.pathname,
+        search: Object.fromEntries(url.searchParams),
       });
     }
   }, [session, navigate]);
