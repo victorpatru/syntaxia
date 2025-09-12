@@ -1,4 +1,4 @@
-// import { google } from "@ai-sdk/google";
+import { google } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
@@ -17,8 +17,8 @@ import { checkRateLimit } from "./rate_limit/helpers";
 import { requireUser } from "./users";
 
 const GATEWAY_MODELS = {
-  ADVANCED: "google/gemini-2.0-flash-lite",
-  CLASSIFICATION: "google/gemini-2.0-flash-lite",
+  ADVANCED: google("gemini-2.5-pro"),
+  CLASSIFICATION: google("gemini-2.5-flash-lite"),
 } as const;
 
 const StatusValidator = v.union(
