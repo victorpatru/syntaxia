@@ -2,9 +2,9 @@
 
 import { ClerkProvider, useAuth } from "@clerk/tanstack-react-start";
 import { getAuth } from "@clerk/tanstack-react-start/server";
-import { ConvexQueryClient } from "@convex-dev/react-query";
+import type { ConvexQueryClient } from "@convex-dev/react-query";
 import { Toaster } from "@syntaxia/ui/sonner";
-import { QueryClient } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
 import {
   createRootRouteWithContext,
   HeadContent,
@@ -15,7 +15,7 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { createServerFn } from "@tanstack/react-start";
 import { getWebRequest } from "@tanstack/react-start/server";
-import { ConvexReactClient } from "convex/react";
+import type { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import type * as React from "react";
 import appCss from "@/styles/app.css?url";
@@ -114,7 +114,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body>
         {children}
         <Toaster />
-        <TanStackRouterDevtools position="bottom-right" />
+        {import.meta.env.DEV && (
+          <TanStackRouterDevtools position="bottom-right" />
+        )}
         <Scripts />
       </body>
     </html>
