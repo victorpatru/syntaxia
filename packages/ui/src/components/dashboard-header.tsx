@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { Sparkles } from "lucide-react";
 import { Button } from "./button";
 import {
@@ -29,7 +30,7 @@ export function DashboardHeader({ credits }: DashboardHeaderProps) {
           <Popover>
             <PopoverTrigger asChild>
               <Button
-                className="group size-8 md:hidden bg-transparent hover:bg-terminal-green/10 border border-terminal-green/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terminal-amber/60"
+                className="group size-8 md:hidden bg-transparent border border-terminal-green/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terminal-amber/60 hover:bg-terminal-green/10 hover:text-terminal-amber"
                 variant="ghost"
                 size="icon"
                 aria-label="Toggle menu"
