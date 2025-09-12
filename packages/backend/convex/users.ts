@@ -83,6 +83,41 @@ export const getUserIdByClerk = internalQuery({
   },
 });
 
+/** Eligibility: Welcome discount not yet redeemed */
+export const isWelcomeDiscountEligible = internalQuery({
+  args: { clerkUserId: v.string() },
+  returns: v.boolean(),
+  handler: async (ctx, { clerkUserId }) => {
+    const user = await getUserByClerkId(ctx, clerkUserId);
+    return !!user && !user.welcomeDiscountRedeemedAt;
+  },
+});
+
+/** Public: Eligibility for current user */
+export const getWelcomeDiscountEligibility = query({
+  args: {},
+  returns: v.boolean(),
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return false;
+    const user = await getUserByClerkId(ctx, identity.subject);
+    return !!user && !user.welcomeDiscountRedeemedAt;
+  },
+});
+
+/** Mark welcome discount as redeemed */
+export const markWelcomeDiscountRedeemed = internalMutation({
+  args: { clerkUserId: v.string() },
+  returns: v.null(),
+  handler: async (ctx, { clerkUserId }) => {
+    const user = await getUserByClerkId(ctx, clerkUserId);
+    if (!user) return null;
+    if (user.welcomeDiscountRedeemedAt) return null;
+    await ctx.db.patch(user._id, { welcomeDiscountRedeemedAt: Date.now() });
+    return null;
+  },
+});
+
 /** Helper: Get current user or throw error */
 export async function requireUser(ctx: QueryCtx): Promise<Doc<"users">> {
   const identity = await ctx.auth.getUserIdentity();

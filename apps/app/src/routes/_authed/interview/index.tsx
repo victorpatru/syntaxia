@@ -46,6 +46,11 @@ function InterviewStart() {
     staleTime: 10000,
   });
 
+  const { data: isWelcomeEligible } = useQuery({
+    ...convexQuery(api.users.getWelcomeDiscountEligibility, {}),
+    staleTime: 10000,
+  });
+
   const convexCreateSession = useAction(api.sessions.createSessionValidated);
   const [isCreating, setIsCreating] = useState(false);
 
@@ -228,6 +233,24 @@ function InterviewStart() {
           </div>
         </div>
       </section>
+
+      {isWelcomeEligible && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40">
+          <div className="border border-terminal-green/30 bg-background/95 backdrop-blur px-4 py-2 flex items-center gap-3">
+            <span className="text-terminal-green text-xs">
+              First session for $1 — use code
+            </span>
+            <code className="text-terminal-amber text-xs">WELCOME1</code>
+            <button
+              type="button"
+              onClick={() => navigate({ to: "/credits" })}
+              className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20"
+            >
+              ./redeem
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

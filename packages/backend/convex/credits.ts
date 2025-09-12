@@ -1,5 +1,6 @@
 import { Polar } from "@polar-sh/sdk";
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import {
   type ActionCtx,
   action,
@@ -113,12 +114,21 @@ export const createCheckout = action({
       server: env.POLAR_ENVIRONMENT,
     });
 
+    const eligibleForWelcomeDiscount =
+      packageId === env.POLAR_PRODUCT_ID_1_SESSION &&
+      (await ctx.runQuery(internal.users.isWelcomeDiscountEligible, {
+        clerkUserId: identity.subject,
+      }));
+
     const checkout = await polar.checkouts.create({
       products: [packageId],
       externalCustomerId: identity.subject,
       customerEmail: identity.email,
       metadata: { clerkUserId: identity.subject },
       successUrl: `${env.APP_URL}/credits?checkout_id={CHECKOUT_ID}`,
+      discountId: eligibleForWelcomeDiscount
+        ? env.POLAR_WELCOME_DISCOUNT_ID
+        : undefined,
     });
 
     return {

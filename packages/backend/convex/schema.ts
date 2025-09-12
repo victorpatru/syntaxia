@@ -12,6 +12,7 @@ export default defineSchema({
     createdAt: v.number(),
     lastActiveAt: v.optional(v.number()),
     credits: v.optional(v.number()),
+    welcomeDiscountRedeemedAt: v.optional(v.number()),
   })
     .index("by_clerk_id", ["clerkUserId"])
     .index("by_email", ["email"]),
