@@ -35,6 +35,7 @@ function TerminalPagination({
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 font-mono text-xs">
         <div className="flex items-center justify-center sm:justify-end space-x-1">
           <button
+            type="button"
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 0}
             className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-2 py-1 transition-colors h-8 min-w-16 disabled:opacity-50 disabled:hover:text-terminal-green"
@@ -45,6 +46,7 @@ function TerminalPagination({
             {currentPage + 1}/{totalPages}
           </span>
           <button
+            type="button"
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages - 1}
             className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-2 py-1 transition-colors h-8 min-w-16 disabled:opacity-50 disabled:hover:text-terminal-green"
@@ -243,9 +245,9 @@ function InterviewReport() {
                 <div className="text-center py-4">
                   <span className="text-terminal-green/60 text-sm">
                     {session.scores?.comments?.strengths?.map(
-                      (strength: string, index: number) => (
+                      (strength: string) => (
                         <div
-                          key={index}
+                          key={`strength-${strength}`}
                           className="border-l-4 border-terminal-green pl-4 mb-2"
                         >
                           <div className="text-xs text-terminal-green">
@@ -280,9 +282,9 @@ function InterviewReport() {
                 <div className="text-center py-4">
                   <span className="text-terminal-green/60 text-sm">
                     {session.scores?.comments?.improvements?.map(
-                      (improvement: string, index: number) => (
+                      (improvement: string) => (
                         <div
-                          key={index}
+                          key={`improvement-short-${improvement}`}
                           className="border-l-4 border-orange-400 pl-4 mb-2"
                         >
                           <div className="text-xs text-orange-400">
@@ -324,9 +326,9 @@ function InterviewReport() {
                 <div className="text-center py-4">
                   <span className="text-terminal-green/60 text-sm">
                     {session.scores?.comments?.improvements?.map(
-                      (improvement: string, index: number) => (
+                      (improvement: string) => (
                         <div
-                          key={index}
+                          key={`improvement-${improvement}`}
                           className="border-l-4 border-orange-400 pl-4 mb-2"
                         >
                           <div className="text-xs text-orange-400">
@@ -373,14 +375,15 @@ function InterviewReport() {
                   </div>
                 </>
               ) : session.scores?.comments?.nextSteps?.length ? (
-                session.scores.comments.nextSteps.map(
-                  (step: string, index: number) => (
-                    <div key={index} className="flex items-start space-x-2">
-                      <span className="text-terminal-green">$</span>
-                      <span className="text-terminal-green">{step}</span>
-                    </div>
-                  ),
-                )
+                session.scores.comments.nextSteps.map((step: string) => (
+                  <div
+                    key={`step-${step}`}
+                    className="flex items-start space-x-2"
+                  >
+                    <span className="text-terminal-green">$</span>
+                    <span className="text-terminal-green">{step}</span>
+                  </div>
+                ))
               ) : (
                 <>
                   <div className="flex items-start space-x-2">

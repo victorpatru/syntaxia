@@ -1,0 +1,37 @@
+name: Deploy Convex to Production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/backend/**'
+      - '.github/workflows/deploy-convex.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/backend
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Deploy to Production
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_PRODUCTION_DEPLOY_KEY }}
+        run: |
+          echo "Deploying Convex backend to production..."
+          bunx convex deploy
+
+      - name: Notify success
+        run: echo "✅ Production deployment completed successfully"

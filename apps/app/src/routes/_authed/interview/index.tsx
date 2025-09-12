@@ -1,16 +1,16 @@
 import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@syntaxia/backend/convex/_generated/api";
 import type { Id } from "@syntaxia/backend/convex/_generated/dataModel";
-import { JD_PRESETS, PRIMARY_PRESET_COUNT } from "@syntaxia/shared";
 import { Button } from "@syntaxia/ui/button";
 import { Textarea } from "@syntaxia/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@syntaxia/ui/tooltip";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useAction } from "convex/react";
 import { Play } from "lucide-react";
 import { startTransition, useRef, useState } from "react";
 import { toast } from "sonner";
+import { JD_PRESETS, PRIMARY_PRESET_COUNT } from "@/jd-presets";
 import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
 import { getSessionRoute } from "@/utils/route-guards";
 
@@ -19,14 +19,14 @@ export const Route = createFileRoute("/_authed/interview/")({
     sessionId: search.sessionId,
   }),
   loader: async (opts) => {
-    const [, currentSession] = await Promise.all([
-      opts.context.queryClient.ensureQueryData(
-        convexQuery(api.credits.getBalance, {}),
-      ),
-      opts.context.queryClient.ensureQueryData(
-        convexQuery(api.sessions.getCurrentSession, {}),
-      ),
-    ]);
+    void opts.context.queryClient.fetchQuery(
+      convexQuery(api.credits.getBalance, {}),
+    );
+
+    const currentSession = await opts.context.queryClient.ensureQueryData({
+      ...convexQuery(api.sessions.getCurrentSession, {}),
+      staleTime: 5000,
+    });
     if (currentSession) {
       throw redirect({ to: getSessionRoute(currentSession) });
     }
@@ -41,9 +41,10 @@ function InterviewStart() {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [showAllPresets, setShowAllPresets] = useState(false);
 
-  const { data: balance } = useSuspenseQuery(
-    convexQuery(api.credits.getBalance, {}),
-  );
+  const { data: balance } = useQuery({
+    ...convexQuery(api.credits.getBalance, {}),
+    staleTime: 10000,
+  });
 
   const convexCreateSession = useAction(api.sessions.createSessionValidated);
   const [isCreating, setIsCreating] = useState(false);

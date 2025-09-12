@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { Sparkles } from "lucide-react";
 import { Button } from "./button";
 import {
@@ -29,7 +30,7 @@ export function DashboardHeader({ credits }: DashboardHeaderProps) {
           <Popover>
             <PopoverTrigger asChild>
               <Button
-                className="group size-8 md:hidden bg-transparent hover:bg-terminal-green/10 border border-terminal-green/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terminal-amber/60"
+                className="group size-8 md:hidden bg-transparent border border-terminal-green/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terminal-amber/60 hover:bg-terminal-green/10 hover:text-terminal-amber"
                 variant="ghost"
                 size="icon"
                 aria-label="Toggle menu"
@@ -71,11 +72,14 @@ export function DashboardHeader({ credits }: DashboardHeaderProps) {
                 <NavigationMenuList className="flex-col items-start gap-0 md:gap-2">
                   {navigationLinks.map((link) => (
                     <NavigationMenuItem key={link.href} className="w-full">
-                      <NavigationMenuLink
-                        href={link.href}
-                        className="py-1.5 text-terminal-green/90 hover:text-terminal-amber hover:bg-terminal-green/5 font-mono text-sm px-2 rounded block w-full transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-terminal-amber/60"
-                      >
-                        {link.label}
+                      <NavigationMenuLink asChild>
+                        <Link
+                          to={link.href}
+                          preload="intent"
+                          className="py-1.5 text-terminal-green/90 font-mono text-sm px-2 rounded block w-full transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-terminal-amber/60 hover:bg-terminal-green/10 hover:text-terminal-amber focus:bg-terminal-green/10 focus:text-terminal-amber data-[active]:bg-transparent"
+                        >
+                          {link.label}
+                        </Link>
                       </NavigationMenuLink>
                     </NavigationMenuItem>
                   ))}
@@ -87,8 +91,9 @@ export function DashboardHeader({ credits }: DashboardHeaderProps) {
           {/* Main nav */}
           <div className="flex items-center gap-6">
             {/* Terminal-style logo */}
-            <a
-              href="/"
+            <Link
+              to="/"
+              preload="intent"
               className="text-terminal-green hover:text-terminal-amber transition-colors rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-terminal-amber/60"
               aria-label="Home"
             >
@@ -97,18 +102,21 @@ export function DashboardHeader({ credits }: DashboardHeaderProps) {
                 <span className="font-mono font-bold">syntaxia</span>
                 <span className="text-terminal-green animate-pulse">_</span>
               </div>
-            </a>
+            </Link>
 
             {/* Navigation menu */}
             <NavigationMenu className="max-md:hidden">
               <NavigationMenuList className="gap-2">
                 {navigationLinks.map((link) => (
                   <NavigationMenuItem key={link.href}>
-                    <NavigationMenuLink
-                      href={link.href}
-                      className="text-terminal-green/90 hover:text-terminal-amber py-1.5 font-mono text-sm transition-colors hover:bg-terminal-green/5 px-2 rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-terminal-amber/60"
-                    >
-                      {link.label}
+                    <NavigationMenuLink asChild>
+                      <Link
+                        to={link.href}
+                        preload="intent"
+                        className="text-terminal-green/90 py-1.5 font-mono text-sm transition-colors px-2 rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-terminal-amber/60 hover:bg-terminal-green/10 hover:text-terminal-amber focus:bg-terminal-green/10 focus:text-terminal-amber data-[active]:bg-transparent"
+                      >
+                        {link.label}
+                      </Link>
                     </NavigationMenuLink>
                   </NavigationMenuItem>
                 ))}
@@ -124,8 +132,9 @@ export function DashboardHeader({ credits }: DashboardHeaderProps) {
 
           {/* Credits indicator */}
           {typeof credits === "number" ? (
-            <a
-              href="/credits"
+            <Link
+              to="/credits"
+              preload="intent"
               className="group inline-flex items-center gap-2 bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-terminal-amber/60"
               aria-label="View credits"
               title="View credits"
@@ -133,7 +142,7 @@ export function DashboardHeader({ credits }: DashboardHeaderProps) {
               <Sparkles className="w-3 h-3 text-terminal-green group-hover:text-terminal-amber transition-colors" />
               <span className="font-mono text-sm leading-none">{credits}</span>
               <span className="font-mono text-xs">credits</span>
-            </a>
+            </Link>
           ) : null}
 
           {/* Custom Terminal User Menu */}

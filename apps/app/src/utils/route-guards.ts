@@ -3,10 +3,12 @@
  * Replaces useEffect navigation logic with proper route-level handling
  */
 
+import type { Question } from "@/types/interview";
+
 export interface SessionData {
   _id: string;
   status: "setup" | "active" | "analyzing" | "complete" | "failed";
-  questions?: any[];
+  questions?: Question[];
   experienceLevel?: string;
   domainTrack?: string;
   startedAt?: number;

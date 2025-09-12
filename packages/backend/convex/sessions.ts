@@ -1,4 +1,4 @@
-// import { google } from "@ai-sdk/google";
+import { google } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
@@ -17,8 +17,8 @@ import { checkRateLimit } from "./rate_limit/helpers";
 import { requireUser } from "./users";
 
 const GATEWAY_MODELS = {
-  ADVANCED: "google/gemini-2.0-flash-lite",
-  CLASSIFICATION: "google/gemini-2.0-flash-lite",
+  ADVANCED: google("gemini-2.5-pro"),
+  CLASSIFICATION: google("gemini-2.5-flash-lite"),
 } as const;
 
 const StatusValidator = v.union(
@@ -996,8 +996,25 @@ export const markCompleteWithoutScores = internalMutation({
   },
 });
 
-export const getCompletedSessions = query({
+export const getCompletedSessionsList = query({
   args: { paginationOpts: paginationOptsValidator },
+  returns: v.object({
+    page: v.array(
+      v.object({
+        _id: v.id("interview_sessions"),
+        createdAt: v.number(),
+        duration: v.optional(v.number()),
+        status: v.literal("complete"),
+        scores: v.optional(
+          v.object({
+            overall: v.number(),
+          }),
+        ),
+      }),
+    ),
+    isDone: v.boolean(),
+    continueCursor: v.string(),
+  }),
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
@@ -1008,13 +1025,25 @@ export const getCompletedSessions = query({
       .unique();
     if (!user) throw new Error("User not found");
 
-    return await ctx.db
+    const result = await ctx.db
       .query("interview_sessions")
       .withIndex("by_user_status", (q) =>
         q.eq("userId", user._id).eq("status", "complete"),
       )
       .order("desc")
       .paginate(args.paginationOpts);
+
+    return {
+      page: result.page.map((s) => ({
+        _id: s._id,
+        createdAt: s.createdAt,
+        duration: s.duration,
+        status: "complete" as const,
+        scores: s.scores ? { overall: s.scores.overall } : undefined,
+      })),
+      isDone: result.isDone,
+      continueCursor: result.continueCursor,
+    };
   },
 });
 

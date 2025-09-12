@@ -1,4 +1,3 @@
-import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@syntaxia/backend/convex/_generated/api";
 import { Button } from "@syntaxia/ui/button";
 import {
@@ -13,25 +12,17 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { usePaginatedQuery } from "convex/react";
 import { format } from "date-fns";
 import { CheckCircle, Clock, FileText } from "lucide-react";
+import type { InterviewScores } from "@/types/interview";
 
 export const Route = createFileRoute("/_authed/interview/reports")({
   component: InterviewReports,
-  loader: async (opts) => {
-    await Promise.all([
-      opts.context.queryClient.ensureQueryData(
-        convexQuery(api.sessions.getCompletedSessions, {
-          paginationOpts: { numItems: 10, cursor: null },
-        }),
-      ),
-    ]);
-  },
 });
 
 function InterviewReports() {
   const { results, status, loadMore } = usePaginatedQuery(
-    api.sessions.getCompletedSessions,
+    api.sessions.getCompletedSessionsList,
     {},
-    { initialNumItems: 10 },
+    { initialNumItems: 5 },
   );
 
   const formatDuration = (seconds: number) => {
@@ -40,7 +31,7 @@ function InterviewReports() {
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
-  const getScoreDisplay = (scores: any, duration?: number) => {
+  const getScoreDisplay = (scores: InterviewScores, duration?: number) => {
     // Check if it was a short session first
     if (duration && duration < 120) {
       return "TOO_SHORT";
