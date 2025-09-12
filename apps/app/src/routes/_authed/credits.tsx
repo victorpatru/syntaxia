@@ -72,15 +72,6 @@ function Credits() {
 
   return (
     <div className="px-6 py-8 space-y-8 max-w-5xl mx-auto">
-      <div className="space-y-2">
-        <h1 className="text-3xl md:text-4xl font-bold font-mono tracking-tight">
-          Credits
-        </h1>
-        <p className="text-muted-foreground text-sm md:text-base max-w-prose">
-          Purchase interview credits to unlock more practice sessions
-        </p>
-      </div>
-
       {/* Current Balance */}
       <Card className="border border-terminal-green/30 bg-background p-6 md:p-7">
         <div className="flex items-center justify-between gap-6">

@@ -43,7 +43,7 @@ function InterviewReports() {
   };
 
   return (
-    <div className="min-h-screen bg-background font-mono">
+    <div className="bg-background font-mono">
       <div className="mx-auto max-w-6xl px-6 py-8">
         {/* Terminal Header */}
         <div className="border border-terminal-green/30 bg-background mb-8">
