@@ -23,6 +23,32 @@ export const currentUserId = query({
   },
 });
 
+/** Get current user profile with credits and discount eligibility */
+export const getCurrentUserProfile = query({
+  args: {},
+  returns: v.union(
+    v.null(),
+    v.object({
+      userId: v.id("users"),
+      credits: v.number(),
+      isWelcomeEligible: v.boolean(),
+    }),
+  ),
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+
+    const user = await getUserByClerkId(ctx, identity.subject);
+    if (!user) return null;
+
+    return {
+      userId: user._id,
+      credits: user.credits ?? 0,
+      isWelcomeEligible: !user.welcomeDiscountRedeemedAt,
+    };
+  },
+});
+
 /** Webhook: Create or update user from Clerk */
 export const updateOrCreateUser = internalMutation({
   args: { clerkUser: v.any() },
@@ -89,18 +115,6 @@ export const isWelcomeDiscountEligible = internalQuery({
   returns: v.boolean(),
   handler: async (ctx, { clerkUserId }) => {
     const user = await getUserByClerkId(ctx, clerkUserId);
-    return !!user && !user.welcomeDiscountRedeemedAt;
-  },
-});
-
-/** Public: Eligibility for current user */
-export const getWelcomeDiscountEligibility = query({
-  args: {},
-  returns: v.boolean(),
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return false;
-    const user = await getUserByClerkId(ctx, identity.subject);
     return !!user && !user.welcomeDiscountRedeemedAt;
   },
 });
