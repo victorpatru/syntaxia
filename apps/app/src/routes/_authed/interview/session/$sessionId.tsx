@@ -1,5 +1,5 @@
 import { useConversation } from "@elevenlabs/react";
-import { api } from "@syntaxia/backend/convex/_generated/api";
+import { api } from "@syntaxia/backend/api";
 import { Button } from "@syntaxia/ui/button";
 import { ConversationPanel, WaveformRingOrb } from "@syntaxia/ui/interview";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -8,10 +8,10 @@ import {
   useMutation as useConvexMutation,
   useQuery,
 } from "convex/react";
+import type { GenericId } from "convex/values";
 import { Clock } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { env } from "@/env";
 import type { VoiceSessionState } from "@/types/interview";
 import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
 import { validateSessionRoute } from "@/utils/route-guards";
@@ -22,13 +22,17 @@ export const Route = createFileRoute("/_authed/interview/session/$sessionId")({
 
 function InterviewSession() {
   const navigate = useNavigate();
-  const { sessionId } = Route.useParams();
+  const { sessionId } = Route.useParams() as {
+    sessionId: GenericId<"interview_sessions">;
+  };
   const [isRecording, setIsRecording] = useState(false);
   const [interviewTime, setInterviewTime] = useState(0);
   const [isInterviewActive, setIsInterviewActive] = useState(false);
   const [hasStartedActive, setHasStartedActive] = useState(false);
 
-  const session = useQuery(api.sessions.getSession, { sessionId });
+  const session = useQuery(api.sessions.getSession, {
+    sessionId: sessionId,
+  });
   const startActiveMutation = useConvexMutation(api.sessions.startActive);
   const endMutation = useConvexMutation(api.sessions.endSession);
   const getConversationTokenAction = useAction(
@@ -99,7 +103,9 @@ function InterviewSession() {
     } as const;
 
     try {
-      const tokenResponse = await getConversationTokenAction({ sessionId });
+      const tokenResponse = await getConversationTokenAction({
+        sessionId: sessionId,
+      });
       if (isRateLimitFailure(tokenResponse)) {
         showRateLimitToast(
           tokenResponse.retryAfterMs,
@@ -129,7 +135,7 @@ function InterviewSession() {
   ]);
 
   useEffect(() => {
-    if (session === undefined) return;
+    if (!session) return;
 
     const validation = validateSessionRoute(session);
     if (!validation.isValid && validation.redirectTo) {
@@ -202,7 +208,10 @@ function InterviewSession() {
       console.error("Failed to end ElevenLabs conversation:", error);
     }
 
-    endMutation({ sessionId, elevenlabsConversationId: conversationId })
+    endMutation({
+      sessionId: sessionId,
+      elevenlabsConversationId: conversationId,
+    })
       .then((res) => {
         if (isRateLimitFailure(res)) {
           showRateLimitToast(
@@ -261,7 +270,7 @@ function InterviewSession() {
 
       try {
         const res = await startActiveMutation({
-          sessionId,
+          sessionId: sessionId,
           micOnAt: micStartTime,
         });
         if (isRateLimitFailure(res)) {
@@ -287,7 +296,7 @@ function InterviewSession() {
     }
   };
 
-  if (session === undefined) {
+  if (!session) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center font-mono">
         <div className="text-center">
@@ -296,10 +305,6 @@ function InterviewSession() {
         </div>
       </div>
     );
-  }
-
-  if (session === null) {
-    return null;
   }
 
   return (

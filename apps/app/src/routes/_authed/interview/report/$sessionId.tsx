@@ -1,7 +1,8 @@
-import { api } from "@syntaxia/backend/convex/_generated/api";
+import { api } from "@syntaxia/backend/api";
 import { Button } from "@syntaxia/ui/button";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
+import type { GenericId } from "convex/values";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { validateSessionForRoute } from "@/utils/route-guards";
@@ -67,7 +68,9 @@ function InterviewReport() {
   const navigate = useNavigate();
   const { sessionId } = Route.useParams();
 
-  const session = useQuery(api.sessions.getSession, { sessionId });
+  const session = useQuery(api.sessions.getSession, {
+    sessionId: sessionId as GenericId<"interview_sessions">,
+  });
 
   const [strengthsPage, setStrengthsPage] = useState(0);
   const [improvementsPage, setImprovementsPage] = useState(0);

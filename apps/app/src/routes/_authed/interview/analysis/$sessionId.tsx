@@ -1,7 +1,8 @@
-import { api } from "@syntaxia/backend/convex/_generated/api";
+import { api } from "@syntaxia/backend/api";
 import { LoadingTerminal } from "@syntaxia/ui/interview";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useAction as useConvexAction, useQuery } from "convex/react";
+import type { GenericId } from "convex/values";
 import { startTransition, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
@@ -13,13 +14,17 @@ export const Route = createFileRoute("/_authed/interview/analysis/$sessionId")({
 
 function InterviewAnalysis() {
   const navigate = useNavigate();
-  const { sessionId } = Route.useParams();
+  const { sessionId } = Route.useParams() as {
+    sessionId: GenericId<"interview_sessions">;
+  };
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [analysisStep, setAnalysisStep] = useState("Preparing analysis...");
   const hasTriggeredAnalysisRef = useRef(false);
   const [retryCount, setRetryCount] = useState(0);
 
-  const session = useQuery(api.sessions.getSession, { sessionId });
+  const session = useQuery(api.sessions.getSession, {
+    sessionId: sessionId,
+  });
   const analyzeAction = useConvexAction(api.sessions.analyzeSession);
 
   const triggerAnalysis = async () => {
@@ -29,7 +34,9 @@ function InterviewAnalysis() {
     setAnalysisStep("Processing audio transcript...");
 
     try {
-      const result = await analyzeAction({ sessionId });
+      const result = await analyzeAction({
+        sessionId: sessionId,
+      });
       if (isRateLimitFailure(result)) {
         showRateLimitToast(result.retryAfterMs, "Failed to analyze interview");
         hasTriggeredAnalysisRef.current = false;
