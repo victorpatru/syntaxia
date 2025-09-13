@@ -109,7 +109,6 @@ function InterviewSession() {
         return;
       }
       await conversation.startSession({
-        agentId: env.VITE_ELEVENLABS_AGENT_ID,
         conversationToken: tokenResponse.conversationToken,
         connectionType: "webrtc",
         userId: sessionId,
