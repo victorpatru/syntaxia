@@ -34,6 +34,7 @@
     "dev:web": "turbo dev --filter=@syntaxia/web",
     "dev:jobs": "turbo jobs --filter=@syntaxia/jobs",
     "dev:app": "turbo dev --filter=@syntaxia/app",
+    "setup-hooks": "./scripts/setup-hooks.sh",
     "start:web": "turbo start --filter=@syntaxia/web",
     "start:app": "turbo start --filter=@syntaxia/app",
     "test": "turbo test --parallel",

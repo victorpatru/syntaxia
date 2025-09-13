@@ -24,7 +24,8 @@
   "scripts": {
     "dev": "convex dev --tail-logs",
     "setup": "convex dev --once && convex env set VALIDATE_ENV=true",
-    "seed": "convex dev --once && convex run init"
+    "seed": "convex dev --once && convex run init",
+    "generate-api": "bunx convex-helpers ts-api-spec --output-file api"
   },
   "type": "module",
   "author": "",
