@@ -25,7 +25,6 @@ function InterviewSession() {
   const { sessionId } = Route.useParams() as {
     sessionId: GenericId<"interview_sessions">;
   };
-  const [isRecording, setIsRecording] = useState(false);
   const [interviewTime, setInterviewTime] = useState(0);
   const [isInterviewActive, setIsInterviewActive] = useState(false);
   const [hasStartedActive, setHasStartedActive] = useState(false);
@@ -43,7 +42,7 @@ function InterviewSession() {
     onConnect: () => {
       setVoiceState((prev) => ({ ...prev, connectionStatus: "connected" }));
 
-      if (!isRecording) {
+      if (!voiceState.isRecording) {
         toggleRecording();
       }
     },
@@ -257,8 +256,7 @@ function InterviewSession() {
   };
 
   const toggleRecording = async () => {
-    const newRecordingState = !isRecording;
-    setIsRecording(newRecordingState);
+    const newRecordingState = !voiceState.isRecording;
     setVoiceState((prev) => ({
       ...prev,
       isRecording: newRecordingState,
@@ -279,7 +277,7 @@ function InterviewSession() {
             "Failed to start interview session",
           );
           setHasStartedActive(false);
-          setIsRecording(false);
+          setVoiceState((prev) => ({ ...prev, isRecording: false }));
           setIsInterviewActive(false);
           return;
         }
@@ -290,7 +288,7 @@ function InterviewSession() {
           action: { label: "Retry", onClick: () => endInterview() },
         });
         setHasStartedActive(false);
-        setIsRecording(false);
+        setVoiceState((prev) => ({ ...prev, isRecording: false }));
         setIsInterviewActive(false);
       }
     }
@@ -340,7 +338,6 @@ function InterviewSession() {
         <div className="flex-1 pt-4">
           <div className="max-w-2xl mx-auto w-full">
             <ConversationPanel
-              isRecording={isRecording}
               onToggleRecording={toggleRecording}
               voiceState={derivedVoiceState}
             />
