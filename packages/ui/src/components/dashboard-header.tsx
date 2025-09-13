@@ -93,6 +93,7 @@ export function DashboardHeader({ credits }: DashboardHeaderProps) {
             {/* Terminal-style logo */}
             <Link
               to="/interview"
+              search={{ sessionId: undefined }}
               preload="intent"
               className="text-terminal-green hover:text-terminal-amber transition-colors rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-terminal-amber/60"
               aria-label="Home"
