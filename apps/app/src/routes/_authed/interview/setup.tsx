@@ -1,8 +1,8 @@
-import { api } from "@syntaxia/backend/convex/_generated/api";
-import type { Id } from "@syntaxia/backend/convex/_generated/dataModel";
+import { api } from "@syntaxia/backend/api";
 import { LoadingTerminal } from "@syntaxia/ui/interview";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useAction, useQuery } from "convex/react";
+import type { GenericId } from "convex/values";
 import {
   startTransition,
   useCallback,
@@ -22,8 +22,8 @@ export const Route = createFileRoute("/_authed/interview/setup")({
   },
   component: InterviewSetup,
   validateSearch: (search: {
-    sessionId: Id<"interview_sessions">;
-  }): { sessionId: Id<"interview_sessions"> } => ({
+    sessionId: GenericId<"interview_sessions">;
+  }): { sessionId: GenericId<"interview_sessions"> } => ({
     sessionId: search.sessionId,
   }),
 });
@@ -31,7 +31,7 @@ export const Route = createFileRoute("/_authed/interview/setup")({
 function InterviewSetup() {
   const navigate = useNavigate();
   const { sessionId } = Route.useSearch() as {
-    sessionId: Id<"interview_sessions">;
+    sessionId: GenericId<"interview_sessions">;
   };
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingStep, setLoadingStep] = useState("Preparing session...");
@@ -61,7 +61,12 @@ function InterviewSetup() {
         navigate({ to: "/interview/setup-failed", search: { sessionId } });
         return;
       }
-      if (result && typeof result === "object" && result.success === false) {
+      if (
+        result &&
+        typeof result === "object" &&
+        "success" in result &&
+        !result.success
+      ) {
         hasStartedSetupRef.current = false;
         navigate({ to: "/interview/setup-failed", search: { sessionId } });
         return;

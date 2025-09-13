@@ -1,4 +1,4 @@
-import { api } from "@syntaxia/backend/convex/_generated/api";
+import { api } from "@syntaxia/backend/api";
 import { Button } from "@syntaxia/ui/button";
 import {
   Table,
@@ -12,7 +12,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { usePaginatedQuery } from "convex/react";
 import { format } from "date-fns";
 import { CheckCircle, Clock, FileText } from "lucide-react";
-import type { InterviewScores } from "@/types/interview";
+import type { CompletedSession } from "@/types/interview";
 
 export const Route = createFileRoute("/_authed/interview/reports")({
   component: InterviewReports,
@@ -31,12 +31,15 @@ function InterviewReports() {
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
-  const getScoreDisplay = (scores: InterviewScores, duration?: number) => {
+  const getScoreDisplay = (
+    scores: CompletedSession["scores"],
+    duration?: number,
+  ) => {
     // Check if it was a short session first
     if (duration && duration < 120) {
       return "TOO_SHORT";
     }
-    if (!scores || !scores.overall) {
+    if (!scores?.overall) {
       return "N/A";
     }
     return `${scores.overall}/10`;
@@ -146,9 +149,9 @@ function InterviewReports() {
                           className={
                             session.duration && session.duration < 120
                               ? "text-orange-400"
-                              : session.scores?.overall >= 7
+                              : (session.scores?.overall ?? 0) >= 7
                                 ? "text-terminal-amber"
-                                : session.scores?.overall >= 4
+                                : (session.scores?.overall ?? 0) >= 4
                                   ? "text-terminal-green"
                                   : session.scores?.overall
                                     ? "text-red-400"
