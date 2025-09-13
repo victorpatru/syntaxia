@@ -11,13 +11,9 @@ fi
 # Create hooks directory if it doesn't exist
 mkdir -p .git/hooks
 
-# Copy the pre-commit hook
-if [ -f ".git/hooks/pre-commit.sample" ]; then
-    cp .git/hooks/pre-commit.sample .git/hooks/pre-commit
-    echo "✅ Copied pre-commit hook template"
-else
-    echo "⚠️  Pre-commit sample not found, creating hook from scratch..."
-    cat > .git/hooks/pre-commit << 'EOF'
+# Create our custom pre-commit hook (always overwrite with Convex code)
+echo "✅ Setting up Convex API generation hook..."
+cat > .git/hooks/pre-commit << 'EOF'
 #!/bin/sh
 
 echo "Pre-commit hook: Generating Convex API types..."
@@ -36,7 +32,6 @@ fi
 
 echo "Pre-commit hook completed."
 EOF
-fi
 
 # Make the hook executable
 chmod +x .git/hooks/pre-commit
