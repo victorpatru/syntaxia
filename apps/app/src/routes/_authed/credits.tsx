@@ -1,5 +1,5 @@
 import { convexQuery } from "@convex-dev/react-query";
-import { api } from "@syntaxia/backend/convex/_generated/api";
+import { api } from "@syntaxia/backend/api";
 import { Button } from "@syntaxia/ui/button";
 import { Card } from "@syntaxia/ui/card";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -18,8 +18,8 @@ export const Route = createFileRoute("/_authed/credits")({
 });
 
 function Credits() {
-  const { data: balance } = useSuspenseQuery(
-    convexQuery(api.credits.getBalance, {}),
+  const { data: userData } = useSuspenseQuery(
+    convexQuery(api.users.getCurrentUserProfile, {}),
   );
   const { data: availablePackages } = useSuspenseQuery(
     convexQuery(api.credits.getAvailablePackages, {}),
@@ -88,7 +88,7 @@ function Credits() {
           </div>
           <div className="text-right">
             <div className="text-4xl md:text-5xl leading-none font-bold font-mono text-terminal-green">
-              {balance}
+              {userData?.credits ?? 0}
             </div>
             <div className="text-xs md:text-sm uppercase tracking-wider text-terminal-green/60">
               credits
