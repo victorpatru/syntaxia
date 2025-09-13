@@ -92,7 +92,7 @@ export function DashboardHeader({ credits }: DashboardHeaderProps) {
           <div className="flex items-center gap-6">
             {/* Terminal-style logo */}
             <Link
-              to="/"
+              to="/interview"
               preload="intent"
               className="text-terminal-green hover:text-terminal-amber transition-colors rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-terminal-amber/60"
               aria-label="Home"
