@@ -1,4 +1,6 @@
-// Interview session types for the AI-powered technical interview system
+import type { GenericId } from "convex/values";
+
+/* Interview session types for the AI-powered technical interview system */
 
 export type InterviewStatus =
   | "setup"
@@ -13,12 +15,12 @@ export type DomainTrack = "web" | "infrastructure" | "analytics" | "edge";
 
 export interface Question {
   id: string;
-  type: "background" | "code_review" | "system_design" | "scenario";
   text: string;
-  context?: string; // Additional context for the question
-  expectedDuration: number; // Expected response time in seconds
-  difficulty: 1 | 2 | 3 | 4 | 5;
-  tags: string[]; // Technology/skill tags
+  type: string;
+  difficulty: number;
+  expectedDuration?: number;
+  tags?: string[];
+  followUps?: string[];
 }
 
 export interface TranscriptEntry {
@@ -26,17 +28,17 @@ export interface TranscriptEntry {
   timestamp: number;
   speaker: "interviewer" | "candidate";
   text: string;
-  audioUrl?: string; // URL to audio recording if available
-  confidence?: number; // STT confidence score
+  audioUrl?: string;
+  confidence?: number;
 }
 
 export interface InterviewScores {
-  communication: number; // 1-10 scale
-  debugging: number; // 1-10 scale
-  breadth: number; // 1-10 scale
-  operationalization: number; // 1-10 scale
-  productSense: number; // 1-10 scale
-  overall: number; // Calculated overall score
+  communication: number;
+  debugging: number;
+  breadth: number;
+  operationalization: number;
+  productSense: number;
+  overall: number;
   comments: {
     strengths: string[];
     improvements: string[];
@@ -48,9 +50,9 @@ export interface FeedbackHighlight {
   id: string;
   timestamp: number;
   type: "strength" | "improvement" | "concern";
-  text: string; // The candidate's response
-  analysis: string; // AI analysis of the response
-  transcriptId: string; // Reference to transcript entry
+  text: string;
+  analysis: string;
+  transcriptId: string;
 }
 
 export interface InterviewSession {
@@ -61,27 +63,23 @@ export interface InterviewSession {
   updatedAt: number;
   completedAt?: number;
 
-  // Session configuration
   jobDescription: string;
   experienceLevel: ExperienceLevel;
   domainTrack: DomainTrack;
 
-  // Interview content
   questions: Question[];
   transcript: TranscriptEntry[];
   currentQuestionIndex: number;
 
-  // Results & feedback
   scores?: InterviewScores;
   highlights: FeedbackHighlight[];
 
-  // Session metadata
-  duration: number; // Total session time in seconds
-  audioRecordingUrl?: string; // Full session audio
+  duration: number;
+  audioRecordingUrl?: string;
   reportGeneratedAt?: number;
 }
 
-// API request/response types
+/* API request/response types */
 
 export interface CreateSessionRequest {
   jobDescription: string;
@@ -91,7 +89,7 @@ export interface CreateSessionRequest {
 
 export interface CreateSessionResponse {
   sessionId: string;
-  estimatedSetupTime: number; // Estimated time for question generation
+  estimatedSetupTime: number;
 }
 
 export interface ParseJobDescriptionRequest {
@@ -105,7 +103,7 @@ export interface ParseJobDescriptionResponse {
   questions: Question[];
   detectedSkills: string[];
   suggestedDuration: number;
-  domainMatch: number; // How well the JD matches the selected domain (0-1)
+  domainMatch: number;
 }
 
 export interface AnalyzeInterviewRequest {
@@ -124,7 +122,7 @@ export interface AnalyzeInterviewResponse {
   }>;
 }
 
-// Voice interface types
+/* Voice interface types */
 
 export interface VoiceConfig {
   elevenLabsVoiceId: string;
@@ -148,7 +146,7 @@ export interface VoiceSessionState {
   lastError?: string;
 }
 
-// Utility types for API integration
+/* Utility types for API integration */
 
 export type InterviewApiError = {
   code: string;
@@ -162,7 +160,7 @@ export type InterviewApiResponse<T> = {
   error?: InterviewApiError;
 };
 
-// Component prop types
+/* Component prop types */
 
 export interface LoadingTerminalProps {
   progress: number;
@@ -185,3 +183,13 @@ export interface ConversationPanelProps {
   onToggleRecording: () => void;
   voiceState: VoiceSessionState;
 }
+
+export type CompletedSession = {
+  _id: GenericId<"interview_sessions">;
+  createdAt: number;
+  duration?: number;
+  status: "complete";
+  scores?: {
+    overall: number;
+  };
+};
