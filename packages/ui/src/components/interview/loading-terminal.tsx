@@ -1,12 +1,16 @@
-import type { LoadingTerminalProps } from "@syntaxia/shared";
-
 export function LoadingTerminal({
   progress,
   currentStep,
   title,
   subtitle,
   additionalInfo = [],
-}: LoadingTerminalProps) {
+}: {
+  progress: number;
+  currentStep: string;
+  title: string;
+  subtitle: string;
+  additionalInfo?: string[];
+}) {
   return (
     <div className="min-h-screen bg-background font-mono flex items-center justify-center">
       <div className="max-w-2xl mx-auto px-4">

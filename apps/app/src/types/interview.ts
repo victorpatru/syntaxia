@@ -160,30 +160,6 @@ export type InterviewApiResponse<T> = {
   error?: InterviewApiError;
 };
 
-/* Component prop types */
-
-export interface LoadingTerminalProps {
-  progress: number;
-  currentStep: string;
-  title: string;
-  subtitle: string;
-  additionalInfo?: string[];
-}
-
-export interface WaveformOrbProps {
-  isActive: boolean;
-  audioLevel?: number;
-  size?: "small" | "medium" | "large";
-}
-
-export interface ConversationPanelProps {
-  transcript: TranscriptEntry[];
-  currentQuestion?: Question;
-  isRecording: boolean;
-  onToggleRecording: () => void;
-  voiceState: VoiceSessionState;
-}
-
 export type CompletedSession = {
   _id: GenericId<"interview_sessions">;
   createdAt: number;

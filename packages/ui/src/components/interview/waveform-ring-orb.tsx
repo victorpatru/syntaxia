@@ -1,11 +1,14 @@
-import type { WaveformOrbProps } from "@syntaxia/shared";
 import { useEffect, useState } from "react";
 
 export function WaveformRingOrb({
   isActive,
   audioLevel = 0.5,
   size = "medium",
-}: WaveformOrbProps) {
+}: {
+  isActive: boolean;
+  audioLevel?: number;
+  size?: "small" | "medium" | "large";
+}) {
   const [waveformData, setWaveformData] = useState([
     0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.3, 0.2,
   ]);

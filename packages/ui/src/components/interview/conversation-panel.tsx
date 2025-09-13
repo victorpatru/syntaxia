@@ -1,4 +1,3 @@
-import type { ConversationPanelProps } from "@syntaxia/shared";
 import { Button } from "@syntaxia/ui/button";
 import { AlertCircle, Mic, MicOff, Wifi, WifiOff } from "lucide-react";
 
@@ -6,7 +5,17 @@ export function ConversationPanel({
   isRecording,
   onToggleRecording,
   voiceState,
-}: ConversationPanelProps) {
+}: {
+  isRecording: boolean;
+  onToggleRecording: () => void;
+  voiceState: {
+    isRecording: boolean;
+    isPlaying: boolean;
+    currentAudioLevel: number;
+    connectionStatus: "connecting" | "connected" | "disconnected" | "error";
+    lastError?: string;
+  };
+}) {
   const getConnectionIcon = () => {
     switch (voiceState.connectionStatus) {
       case "connected":
