@@ -39,7 +39,7 @@ function InterviewReports() {
     if (duration && duration < 120) {
       return "TOO_SHORT";
     }
-    if (!scores?.overall) {
+    if (scores?.overall == null) {
       return "N/A";
     }
     return `${scores.overall}/10`;
@@ -153,7 +153,7 @@ function InterviewReports() {
                                 ? "text-terminal-amber"
                                 : (session.scores?.overall ?? 0) >= 4
                                   ? "text-terminal-green"
-                                  : session.scores?.overall
+                                  : session.scores?.overall != null
                                     ? "text-red-400"
                                     : "text-terminal-green/60"
                           }
