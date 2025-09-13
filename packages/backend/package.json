@@ -8,6 +8,10 @@
       "types": "./convex/_generated/api.d.ts",
       "default": "./convex/_generated/api.js"
     },
+    "./api": {
+      "types": "./api.ts",
+      "default": "./api.ts"
+    },
     "./convex/_generated/api": {
       "types": "./convex/_generated/api.d.ts",
       "default": "./convex/_generated/api.js"
@@ -35,7 +39,7 @@
     "@t3-oss/env-core": "catalog:shared",
     "ai": "^5.0.26",
     "convex": "^1.25.4",
-    "convex-helpers": "^0.1.101",
+    "convex-helpers": "^0.1.104",
     "svix": "^1.71.0",
     "zod": "catalog:shared"
   }
