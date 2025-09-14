@@ -3,7 +3,7 @@ import {
   validateEvent,
   WebhookVerificationError,
 } from "@polar-sh/sdk/webhooks";
-import { OrderData } from "@syntaxia/shared";
+import type { OrderData } from "@syntaxia/shared";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { internalAction } from "../_generated/server";
@@ -27,7 +27,7 @@ export const handleWebhook = internalAction({
       "webhook-signature": webhookSignature,
     };
 
-    let event: { type: string; data: any };
+    let event: { type: string; data: unknown };
     try {
       event = validateEvent(body, headers, env.POLAR_WEBHOOK_SECRET);
     } catch (err) {
@@ -50,7 +50,7 @@ export const handleWebhook = internalAction({
 
     if (event.type === "order.paid") {
       const orderData = event.data as OrderData;
-      const { id: orderId, productId, metadata } = orderData;
+      const { id: orderId, productId, metadata, discountId } = orderData;
       const clerkUserId = metadata?.clerkUserId;
 
       if (clerkUserId && productId && orderId) {
@@ -66,6 +66,16 @@ export const handleWebhook = internalAction({
             orderId,
             credits,
           });
+
+          // Mark welcome discount as redeemed if this order used it
+          if (
+            productId === env.POLAR_PRODUCT_ID_1_SESSION &&
+            discountId === env.POLAR_WELCOME_DISCOUNT_ID
+          ) {
+            await ctx.runMutation(internal.users.markWelcomeDiscountRedeemed, {
+              clerkUserId,
+            });
+          }
         } else {
           console.log("Product ID does not match expected value");
         }

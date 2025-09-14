@@ -14,7 +14,6 @@ export const env = createEnv({
 
   client: {
     VITE_CONVEX_URL: z.url(),
-    VITE_ELEVENLABS_AGENT_ID: z.string().min(1).optional(),
     VITE_CLERK_PUBLISHABLE_KEY: z.string().min(1),
   },
 
@@ -27,7 +26,6 @@ export const env = createEnv({
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
     // Client
     VITE_CONVEX_URL: import.meta.env.VITE_CONVEX_URL,
-    VITE_ELEVENLABS_AGENT_ID: import.meta.env.VITE_ELEVENLABS_AGENT_ID,
     VITE_CLERK_PUBLISHABLE_KEY: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
   },
 

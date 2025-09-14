@@ -1,12 +1,19 @@
-import type { ConversationPanelProps } from "@syntaxia/shared";
 import { Button } from "@syntaxia/ui/button";
 import { AlertCircle, Mic, MicOff, Wifi, WifiOff } from "lucide-react";
 
 export function ConversationPanel({
-  isRecording,
   onToggleRecording,
   voiceState,
-}: ConversationPanelProps) {
+}: {
+  onToggleRecording: () => void;
+  voiceState: {
+    isRecording: boolean;
+    isPlaying: boolean;
+    currentAudioLevel: number;
+    connectionStatus: "connecting" | "connected" | "disconnected" | "error";
+    lastError?: string;
+  };
+}) {
   const getConnectionIcon = () => {
     switch (voiceState.connectionStatus) {
       case "connected":
@@ -37,13 +44,13 @@ export function ConversationPanel({
           {getConnectionIcon()}
         </div>
         <Button
-          variant={isRecording ? "destructive" : "default"}
+          variant={voiceState.isRecording ? "destructive" : "default"}
           size="sm"
           className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20"
           onClick={onToggleRecording}
           disabled={voiceState.connectionStatus !== "connected"}
         >
-          {isRecording ? (
+          {voiceState.isRecording ? (
             <div className="flex items-center space-x-1">
               <MicOff className="w-3 h-3" />
               <span className="text-xs">STOP</span>
@@ -95,7 +102,7 @@ export function ConversationPanel({
           </div>
 
           <div className="min-h-16">
-            {isRecording ? (
+            {voiceState.isRecording ? (
               <span className="text-terminal-green">
                 Recording your response...
               </span>

@@ -1,5 +1,5 @@
 import { useConversation } from "@elevenlabs/react";
-import { api } from "@syntaxia/backend/convex/_generated/api";
+import { api } from "@syntaxia/backend/api";
 import { Button } from "@syntaxia/ui/button";
 import { ConversationPanel, WaveformRingOrb } from "@syntaxia/ui/interview";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -8,10 +8,10 @@ import {
   useMutation as useConvexMutation,
   useQuery,
 } from "convex/react";
+import type { GenericId } from "convex/values";
 import { Clock } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { env } from "@/env";
 import type { VoiceSessionState } from "@/types/interview";
 import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
 import { validateSessionRoute } from "@/utils/route-guards";
@@ -22,13 +22,16 @@ export const Route = createFileRoute("/_authed/interview/session/$sessionId")({
 
 function InterviewSession() {
   const navigate = useNavigate();
-  const { sessionId } = Route.useParams();
-  const [isRecording, setIsRecording] = useState(false);
+  const { sessionId } = Route.useParams() as {
+    sessionId: GenericId<"interview_sessions">;
+  };
   const [interviewTime, setInterviewTime] = useState(0);
   const [isInterviewActive, setIsInterviewActive] = useState(false);
   const [hasStartedActive, setHasStartedActive] = useState(false);
 
-  const session = useQuery(api.sessions.getSession, { sessionId });
+  const session = useQuery(api.sessions.getSession, {
+    sessionId: sessionId,
+  });
   const startActiveMutation = useConvexMutation(api.sessions.startActive);
   const endMutation = useConvexMutation(api.sessions.endSession);
   const getConversationTokenAction = useAction(
@@ -39,7 +42,7 @@ function InterviewSession() {
     onConnect: () => {
       setVoiceState((prev) => ({ ...prev, connectionStatus: "connected" }));
 
-      if (!isRecording) {
+      if (!isRecordingRef.current) {
         toggleRecording();
       }
     },
@@ -62,6 +65,12 @@ function InterviewSession() {
     currentAudioLevel: 0.3,
     connectionStatus: "disconnected",
   });
+
+  const isRecordingRef = useRef(voiceState.isRecording);
+
+  useEffect(() => {
+    isRecordingRef.current = voiceState.isRecording;
+  }, [voiceState.isRecording]);
 
   const derivedVoiceState = {
     ...voiceState,
@@ -99,18 +108,20 @@ function InterviewSession() {
     } as const;
 
     try {
-      const tokenResponse = await getConversationTokenAction({ sessionId });
+      const tokenResponse = await getConversationTokenAction({
+        sessionId: sessionId,
+      });
       if (isRateLimitFailure(tokenResponse)) {
         showRateLimitToast(
-          tokenResponse.retryAfterMs,
+          (tokenResponse as { retryAfterMs?: number }).retryAfterMs,
           "Failed to initialize voice conversation",
         );
         setHasStartedActive(false);
         return;
       }
       await conversation.startSession({
-        agentId: env.VITE_ELEVENLABS_AGENT_ID,
-        conversationToken: tokenResponse.conversationToken,
+        conversationToken: (tokenResponse as { conversationToken: string })
+          .conversationToken,
         connectionType: "webrtc",
         userId: sessionId,
         dynamicVariables,
@@ -130,7 +141,7 @@ function InterviewSession() {
   ]);
 
   useEffect(() => {
-    if (session === undefined) return;
+    if (!session) return;
 
     const validation = validateSessionRoute(session);
     if (!validation.isValid && validation.redirectTo) {
@@ -203,11 +214,14 @@ function InterviewSession() {
       console.error("Failed to end ElevenLabs conversation:", error);
     }
 
-    endMutation({ sessionId, elevenlabsConversationId: conversationId })
+    endMutation({
+      sessionId: sessionId,
+      elevenlabsConversationId: conversationId,
+    })
       .then((res) => {
         if (isRateLimitFailure(res)) {
           showRateLimitToast(
-            res.retryAfterMs,
+            (res as { retryAfterMs?: number }).retryAfterMs,
             "Failed to end session. Please try again.",
           );
           return;
@@ -249,8 +263,7 @@ function InterviewSession() {
   };
 
   const toggleRecording = async () => {
-    const newRecordingState = !isRecording;
-    setIsRecording(newRecordingState);
+    const newRecordingState = !voiceState.isRecording;
     setVoiceState((prev) => ({
       ...prev,
       isRecording: newRecordingState,
@@ -262,16 +275,16 @@ function InterviewSession() {
 
       try {
         const res = await startActiveMutation({
-          sessionId,
+          sessionId: sessionId,
           micOnAt: micStartTime,
         });
         if (isRateLimitFailure(res)) {
           showRateLimitToast(
-            res.retryAfterMs,
+            (res as { retryAfterMs?: number }).retryAfterMs,
             "Failed to start interview session",
           );
           setHasStartedActive(false);
-          setIsRecording(false);
+          setVoiceState((prev) => ({ ...prev, isRecording: false }));
           setIsInterviewActive(false);
           return;
         }
@@ -282,13 +295,13 @@ function InterviewSession() {
           action: { label: "Retry", onClick: () => endInterview() },
         });
         setHasStartedActive(false);
-        setIsRecording(false);
+        setVoiceState((prev) => ({ ...prev, isRecording: false }));
         setIsInterviewActive(false);
       }
     }
   };
 
-  if (session === undefined) {
+  if (!session) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center font-mono">
         <div className="text-center">
@@ -297,10 +310,6 @@ function InterviewSession() {
         </div>
       </div>
     );
-  }
-
-  if (session === null) {
-    return null;
   }
 
   return (
@@ -336,7 +345,6 @@ function InterviewSession() {
         <div className="flex-1 pt-4">
           <div className="max-w-2xl mx-auto w-full">
             <ConversationPanel
-              isRecording={isRecording}
               onToggleRecording={toggleRecording}
               voiceState={derivedVoiceState}
             />

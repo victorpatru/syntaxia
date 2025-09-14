@@ -1,34 +1,41 @@
-import { convexQuery } from "@convex-dev/react-query";
-import { api } from "@syntaxia/backend/convex/_generated/api";
-import type { Id } from "@syntaxia/backend/convex/_generated/dataModel";
+import { api } from "@syntaxia/backend/api";
 import { Button } from "@syntaxia/ui/button";
 import { Textarea } from "@syntaxia/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@syntaxia/ui/tooltip";
-import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { useAction } from "convex/react";
+import { useAction, useQuery } from "convex/react";
+import type { GenericId } from "convex/values";
 import { Play } from "lucide-react";
 import { startTransition, useRef, useState } from "react";
 import { toast } from "sonner";
+import { WelcomeDiscountBanner } from "@/components/WelcomeDiscountBanner";
 import { JD_PRESETS, PRIMARY_PRESET_COUNT } from "@/jd-presets";
 import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
 import { getSessionRoute } from "@/utils/route-guards";
 
 export const Route = createFileRoute("/_authed/interview/")({
-  validateSearch: (search: { sessionId?: Id<"interview_sessions"> } = {}) => ({
+  validateSearch: (
+    search: { sessionId?: GenericId<"interview_sessions"> } = {},
+  ) => ({
     sessionId: search.sessionId,
   }),
   loader: async (opts) => {
-    void opts.context.queryClient.fetchQuery(
-      convexQuery(api.credits.getBalance, {}),
-    );
+    try {
+      // Preload user profile
+      void opts.context.convexClient.query(api.users.getCurrentUserProfile, {});
 
-    const currentSession = await opts.context.queryClient.ensureQueryData({
-      ...convexQuery(api.sessions.getCurrentSession, {}),
-      staleTime: 5000,
-    });
-    if (currentSession) {
-      throw redirect({ to: getSessionRoute(currentSession) });
+      // Check for existing session and redirect if found
+      const currentSession = await opts.context.convexClient.query(
+        api.sessions.getCurrentSession,
+        {},
+      );
+      if (currentSession) {
+        throw redirect({
+          to: getSessionRoute(currentSession),
+        });
+      }
+    } catch (error) {
+      console.warn("Authentication not ready during route load:", error);
     }
   },
   component: InterviewStart,
@@ -41,10 +48,10 @@ function InterviewStart() {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [showAllPresets, setShowAllPresets] = useState(false);
 
-  const { data: balance } = useQuery({
-    ...convexQuery(api.credits.getBalance, {}),
-    staleTime: 10000,
-  });
+  const data = useQuery(api.users.getCurrentUserProfile, {});
+
+  const balance = data?.credits ?? 0;
+  const isWelcomeEligible = data?.isWelcomeEligible ?? false;
 
   const convexCreateSession = useAction(api.sessions.createSessionValidated);
   const [isCreating, setIsCreating] = useState(false);
@@ -82,8 +89,7 @@ function InterviewStart() {
       toast.error("Job description must be at least 50 characters.");
       return;
     }
-    // TODO: Uncomment this when Polar payments are ready
-    /*
+
     if (balance < 15) {
       toast.error("You need at least 15 credits to start an interview.", {
         action: {
@@ -93,7 +99,6 @@ function InterviewStart() {
       });
       return;
     }
-    */
     createSession();
   };
 
@@ -228,6 +233,8 @@ function InterviewStart() {
           </div>
         </div>
       </section>
+
+      <WelcomeDiscountBanner isEligible={isWelcomeEligible} />
     </div>
   );
 }

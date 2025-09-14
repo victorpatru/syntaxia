@@ -8,3 +8,7 @@ Main flow:
 - The interview session starts and goes on for 15 minutes
 - The Conversational AI nudges for a gentle end of interview
 - Conversation gets processed and we see a "did good + potential improvements + next steps" screen
+
+## Development
+
+See [DEVELOPMENT.md](DEVELOPMENT.md) for setup instructions and development workflow.

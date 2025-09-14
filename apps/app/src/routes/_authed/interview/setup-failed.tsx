@@ -1,14 +1,14 @@
-import { api } from "@syntaxia/backend/convex/_generated/api";
-import type { Id } from "@syntaxia/backend/convex/_generated/dataModel";
+import { api } from "@syntaxia/backend/api";
 import { Button } from "@syntaxia/ui/button";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "convex/react";
+import type { GenericId } from "convex/values";
 
 export const Route = createFileRoute("/_authed/interview/setup-failed")({
   component: SetupFailed,
   validateSearch: (search: {
-    sessionId?: Id<"interview_sessions">;
-  }): { sessionId?: Id<"interview_sessions"> } => ({
+    sessionId?: GenericId<"interview_sessions">;
+  }): { sessionId?: GenericId<"interview_sessions"> } => ({
     sessionId: search.sessionId,
   }),
 });
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_authed/interview/setup-failed")({
 function SetupFailed() {
   const navigate = useNavigate();
   const { sessionId } = Route.useSearch() as {
-    sessionId?: Id<"interview_sessions">;
+    sessionId?: GenericId<"interview_sessions">;
   };
 
   const session = useQuery(

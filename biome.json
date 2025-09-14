@@ -7,13 +7,15 @@
       "!**/node_modules/**",
       "!**/.vite/**",
       "!**/.output/**",
+      "!**/.nitro/**",
       "!**/.tanstack/**",
       "!**/packages/tsconfig",
       "!**/dist/**",
       "!**/routeTree.gen.ts",
       "!**/_generated/**",
       "!bun.lock",
-      "!**/app.css"
+      "!**/app.css",
+      "!**/api.ts"
     ]
   },
   "linter": {

@@ -30,9 +30,7 @@ export function showRateLimitToast(
   }
 }
 
-export function isRateLimitFailure(
-  result: unknown,
-): result is RateLimitFailure {
+export function isRateLimitFailure(result: unknown): boolean {
   return (
     !!result &&
     typeof result === "object" &&

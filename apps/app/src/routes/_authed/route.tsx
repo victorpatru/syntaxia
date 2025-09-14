@@ -1,9 +1,7 @@
-import { convexQuery } from "@convex-dev/react-query";
-import { api } from "@syntaxia/backend/convex/_generated/api";
+import { api } from "@syntaxia/backend/api";
 import { DashboardHeader } from "@syntaxia/ui/dashboard-header";
-import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
-import { Authenticated, Unauthenticated } from "convex/react";
+import { Authenticated, Unauthenticated, useQuery } from "convex/react";
 
 function AuthedLayout() {
   const location = useLocation();
@@ -11,17 +9,15 @@ function AuthedLayout() {
     location.pathname.includes("/interview/setup") ||
     location.pathname.includes("/interview/session/") ||
     location.pathname.includes("/interview/analysis/");
-  const { data: balance, isLoading } = useQuery({
-    ...convexQuery(api.credits.getBalance, {}),
-    staleTime: 10000,
-  });
+  const userData = useQuery(api.users.getCurrentUserProfile, {});
+  const balance = userData?.credits ?? 0;
 
   return (
     <>
       <Authenticated>
         <div className="min-h-screen">
           {!isInterviewFlow &&
-            (isLoading ? (
+            (!userData ? (
               <div className="border-b border-terminal-green/30 bg-terminal-dark font-mono">
                 <div className="mx-auto max-w-6xl px-6 flex h-14 md:h-16 items-center justify-between gap-4">
                   <div className="h-4 w-24 bg-terminal-green/10 animate-pulse" />
