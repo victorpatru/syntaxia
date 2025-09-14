@@ -68,9 +68,9 @@ export function LoadingTerminal({
                 <div
                   key={`terminal-info-${index}-${info.slice(0, 10)}`}
                   className="text-terminal-green/60"
-                >
-                  {info}
-                </div>
+                  // biome-ignore lint/security/noDangerouslySetInnerHtml: cannot use it otherwise
+                  dangerouslySetInnerHTML={{ __html: info }}
+                />
               ))}
             </div>
           </div>

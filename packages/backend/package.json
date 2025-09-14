@@ -31,7 +31,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@ai-sdk/google": "^2.0.11",
     "@clerk/backend": "^2.7.0",
     "@convex-dev/rate-limiter": "^0.2.12",
     "@notionhq/client": "^4.0.2",

@@ -1,4 +1,3 @@
-import { google } from "@ai-sdk/google";
 import { generateObject } from "ai";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
@@ -17,8 +16,8 @@ import { checkRateLimit } from "./rate_limit/helpers";
 import { requireUser } from "./users";
 
 const GATEWAY_MODELS = {
-  ADVANCED: google("gemini-2.5-pro"),
-  CLASSIFICATION: google("gemini-2.5-flash-lite"),
+  ADVANCED: "google/gemini-2.5-flash-lite",
+  CLASSIFICATION: "google/gemini-2.5-flash-lite",
 } as const;
 
 const StatusValidator = v.union(
@@ -188,7 +187,7 @@ export const getCurrentSession = query({
   returns: v.union(v.null(), SessionValidator),
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    if (!identity) return null;
 
     const user = await ctx.db
       .query("users")
