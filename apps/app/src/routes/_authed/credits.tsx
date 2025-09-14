@@ -2,9 +2,12 @@ import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@syntaxia/backend/api";
 import { Button } from "@syntaxia/ui/button";
 import { Card } from "@syntaxia/ui/card";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { useAction } from "convex/react";
 import { CreditCard, Sparkles } from "lucide-react";
+import { toast } from "sonner";
+import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
 
 interface CreditPackage {
   id: string;
@@ -25,14 +28,13 @@ function Credits() {
     convexQuery(api.credits.getAvailablePackages, {}),
   );
 
-  /* TODO: Uncomment this when Polar payments are ready
   const convexCreateCheckout = useAction(api.credits.createCheckout);
 
   const createCheckoutMutation = useMutation({
     mutationFn: async (packageId: string) => {
       const result = await convexCreateCheckout({ packageId });
 
-      if (!result.success) {
+      if (result.success === false) {
         // Handle specific error cases with proper toast notifications
         if (isRateLimitFailure(result)) {
           showRateLimitToast(
@@ -60,7 +62,9 @@ function Credits() {
       return result;
     },
     onSuccess: (data) => {
-      window.location.href = data.url;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
     },
     onError: (error) => {
       // This will only catch network errors or unexpected issues
@@ -68,7 +72,6 @@ function Credits() {
       toast.error("Network error. Please check your connection and try again.");
     },
   });
-  */
 
   return (
     <div className="px-6 py-8 space-y-8 max-w-5xl mx-auto">
@@ -126,7 +129,6 @@ function Credits() {
                   </p>
                 </div>
 
-                {/* TODO: Uncomment this when Polar payments are ready
                 <Button
                   onClick={() => createCheckoutMutation.mutate(pkg.id)}
                   disabled={createCheckoutMutation.isPending || !pkg.id}
@@ -135,13 +137,6 @@ function Credits() {
                   {createCheckoutMutation.isPending
                     ? "./processing..."
                     : "./purchase"}
-                </Button>
-                */}
-                <Button
-                  disabled={true}
-                  className="w-full font-mono text-xs md:text-sm bg-transparent border border-terminal-green/30 text-terminal-green/40 px-4 transition-colors h-9 md:h-10 cursor-not-allowed"
-                >
-                  ./coming-soon
                 </Button>
               </div>
             </Card>
