@@ -107,14 +107,15 @@ function InterviewSession() {
       });
       if (isRateLimitFailure(tokenResponse)) {
         showRateLimitToast(
-          tokenResponse.retryAfterMs,
+          (tokenResponse as { retryAfterMs?: number }).retryAfterMs,
           "Failed to initialize voice conversation",
         );
         setHasStartedActive(false);
         return;
       }
       await conversation.startSession({
-        conversationToken: tokenResponse.conversationToken,
+        conversationToken: (tokenResponse as { conversationToken: string })
+          .conversationToken,
         connectionType: "webrtc",
         userId: sessionId,
         dynamicVariables,
@@ -214,7 +215,7 @@ function InterviewSession() {
       .then((res) => {
         if (isRateLimitFailure(res)) {
           showRateLimitToast(
-            res.retryAfterMs,
+            (res as { retryAfterMs?: number }).retryAfterMs,
             "Failed to end session. Please try again.",
           );
           return;
@@ -273,7 +274,7 @@ function InterviewSession() {
         });
         if (isRateLimitFailure(res)) {
           showRateLimitToast(
-            res.retryAfterMs,
+            (res as { retryAfterMs?: number }).retryAfterMs,
             "Failed to start interview session",
           );
           setHasStartedActive(false);

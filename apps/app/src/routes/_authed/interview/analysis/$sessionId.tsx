@@ -38,7 +38,10 @@ function InterviewAnalysis() {
         sessionId: sessionId,
       });
       if (isRateLimitFailure(result)) {
-        showRateLimitToast(result.retryAfterMs, "Failed to analyze interview");
+        showRateLimitToast(
+          (result as { retryAfterMs?: number }).retryAfterMs,
+          "Failed to analyze interview",
+        );
         hasTriggeredAnalysisRef.current = false;
         return;
       }

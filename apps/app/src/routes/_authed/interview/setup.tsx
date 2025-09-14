@@ -54,7 +54,7 @@ function InterviewSetup() {
       const result = await startSetupAction({ sessionId });
       if (isRateLimitFailure(result)) {
         showRateLimitToast(
-          result.retryAfterMs,
+          (result as { retryAfterMs?: number }).retryAfterMs,
           "Failed to process job description",
         );
         hasStartedSetupRef.current = false;
