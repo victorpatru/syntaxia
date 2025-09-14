@@ -36,7 +36,7 @@ function InterviewReports() {
     duration?: number,
   ) => {
     // Check if it was a short session first
-    if (duration && duration < 120) {
+    if (duration != null && duration < 120) {
       return "TOO_SHORT";
     }
     if (scores?.overall == null) {
@@ -135,7 +135,7 @@ function InterviewReports() {
                         {format(new Date(session.createdAt), "MMM dd, yyyy")}
                       </TableCell>
                       <TableCell className="font-mono text-terminal-green/80 text-xs p-3">
-                        {session.duration ? (
+                        {session.duration != null ? (
                           <div className="flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             {formatDuration(session.duration)}
@@ -147,7 +147,7 @@ function InterviewReports() {
                       <TableCell className="font-mono text-terminal-green/80 text-xs p-3">
                         <span
                           className={
-                            session.duration && session.duration < 120
+                            session.duration != null && session.duration < 120
                               ? "text-orange-400"
                               : (session.scores?.overall ?? 0) >= 7
                                 ? "text-terminal-amber"

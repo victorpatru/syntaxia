@@ -10,7 +10,7 @@ import {
 } from "convex/react";
 import type { GenericId } from "convex/values";
 import { Clock } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { VoiceSessionState } from "@/types/interview";
 import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
@@ -42,7 +42,7 @@ function InterviewSession() {
     onConnect: () => {
       setVoiceState((prev) => ({ ...prev, connectionStatus: "connected" }));
 
-      if (!voiceState.isRecording) {
+      if (!isRecordingRef.current) {
         toggleRecording();
       }
     },
@@ -65,6 +65,12 @@ function InterviewSession() {
     currentAudioLevel: 0.3,
     connectionStatus: "disconnected",
   });
+
+  const isRecordingRef = useRef(voiceState.isRecording);
+
+  useEffect(() => {
+    isRecordingRef.current = voiceState.isRecording;
+  }, [voiceState.isRecording]);
 
   const derivedVoiceState = {
     ...voiceState,
