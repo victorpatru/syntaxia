@@ -39,6 +39,7 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL;
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
 		
+		
 		<!-- TODO: Uncomment Wistia Player when demo is ready -->
 		<!-- Wistia Player -->
 		<!-- <script src="https://fast.wistia.com/player.js" async></script> -->
@@ -46,6 +47,7 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL;
 		<!-- <style>wistia-player[media-id='scmeic9wpj']:not(:defined) { background: center / contain no-repeat url('https://fast.wistia.com/embed/medias/scmeic9wpj/swatch'); display: block; filter: blur(5px); padding-top:62.29%; }</style> -->
 		
 		<title>Syntaxia</title>
+		
 	</head>
 	<body class="min-h-screen bg-background text-foreground font-mono" style="scroll-behavior: smooth;">
 		<header class="border-b border-terminal-green/30 bg-terminal-dark font-mono">
@@ -198,14 +200,16 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL;
 							<span class="text-terminal-amber font-mono text-xs">Step 1</span>
 						</div>
 						<div class="bg-terminal-dark border border-terminal-green/20 overflow-hidden mb-3 h-[280px] mt-3">
-							<Image 
-								src="https://afg7xsppojwqvdjk.public.blob.vercel-storage.com/dark-jd-page.png"
-								alt="Syntaxia job description input interface showing where users paste and analyze job requirements"
-								class="w-full h-full object-cover"
-								loading="lazy"
-								width={1200}
-								height={800}
-							/>
+							<a href="https://afg7xsppojwqvdjk.public.blob.vercel-storage.com/dark-jd-page.png" data-glightbox="title: Step 1: Input job description; description: Paste your job description so the interview mirrors the role.">
+								<Image 
+									src="https://afg7xsppojwqvdjk.public.blob.vercel-storage.com/dark-jd-page.png"
+									alt="Syntaxia job description input interface showing where users paste and analyze job requirements"
+									class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+									loading="lazy"
+									width={1200}
+									height={800}
+								/>
+							</a>
 						</div>
 						<p class="text-terminal-green/70 text-sm mt-1">Input job description</p>
 						
@@ -217,14 +221,16 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL;
 							<span class="text-terminal-amber font-mono text-xs">Step 2</span>
 						</div>
 						<div class="bg-terminal-dark border border-terminal-green/20 overflow-hidden mb-3 h-[280px] mt-3">
-							<Image 
-								src="https://afg7xsppojwqvdjk.public.blob.vercel-storage.com/dark-interview-page.png"
-								alt="Syntaxia interview session interface showing voice conversation with AI interviewer"
-								class="w-full h-full object-cover"
-								loading="lazy"
-								width={1200}
-								height={800}
-							/>
+							<a href="https://afg7xsppojwqvdjk.public.blob.vercel-storage.com/dark-interview-page.png" data-glightbox="title: Step 2: Start having an actual conversation; description: Talk through problems with the AI interviewer—like a real phone screen.">
+								<Image 
+									src="https://afg7xsppojwqvdjk.public.blob.vercel-storage.com/dark-interview-page.png"
+									alt="Syntaxia interview session interface showing voice conversation with AI interviewer"
+									class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+									loading="lazy"
+									width={1200}
+									height={800}
+								/>
+							</a>
 						</div>
 						<p class="text-terminal-green/70 text-sm mt-1">Start having an actual conversation</p>
 						
@@ -239,14 +245,16 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL;
 							<span class="text-terminal-amber font-mono text-xs">Step 3</span>
 						</div>
 						<div class="bg-terminal-dark border border-terminal-green/20 overflow-hidden mb-3 h-[400px] mt-3">
-							<Image 
-								src="https://afg7xsppojwqvdjk.public.blob.vercel-storage.com/dark-report-page.png"
-								alt="Syntaxia session review dashboard showing performance metrics and improvement suggestions"
-								class="w-full h-full object-cover"
-								loading="lazy"
-								width={1200}
-								height={800}
-							/>
+							<a href="https://afg7xsppojwqvdjk.public.blob.vercel-storage.com/dark-report-page.png" data-glightbox="title: Step 3: Get a detailed report after the interview; description: Receive a clear scorecard and a prioritized action plan with next steps.">
+								<Image 
+									src="https://afg7xsppojwqvdjk.public.blob.vercel-storage.com/dark-report-page.png"
+									alt="Syntaxia session review dashboard showing performance metrics and improvement suggestions"
+									class="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+									loading="lazy"
+									width={1200}
+									height={800}
+								/>
+							</a>
 						</div>
 						<p class="text-terminal-green/70 text-sm mt-1">Get a detailed report after the interview</p>
 					</div>
@@ -348,5 +356,62 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL;
 				</div>
 			</div>
 		</main>
+		
+		<!-- Custom Lightbox JavaScript -->
+		<script>
+			// Simple lightbox implementation
+			document.addEventListener('DOMContentLoaded', () => {
+				const lightboxLinks = document.querySelectorAll('[data-glightbox]');
+				
+				lightboxLinks.forEach(link => {
+					link.addEventListener('click', (e) => {
+						e.preventDefault();
+						
+						// Create lightbox overlay
+						const overlay = document.createElement('div');
+						overlay.style.cssText = `
+							position: fixed;
+							top: 0;
+							left: 0;
+							width: 100%;
+							height: 100%;
+							background: rgba(0, 0, 0, 0.9);
+							display: flex;
+							align-items: center;
+							justify-content: center;
+							z-index: 9999;
+							cursor: pointer;
+						`;
+						
+						// Create image
+						const img = document.createElement('img');
+						img.src = (link as HTMLAnchorElement).href;
+						img.style.cssText = `
+							max-width: 90%;
+							max-height: 90%;
+							object-fit: contain;
+							border: 2px solid #00ff00;
+						`;
+						
+						overlay.appendChild(img);
+						document.body.appendChild(overlay);
+						
+						// Close on click
+						overlay.addEventListener('click', () => {
+							document.body.removeChild(overlay);
+						});
+						
+						// Close on ESC
+						const handleEsc = (e: KeyboardEvent) => {
+							if (e.key === 'Escape') {
+								document.body.removeChild(overlay);
+								document.removeEventListener('keydown', handleEsc);
+							}
+						};
+						document.addEventListener('keydown', handleEsc);
+					});
+				});
+			});
+		</script>
 	</body>
 </html>
