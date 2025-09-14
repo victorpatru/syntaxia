@@ -179,38 +179,67 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL;
 			<!-- Features Grid removed to reduce repetition with How it works -->
 
 			<!-- Product Screenshots -->
-			<div id="show-demos" class="mb-12">
-				<h2 class="text-xl font-bold text-terminal-green mb-6 text-center">$ ./show-demos</h2>
-				<div class="grid grid-cols-1 gap-8">
-					<div class="border border-terminal-green/30 bg-card p-4">
-						<div class="bg-terminal-dark border border-terminal-green/20 overflow-hidden mb-3">
-							<!-- TODO: add light mode image -->
-						<Image 
-							src="https://afg7xsppojwqvdjk.public.blob.vercel-storage.com/dark-interview-page.png"
-							alt="Syntaxia interview session interface showing voice conversation with AI interviewer"
-							class="w-full h-auto"
-							loading="lazy"
-							width={1200}
-							height={800}
-						/>
+			<div id="show-demos" class="mb-16">
+				<h2 class="text-xl font-bold text-terminal-green mb-8 text-center">$ ./show-demos</h2>
+				<!-- Steps 1 & 2 on same row -->
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-8">
+					<!-- Step 1: Job Description Input -->
+					<div class="border border-terminal-green/30 bg-card p-4 relative">
+						<div class="absolute -top-3 left-4 bg-background px-3 py-1 border border-terminal-green/30 z-10">
+							<span class="text-terminal-amber font-mono text-xs">Step 1</span>
 						</div>
-						<h3 class="text-terminal-green font-mono text-sm">./interview-session.png</h3>
-						<p class="text-terminal-green/70 text-xs mt-1">Live conversation interface with AI interviewer</p>
+						<div class="bg-terminal-dark border border-terminal-green/20 overflow-hidden mb-3 h-[280px] mt-3">
+							<Image 
+								src="https://afg7xsppojwqvdjk.public.blob.vercel-storage.com/dark-jd-page.png"
+								alt="Syntaxia job description input interface showing where users paste and analyze job requirements"
+								class="w-full h-full object-cover"
+								loading="lazy"
+								width={1200}
+								height={800}
+							/>
+						</div>
+						<p class="text-terminal-green/70 text-sm mt-1">Input job description</p>
+						
 					</div>
-					<div class="border border-terminal-green/30 bg-card p-4">
-						<div class="bg-terminal-dark border border-terminal-green/20 overflow-hidden mb-3">
-							<!-- TODO: add light mode image -->
-						<Image 
-							src="https://afg7xsppojwqvdjk.public.blob.vercel-storage.com/dark-report-page.png"
-							alt="Syntaxia session review dashboard showing performance metrics and improvement suggestions"
-							class="w-full h-auto"
-							loading="lazy"
-							width={1200}
-							height={800}
-						/>
+
+					<!-- Step 2: Interview Session -->
+					<div class="border border-terminal-green/30 bg-card p-4 relative">
+						<div class="absolute -top-3 left-4 bg-background px-3 py-1 border border-terminal-green/30 z-10">
+							<span class="text-terminal-amber font-mono text-xs">Step 2</span>
 						</div>
-						<h3 class="text-terminal-green font-mono text-sm">./session-review.png</h3>
-						<p class="text-terminal-green/70 text-xs mt-1">Detailed analysis and action plan after each session</p>
+						<div class="bg-terminal-dark border border-terminal-green/20 overflow-hidden mb-3 h-[280px] mt-3">
+							<Image 
+								src="https://afg7xsppojwqvdjk.public.blob.vercel-storage.com/dark-interview-page.png"
+								alt="Syntaxia interview session interface showing voice conversation with AI interviewer"
+								class="w-full h-full object-cover"
+								loading="lazy"
+								width={1200}
+								height={800}
+							/>
+						</div>
+						<p class="text-terminal-green/70 text-sm mt-1">Start having an actual conversation</p>
+						
+					</div>
+				</div>
+
+				<!-- Step 3 on its own row for better visibility -->
+				<div class="max-w-4xl mx-auto">
+					<!-- Step 3: Detailed Report -->
+					<div class="border border-terminal-green/30 bg-card p-4 relative">
+						<div class="absolute -top-3 left-4 bg-background px-3 py-1 border border-terminal-green/30 z-10">
+							<span class="text-terminal-amber font-mono text-xs">Step 3</span>
+						</div>
+						<div class="bg-terminal-dark border border-terminal-green/20 overflow-hidden mb-3 h-[400px] mt-3">
+							<Image 
+								src="https://afg7xsppojwqvdjk.public.blob.vercel-storage.com/dark-report-page.png"
+								alt="Syntaxia session review dashboard showing performance metrics and improvement suggestions"
+								class="w-full h-full object-cover"
+								loading="lazy"
+								width={1200}
+								height={800}
+							/>
+						</div>
+						<p class="text-terminal-green/70 text-sm mt-1">Get a detailed report after the interview</p>
 					</div>
 				</div>
 			</div>
