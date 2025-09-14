@@ -8,7 +8,7 @@ interface WelcomeBannerProps {
 const DISMISSAL_KEY = "welcomeBannerDismissed";
 const TTL_DAYS = 3;
 
-export function WelcomeBanner({ isEligible }: WelcomeBannerProps) {
+export function WelcomeDiscountBanner({ isEligible }: WelcomeBannerProps) {
   const navigate = useNavigate();
   const [isDismissed, setIsDismissed] = useState(false);
 
@@ -51,9 +51,8 @@ export function WelcomeBanner({ isEligible }: WelcomeBannerProps) {
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40">
       <div className="border border-terminal-green/30 bg-background/95 backdrop-blur px-4 py-2 flex items-center gap-3">
         <span className="text-terminal-green text-xs">
-          First session for $1 — use code
+          First session for $1 — limited time offer
         </span>
-        <code className="text-terminal-amber text-xs">WELCOME1</code>
         <button
           type="button"
           onClick={() => navigate({ to: "/credits" })}

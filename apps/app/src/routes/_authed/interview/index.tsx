@@ -8,7 +8,7 @@ import type { GenericId } from "convex/values";
 import { Play } from "lucide-react";
 import { startTransition, useRef, useState } from "react";
 import { toast } from "sonner";
-import { WelcomeBanner } from "@/components/WelcomeBanner";
+import { WelcomeDiscountBanner } from "@/components/WelcomeDiscountBanner";
 import { JD_PRESETS, PRIMARY_PRESET_COUNT } from "@/jd-presets";
 import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
 import { getSessionRoute } from "@/utils/route-guards";
@@ -234,7 +234,7 @@ function InterviewStart() {
         </div>
       </section>
 
-      <WelcomeBanner isEligible={isWelcomeEligible} />
+      <WelcomeDiscountBanner isEligible={isWelcomeEligible} />
     </div>
   );
 }
