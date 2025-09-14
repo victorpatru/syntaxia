@@ -39,10 +39,11 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL;
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
 		
+		<!-- TODO: Uncomment Wistia Player when demo is ready -->
 		<!-- Wistia Player -->
-		<script src="https://fast.wistia.com/player.js" async></script>
-		<script src="https://fast.wistia.com/embed/scmeic9wpj.js" async type="module"></script>
-		<style>wistia-player[media-id='scmeic9wpj']:not(:defined) { background: center / contain no-repeat url('https://fast.wistia.com/embed/medias/scmeic9wpj/swatch'); display: block; filter: blur(5px); padding-top:62.29%; }</style>
+		<!-- <script src="https://fast.wistia.com/player.js" async></script> -->
+		<!-- <script src="https://fast.wistia.com/embed/scmeic9wpj.js" async type="module"></script> -->
+		<!-- <style>wistia-player[media-id='scmeic9wpj']:not(:defined) { background: center / contain no-repeat url('https://fast.wistia.com/embed/medias/scmeic9wpj/swatch'); display: block; filter: blur(5px); padding-top:62.29%; }</style> -->
 		
 		<title>Syntaxia</title>
 	</head>
@@ -60,8 +61,8 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL;
 					<a href="#how-it-works" class="font-mono text-sm text-terminal-green hover:text-terminal-amber transition-colors">
 						./how-it-works
 					</a>
-					<a href="#show-demos" class="font-mono text-sm text-terminal-green hover:text-terminal-amber transition-colors">
-						./show-demos
+					<a href="#walkthrough" class="font-mono text-sm text-terminal-green hover:text-terminal-amber transition-colors">
+						./walkthrough
 					</a>
 					<a href="#pricing" class="font-mono text-sm text-terminal-green hover:text-terminal-amber transition-colors">
 						./pricing
@@ -102,7 +103,15 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL;
 
 			<!-- Video Demo (moved below fold) -->
 			<div id="demo" class="mb-16">
-				<wistia-player media-id="scmeic9wpj" aspect="1.605351170568562"></wistia-player>
+				<!-- TODO: Uncomment Wistia player when demo is ready -->
+				<!-- <wistia-player media-id="scmeic9wpj" aspect="1.605351170568562"></wistia-player> -->
+				
+				<!-- Placeholder for demo video -->
+				<div class="border border-terminal-green/30 bg-terminal-dark p-8 text-center">
+					<div class="text-terminal-amber font-mono text-lg mb-2">$ ./loading-demo</div>
+					<div class="text-terminal-green/70 font-mono text-sm">Product demo coming real soon...</div>
+					<div class="text-terminal-green/40 font-mono text-xs mt-2 animate-pulse">_</div>
+				</div>
 			</div>
 
 			<!-- How it Works -->
@@ -179,8 +188,8 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL;
 			<!-- Features Grid removed to reduce repetition with How it works -->
 
 			<!-- Product Screenshots -->
-			<div id="show-demos" class="mb-16">
-				<h2 class="text-xl font-bold text-terminal-green mb-8 text-center">$ ./show-demos</h2>
+			<div id="walkthrough" class="mb-16">
+				<h2 class="text-xl font-bold text-terminal-green mb-8 text-center">$ ./walkthrough</h2>
 				<!-- Steps 1 & 2 on same row -->
 				<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-8">
 					<!-- Step 1: Job Description Input -->
