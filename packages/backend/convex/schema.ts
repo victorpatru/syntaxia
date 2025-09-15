@@ -29,13 +29,18 @@ export default defineSchema({
     userId: v.id("users"),
     amount: v.number(),
     // Source:Action Format for Reason Fields
-    reason: v.union(v.literal("polar:purchase"), v.literal("session:usage")),
+    reason: v.union(
+      v.literal("polar:purchase"),
+      v.literal("session:usage"),
+      v.literal("beta:grant"),
+    ),
     orderId: v.optional(v.string()),
     sessionId: v.optional(v.id("interview_sessions")),
   })
     .index("by_user", ["userId"])
     .index("by_order_id", ["orderId"])
-    .index("by_session_reason", ["sessionId", "reason"]),
+    .index("by_session_reason", ["sessionId", "reason"])
+    .index("by_user_reason", ["userId", "reason"]),
 
   interview_sessions: defineTable({
     userId: v.id("users"),

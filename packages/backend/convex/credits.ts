@@ -173,6 +173,51 @@ export const creditAccount = internalMutation({
   },
 });
 
+export const grantBetaCredits = internalMutation({
+  args: {
+    email: v.string(),
+    credits: v.number(),
+  },
+  returns: v.null(),
+  handler: async (ctx, { email, credits }) => {
+    // Find user by email using index
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .unique();
+
+    if (!user) throw new Error(`User not found: ${email}`);
+
+    // Check if beta credits already granted to prevent duplicates
+    const existingBetaGrant = await ctx.db
+      .query("credits_log")
+      .withIndex("by_user_reason", (q) =>
+        q.eq("userId", user._id).eq("reason", "beta:grant"),
+      )
+      .unique();
+
+    if (existingBetaGrant) {
+      console.log(`Beta credits already granted to ${email}`);
+      return null;
+    }
+
+    // Grant credits
+    await ctx.db.insert("credits_log", {
+      userId: user._id,
+      amount: credits,
+      reason: "beta:grant",
+      orderId: `beta-${Date.now()}`, // Unique ID for tracking
+    });
+
+    await ctx.db.patch(user._id, {
+      credits: (user.credits ?? 0) + credits,
+    });
+
+    console.log(`Granted ${credits} beta credits to ${email}`);
+    return null;
+  },
+});
+
 export const debitAccount = internalMutation({
   args: {
     sessionId: v.id("interview_sessions"),
