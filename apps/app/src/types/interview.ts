@@ -9,7 +9,7 @@ export type InterviewStatus =
   | "complete"
   | "failed";
 
-export type ExperienceLevel = "mid" | "senior" | "staff";
+export type ExperienceLevel = "junior" | "mid" | "senior" | "staff";
 
 export type DomainTrack = "web" | "infrastructure" | "analytics" | "edge";
 

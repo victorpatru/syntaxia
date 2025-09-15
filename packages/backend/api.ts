@@ -43,7 +43,7 @@ export type PublicApiType = {
         duration?: number;
         elevenlabsConversationId?: string;
         elevenlabsSessionId?: string;
-        experienceLevel?: "mid" | "senior" | "staff";
+        experienceLevel?: "junior" | "mid" | "senior" | "staff";
         failureCode?:
           | "AUTH"
           | "UNAUTHORIZED"
@@ -106,7 +106,7 @@ export type PublicApiType = {
         duration?: number;
         elevenlabsConversationId?: string;
         elevenlabsSessionId?: string;
-        experienceLevel?: "mid" | "senior" | "staff";
+        experienceLevel?: "junior" | "mid" | "senior" | "staff";
         failureCode?:
           | "AUTH"
           | "UNAUTHORIZED"
@@ -156,7 +156,10 @@ export type PublicApiType = {
     createSessionValidated: FunctionReference<
       "action",
       "public",
-      { jobDescription: string },
+      {
+        experienceLevel?: "junior" | "mid" | "senior" | "staff";
+        jobDescription: string;
+      },
       | { sessionId: Id<"interview_sessions">; success: true }
       | { error: string; retryAfterMs?: number; success: false }
     >;
@@ -167,7 +170,7 @@ export type PublicApiType = {
       | {
           detectedSkills: Array<string>;
           domainTrack: "web" | "infrastructure" | "analytics" | "edge";
-          experienceLevel: "mid" | "senior" | "staff";
+          experienceLevel: "junior" | "mid" | "senior" | "staff";
           questions: Array<{
             difficulty: number;
             expectedDuration?: number;

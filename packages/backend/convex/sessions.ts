@@ -39,6 +39,7 @@ const FailureCodeValidator = v.union(
 );
 
 const ExperienceLevelValidator = v.union(
+  v.literal("junior"),
   v.literal("mid"),
   v.literal("senior"),
   v.literal("staff"),
@@ -126,7 +127,7 @@ const MinimalQuestionSchema = z.object({
 const JDParseResponseSchema = z.object({
   questions: z.array(MinimalQuestionSchema),
   detectedSkills: z.array(z.string()),
-  experienceLevel: z.enum(["mid", "senior", "staff"]),
+  experienceLevel: z.enum(["junior", "mid", "senior", "staff"]),
   domainTrack: z.enum(["web", "infrastructure", "analytics", "edge"]),
 });
 
@@ -223,9 +224,12 @@ export const getCurrentSession = query({
 });
 
 export const createSession = internalMutation({
-  args: { jobDescription: v.string() },
+  args: {
+    jobDescription: v.string(),
+    experienceLevel: v.optional(ExperienceLevelValidator),
+  },
   returns: v.id("interview_sessions"),
-  handler: async (ctx, { jobDescription }) => {
+  handler: async (ctx, { jobDescription, experienceLevel }) => {
     const user = await requireUser(ctx);
 
     if (!jobDescription || jobDescription.trim().length < 50) {
@@ -273,6 +277,7 @@ export const createSession = internalMutation({
       createdAt: now,
       updatedAt: now,
       jobDescription: jobDescription.trim(),
+      experienceLevel,
       currentQuestionIndex: 0,
     });
 
@@ -289,7 +294,10 @@ export const createSession = internalMutation({
 });
 
 export const createSessionValidated = action({
-  args: { jobDescription: v.string() },
+  args: {
+    jobDescription: v.string(),
+    experienceLevel: v.optional(ExperienceLevelValidator),
+  },
   returns: v.union(
     v.object({
       success: v.literal(true),
@@ -301,7 +309,7 @@ export const createSessionValidated = action({
       retryAfterMs: v.optional(v.number()),
     }),
   ),
-  handler: async (ctx, { jobDescription }) => {
+  handler: async (ctx, { jobDescription, experienceLevel }) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
       return { success: false as const, error: "Not authenticated" };
@@ -333,6 +341,7 @@ export const createSessionValidated = action({
 
     const sessionId = await ctx.runMutation(internal.sessions.createSession, {
       jobDescription,
+      experienceLevel,
     });
     return {
       success: true as const,
@@ -430,7 +439,7 @@ export const startSetup = action({
         prompt: `Analyze this job description and extract:
 1. 8-12 technical interview questions appropriate for the role
 2. Key skills mentioned or implied
-3. Experience level (mid/senior/staff)
+3. Experience level ${session.experienceLevel ? `(use "${session.experienceLevel}" as specified by user)` : "(junior/mid/senior/staff)"}
 4. Domain track (web/infrastructure/analytics/edge)
 
             Job Description:
@@ -441,7 +450,11 @@ Guidelines:
 - For niche terms, either include a brief 6-12 word micro-primer inline or first ask: "In one sentence, define X; then ...".
 - Cover themes explicitly present in the JD (e.g., orchestration, TypeScript + GraphQL API design, observability/logging at scale, reproducible builds, distributed/oncall, ERDs/planning, frontend data architecture). Do not add themes not in the JD. Do not name the company.
 - Question mix: 8-12 total with a balance of types: include "background", "technical", "system_design", "scenario", and "problem_solving".
-- Difficulty: mostly 3-4; include at least one level-2 warm-up; at most one level-5.
+- Difficulty based on experience level:
+  * Junior: mostly 1-2; include at least one level-1 warm-up; at most one level-3.
+  * Mid/Senior: mostly 3-4; include at least one level-2 warm-up; at most one level-5.
+  * Staff: mostly 4-5; include at least one level-3 warm-up; all questions level-3+.
+- For junior level, focus on fundamentals: basic data structures, simple algorithms, code reading, and entry-level scenarios. Avoid system design and production debugging.
 - Durations: each 60-240 seconds; target total across all questions ≈ 850 seconds (finish slightly early vs 900 hard cap).
 - For each question, include followUps (0-2) as concise, voice-friendly prompts focused on decisions, trade-offs, or metrics; avoid vendor-deep details.
 - Keep each question 1-2 sentences, voice-friendly (no code-style syntax). Optionally add a brief follow-up hint in parentheses.
@@ -452,7 +465,7 @@ Guidelines:
         sessionId,
         questions: parseResult.questions,
         detectedSkills: parseResult.detectedSkills,
-        experienceLevel: parseResult.experienceLevel,
+        experienceLevel: session.experienceLevel || parseResult.experienceLevel,
         domainTrack: parseResult.domainTrack,
       });
       return { success: true as const, ...parseResult };

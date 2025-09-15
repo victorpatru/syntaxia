@@ -10,6 +10,7 @@ import { startTransition, useRef, useState } from "react";
 import { toast } from "sonner";
 import { WelcomeDiscountBanner } from "@/components/WelcomeDiscountBanner";
 import { JD_PRESETS, PRIMARY_PRESET_COUNT } from "@/jd-presets";
+import type { ExperienceLevel } from "@/types/interview";
 import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
 import { getSessionRoute } from "@/utils/route-guards";
 
@@ -44,6 +45,8 @@ export const Route = createFileRoute("/_authed/interview/")({
 function InterviewStart() {
   const navigate = useNavigate();
   const [jobDescription, setJobDescription] = useState("");
+  const [experienceLevel, setExperienceLevel] =
+    useState<ExperienceLevel | null>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [showAllPresets, setShowAllPresets] = useState(false);
@@ -61,6 +64,7 @@ function InterviewStart() {
       setIsCreating(true);
       const result = await convexCreateSession({
         jobDescription: jobDescription.trim(),
+        experienceLevel: experienceLevel || undefined,
       });
 
       if (!result.success) {
@@ -127,8 +131,49 @@ function InterviewStart() {
                   placeholder="We're looking for a Senior Full-Stack Engineer with experience in React, Node.js, and system design..."
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
-                  className="min-h-32 font-mono bg-background border border-terminal-green/30 text-terminal-green placeholder:text-terminal-green/40 focus:outline-none focus:border-terminal-green/50 resize-none"
+                  className="min-h-32 font-mono bg-background border border-terminal-green/30 text-terminal-green placeholder:text-terminal-green/40 focus:outline-none focus:border-terminal-green/50"
                 />
+                <div className="mt-4">
+                  <fieldset className="mb-4">
+                    <legend className="text-terminal-green/60 font-mono text-xs mb-2">
+                      # Select your experience level (optional fine-tuning)
+                    </legend>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        {
+                          value: "junior" as const,
+                          label: "Junior (0-2 years)",
+                        },
+                        { value: "mid" as const, label: "Mid (2-5 years)" },
+                        {
+                          value: "senior" as const,
+                          label: "Senior (5+ years)",
+                        },
+                        { value: "staff" as const, label: "Staff/Principal" },
+                      ].map((level) => (
+                        <button
+                          key={level.value}
+                          type="button"
+                          onClick={() =>
+                            setExperienceLevel(
+                              experienceLevel === level.value
+                                ? null
+                                : level.value,
+                            )
+                          }
+                          aria-pressed={experienceLevel === level.value}
+                          className={`font-mono text-xs border border-terminal-green/30 px-3 py-1 transition-colors h-8 min-w-20 cursor-pointer ${
+                            experienceLevel === level.value
+                              ? "bg-terminal-green/20 text-terminal-green"
+                              : "bg-transparent text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber"
+                          }`}
+                        >
+                          {level.label}
+                        </button>
+                      ))}
+                    </div>
+                  </fieldset>
+                </div>
                 <div className="mt-4">
                   <div className="mb-2">
                     <span className="text-terminal-green/60 font-mono text-xs">
@@ -153,7 +198,7 @@ function InterviewStart() {
                                 });
                                 textareaRef.current?.focus();
                               }}
-                              className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20"
+                              className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20 cursor-pointer"
                             >
                               {company}
                             </button>
@@ -168,7 +213,7 @@ function InterviewStart() {
                       <button
                         type="button"
                         onClick={() => setShowAllPresets((v) => !v)}
-                        className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20"
+                        className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20 cursor-pointer"
                       >
                         {showAllPresets ? "./less" : "./more"}
                       </button>

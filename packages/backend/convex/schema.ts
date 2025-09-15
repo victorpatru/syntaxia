@@ -63,7 +63,12 @@ export default defineSchema({
     ),
     failureMessage: v.optional(v.string()),
     experienceLevel: v.optional(
-      v.union(v.literal("mid"), v.literal("senior"), v.literal("staff")),
+      v.union(
+        v.literal("junior"),
+        v.literal("mid"),
+        v.literal("senior"),
+        v.literal("staff"),
+      ),
     ),
     domainTrack: v.optional(
       v.union(
