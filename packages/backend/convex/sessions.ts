@@ -16,7 +16,7 @@ import { checkRateLimit } from "./rate_limit/helpers";
 import { requireUser } from "./users";
 
 const GATEWAY_MODELS = {
-  ADVANCED: "google/gemini-2.5-flash-lite",
+  ADVANCED: "google/gemini-2.5-flash",
   CLASSIFICATION: "google/gemini-2.5-flash-lite",
 } as const;
 
