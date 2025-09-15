@@ -653,13 +653,17 @@ export const startActive = mutation({
 
     await ctx.db.patch(sessionId, updateData);
 
-    await ctx.scheduler.runAfter(120 * 1000, internal.sessions.ensureCharge, {
-      sessionId,
-    });
-
-    // Schedule automatic session termination after 15 minutes
     await ctx.scheduler.runAfter(
-      15 * 60 * 1000,
+      (2 * 60 + 30) * 1000,
+      internal.sessions.ensureCharge,
+      {
+        sessionId,
+      },
+    );
+
+    // Schedule automatic session termination after 15 minutes + 30s buffer
+    await ctx.scheduler.runAfter(
+      (15 * 60 + 30) * 1000,
       internal.sessions.autoEndSession,
       {
         sessionId,
@@ -687,7 +691,7 @@ export const ensureCharge = internalAction({
     }
 
     const elapsed = Date.now() - (session.startedAt || session.createdAt);
-    if (elapsed >= 120 * 1000) {
+    if (elapsed >= (2 * 60 + 30) * 1000) {
       try {
         await ctx.runMutation(internal.credits.debitAccount, { sessionId });
         console.log(
