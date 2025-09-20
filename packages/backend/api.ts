@@ -360,7 +360,6 @@ export type PublicApiType = {
       Record<string, never>,
       null | {
         credits: number;
-        email?: string;
         firstName?: string;
         isWelcomeEligible: boolean;
         userId: Id<"users">;
