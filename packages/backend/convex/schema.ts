@@ -51,6 +51,8 @@ export default defineSchema({
       v.literal("complete"),
       v.literal("failed"),
     ),
+    // Session mode: default is technical when unset
+    mode: v.optional(v.union(v.literal("technical"), v.literal("behavioral"))),
     createdAt: v.number(),
     updatedAt: v.number(),
     completedAt: v.optional(v.number()),
@@ -83,6 +85,17 @@ export default defineSchema({
         v.literal("edge"),
       ),
     ),
+    // Behavioral-only fields
+    behavioralCategory: v.optional(
+      v.union(
+        v.literal("Conflict"),
+        v.literal("Leadership"),
+        v.literal("Failure"),
+        v.literal("Ownership"),
+        v.literal("Success"),
+      ),
+    ),
+    behavioralQuestion: v.optional(v.string()),
     detectedSkills: v.optional(v.array(v.string())),
     questions: v.optional(
       v.array(

@@ -34,6 +34,13 @@ export type PublicApiType = {
       null | {
         _creationTime: number;
         _id: Id<"interview_sessions">;
+        behavioralCategory?:
+          | "Conflict"
+          | "Leadership"
+          | "Failure"
+          | "Ownership"
+          | "Success";
+        behavioralQuestion?: string;
         chargeCommittedAt?: number;
         completedAt?: number;
         createdAt: number;
@@ -63,6 +70,7 @@ export type PublicApiType = {
         }>;
         jobDescription: string;
         micOnAt?: number;
+        mode?: "technical" | "behavioral";
         questions?: Array<{
           difficulty: number;
           expectedDuration?: number;
@@ -97,6 +105,13 @@ export type PublicApiType = {
       null | {
         _creationTime: number;
         _id: Id<"interview_sessions">;
+        behavioralCategory?:
+          | "Conflict"
+          | "Leadership"
+          | "Failure"
+          | "Ownership"
+          | "Success";
+        behavioralQuestion?: string;
         chargeCommittedAt?: number;
         completedAt?: number;
         createdAt: number;
@@ -126,6 +141,7 @@ export type PublicApiType = {
         }>;
         jobDescription: string;
         micOnAt?: number;
+        mode?: "technical" | "behavioral";
         questions?: Array<{
           difficulty: number;
           expectedDuration?: number;
@@ -279,6 +295,57 @@ export type PublicApiType = {
         }>;
       }
     >;
+    getAllCompletedSessionsList: FunctionReference<
+      "query",
+      "public",
+      {
+        paginationOpts: {
+          cursor: string | null;
+          endCursor?: string | null;
+          id?: number;
+          maximumBytesRead?: number;
+          maximumRowsRead?: number;
+          numItems: number;
+        };
+      },
+      {
+        continueCursor: string;
+        isDone: boolean;
+        page: Array<{
+          _id: Id<"interview_sessions">;
+          createdAt: number;
+          duration?: number;
+          mode?: "technical" | "behavioral";
+          scores?: { overall: number };
+          status: "complete";
+        }>;
+      }
+    >;
+    getBehavioralCompletedSessionsList: FunctionReference<
+      "query",
+      "public",
+      {
+        paginationOpts: {
+          cursor: string | null;
+          endCursor?: string | null;
+          id?: number;
+          maximumBytesRead?: number;
+          maximumRowsRead?: number;
+          numItems: number;
+        };
+      },
+      {
+        continueCursor: string;
+        isDone: boolean;
+        page: Array<{
+          _id: Id<"interview_sessions">;
+          createdAt: number;
+          duration?: number;
+          scores?: { overall: number };
+          status: "complete";
+        }>;
+      }
+    >;
   };
   users: {
     currentUserId: FunctionReference<
@@ -293,9 +360,62 @@ export type PublicApiType = {
       Record<string, never>,
       null | {
         credits: number;
+        email?: string;
+        firstName?: string;
         isWelcomeEligible: boolean;
         userId: Id<"users">;
       }
+    >;
+  };
+  behavioral: {
+    createSessionValidated: FunctionReference<
+      "action",
+      "public",
+      {
+        category:
+          | "Conflict"
+          | "Leadership"
+          | "Failure"
+          | "Ownership"
+          | "Success";
+      },
+      | { sessionId: Id<"interview_sessions">; success: true }
+      | { error: string; retryAfterMs?: number; success: false }
+    >;
+    startSetup: FunctionReference<
+      "action",
+      "public",
+      { sessionId: Id<"interview_sessions"> },
+      | { success: true }
+      | { error: string; retryAfterMs?: number; success: false }
+    >;
+    analyzeSession: FunctionReference<
+      "action",
+      "public",
+      { sessionId: Id<"interview_sessions"> },
+      | null
+      | {
+          highlights: Array<{
+            analysis: string;
+            id: string;
+            text: string;
+            timestamp: number;
+            transcriptId: string;
+            type: "strength" | "improvement" | "concern";
+          }>;
+          scores: {
+            comments: {
+              improvements: Array<string>;
+              nextSteps: Array<string>;
+              strengths: Array<string>;
+            };
+            communication: number;
+            overall: number;
+            problemSolving: number;
+            technical: number;
+          };
+        }
+      | { error: string; retryAfterMs?: number; success: false }
     >;
   };
 };

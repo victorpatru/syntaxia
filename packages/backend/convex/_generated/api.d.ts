@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as behavioral from "../behavioral.js";
 import type * as credits from "../credits.js";
 import type * as env from "../env.js";
 import type * as http_clerk from "../http/clerk.js";
@@ -21,6 +22,7 @@ import type * as types_webhooks from "../types/webhooks.js";
 import type * as users from "../users.js";
 import type * as utils_clerk from "../utils/clerk.js";
 import type * as utils_webhooks from "../utils/webhooks.js";
+import type * as validators from "../validators.js";
 import type * as webhooks_clerk from "../webhooks/clerk.js";
 import type * as webhooks_events from "../webhooks/events.js";
 import type * as webhooks_polar from "../webhooks/polar.js";
@@ -40,6 +42,7 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  behavioral: typeof behavioral;
   credits: typeof credits;
   env: typeof env;
   "http/clerk": typeof http_clerk;
@@ -53,6 +56,7 @@ declare const fullApi: ApiFromModules<{
   users: typeof users;
   "utils/clerk": typeof utils_clerk;
   "utils/webhooks": typeof utils_webhooks;
+  validators: typeof validators;
   "webhooks/clerk": typeof webhooks_clerk;
   "webhooks/events": typeof webhooks_events;
   "webhooks/polar": typeof webhooks_polar;

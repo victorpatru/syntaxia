@@ -12,8 +12,9 @@ import { TerminalUserMenu } from "./terminal-user-menu";
 import { ThemeToggle } from "./theme-toggle";
 
 const navigationLinks = [
-  { href: "/interview", label: "./interview" },
-  { href: "/interview/reports", label: "./reports" },
+  { href: "/interview", label: "./technical" },
+  { href: "/behavioral", label: "./behavioral" },
+  { href: "/reports", label: "./reports" },
 ];
 
 interface DashboardHeaderProps {
@@ -92,8 +93,7 @@ export function DashboardHeader({ credits }: DashboardHeaderProps) {
           <div className="flex items-center gap-6">
             {/* Terminal-style logo */}
             <Link
-              to="/interview"
-              search={{ sessionId: undefined }}
+              to="/"
               preload="intent"
               className="text-terminal-green hover:text-terminal-amber transition-colors rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-terminal-amber/60"
               aria-label="Home"

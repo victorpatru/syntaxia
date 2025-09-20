@@ -107,177 +107,227 @@ function InterviewStart() {
   };
 
   return (
-    <div className="bg-background font-mono">
-      <section className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="max-w-3xl mx-auto">
-            <div className="border border-terminal-green/30 bg-background">
-              <div className="border-b border-terminal-green/30 px-6 py-3 bg-terminal-dark">
-                <span className="text-terminal-green font-mono">
-                  syntaxia@terminal
-                </span>
-                <span className="text-terminal-green/60">:</span>
-                <span className="text-terminal-amber">~/job-description</span>
-                <span className="text-terminal-green/60">$</span>
-              </div>
-              <div className="p-6">
-                <div className="mb-6">
-                  <span className="text-terminal-green/60 font-mono text-sm">
-                    # Paste job description to generate personalized questions
-                  </span>
-                </div>
-                <Textarea
-                  ref={textareaRef}
-                  placeholder="We're looking for a Senior Full-Stack Engineer with experience in React, Node.js, and system design..."
-                  value={jobDescription}
-                  onChange={(e) => setJobDescription(e.target.value)}
-                  className="min-h-32 font-mono bg-background border border-terminal-green/30 text-terminal-green placeholder:text-terminal-green/40 focus:outline-none focus:border-terminal-green/50"
-                />
-                <div className="mt-4">
-                  <fieldset className="mb-4">
-                    <legend className="text-terminal-green/60 font-mono text-xs mb-2">
-                      # Select your experience level (optional fine-tuning)
-                    </legend>
-                    <div className="flex flex-wrap gap-2">
-                      {[
-                        {
-                          value: "junior" as const,
-                          label: "Junior (0-2 years)",
-                        },
-                        { value: "mid" as const, label: "Mid (2-5 years)" },
-                        {
-                          value: "senior" as const,
-                          label: "Senior (5+ years)",
-                        },
-                        { value: "staff" as const, label: "Staff/Principal" },
-                      ].map((level) => (
-                        <button
-                          key={level.value}
-                          type="button"
-                          onClick={() =>
-                            setExperienceLevel(
-                              experienceLevel === level.value
-                                ? null
-                                : level.value,
-                            )
-                          }
-                          aria-pressed={experienceLevel === level.value}
-                          className={`font-mono text-xs border border-terminal-green/30 px-3 py-1 transition-colors h-8 min-w-20 cursor-pointer ${
-                            experienceLevel === level.value
-                              ? "bg-terminal-green/20 text-terminal-green"
-                              : "bg-transparent text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber"
-                          }`}
-                        >
-                          {level.label}
-                        </button>
-                      ))}
-                    </div>
-                  </fieldset>
-                </div>
-                <div className="mt-4">
-                  <div className="mb-2">
-                    <span className="text-terminal-green/60 font-mono text-xs">
-                      # Sample job descriptions (click to autofill)
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {(showAllPresets
-                      ? JD_PRESETS
-                      : JD_PRESETS.slice(0, PRIMARY_PRESET_COUNT)
-                    ).map((preset) => {
-                      const company =
-                        preset.label.split(" — ")[0] || preset.label;
-                      return (
-                        <Tooltip key={preset.id}>
-                          <TooltipTrigger asChild>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                startTransition(() => {
-                                  setJobDescription(preset.description.trim());
-                                });
-                                textareaRef.current?.focus();
-                              }}
-                              className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20 cursor-pointer"
-                            >
-                              {company}
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <span className="font-mono">{preset.label}</span>
-                          </TooltipContent>
-                        </Tooltip>
-                      );
-                    })}
-                    {JD_PRESETS.length > PRIMARY_PRESET_COUNT && (
-                      <button
-                        type="button"
-                        onClick={() => setShowAllPresets((v) => !v)}
-                        className="font-mono text-xs bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-3 py-1 transition-colors h-8 min-w-20 cursor-pointer"
-                      >
-                        {showAllPresets ? "./less" : "./more"}
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <div className="mt-6 flex items-center justify-between">
-                  <span
-                    className={`text-sm font-mono ${
-                      jobDescription.length > 0 && jobDescription.length < 50
-                        ? "text-terminal-amber"
-                        : "text-terminal-green/60"
-                    }`}
-                  >
-                    {jobDescription.length}/50 chars minimum
-                  </span>
-                  <Button
-                    onClick={startInterview}
-                    disabled={
-                      !jobDescription.trim() ||
-                      jobDescription.trim().length < 50 ||
-                      isCreating ||
-                      balance < 15
-                    }
-                    className="font-mono text-sm bg-transparent border border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber px-4 py-2 transition-colors h-10 min-w-28"
-                  >
-                    <Play className="w-4 h-4 mr-2" />
-                    {isCreating ? "./creating..." : "./start-interview"}
-                  </Button>
-                </div>
-              </div>
+    <div className="bg-background font-mono min-h-screen">
+      <div className="mx-auto max-w-4xl px-6 py-8">
+        {/* Header Section */}
+        <div className="border border-terminal-green/30 p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-terminal-green text-lg font-mono">
+                technical.interview
+              </h1>
+              <p className="text-terminal-green/70 text-xs mt-1">
+                Practice technical phone screens with AI-powered interviews
+              </p>
             </div>
-            <div className="mt-6 border border-terminal-green/30 bg-background/50 backdrop-blur-sm p-6 relative overflow-hidden">
-              <div className="absolute top-2 left-2 w-3 h-3 border-l border-t border-terminal-green/30"></div>
-              <div className="absolute top-2 right-2 w-3 h-3 border-r border-t border-terminal-green/30"></div>
-              <div className="absolute bottom-2 left-2 w-3 h-3 border-l border-b border-terminal-green/30"></div>
-              <div className="absolute bottom-2 right-2 w-3 h-3 border-r border-b border-terminal-green/30"></div>
-
-              <div className="space-y-2 font-mono text-sm relative">
-                <div className="flex items-center space-x-2">
-                  <span className="text-terminal-green/40">#</span>
-                  <span className="text-terminal-green/70">
-                    You'll need 15 credits for a 15-minute interview
-                  </span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-terminal-green/40">#</span>
-                  <span className="text-terminal-green/70">
-                    This is a technical phone screen
-                  </span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-terminal-green/40">#</span>
-                  <span className="text-terminal-green/70">
-                    15 credits get charged once you hit the 2-minute mark
-                  </span>
-                </div>
-              </div>
-
-              <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-terminal-green/20 to-transparent"></div>
+            <div
+              className={`text-xs px-3 py-1 border ${
+                balance >= 15
+                  ? "border-terminal-green/30 text-terminal-green"
+                  : "border-terminal-amber/50 text-terminal-amber bg-terminal-amber/5"
+              }`}
+            >
+              credits: {balance} • cost: 15
+              {balance < 15 && (
+                <div className="text-xs mt-1">insufficient funds</div>
+              )}
             </div>
           </div>
+
+          {balance < 15 && (
+            <div className="border border-terminal-amber/30 bg-terminal-amber/5 p-3 mb-4">
+              <div className="text-terminal-amber text-xs">
+                ⚠ You need 15 credits to start a technical session. Current
+                balance: {balance}
+              </div>
+            </div>
+          )}
+
+          <div className="text-terminal-green/60 text-xs">
+            • Duration: ~15 minutes • Format: Technical phone screen • AI voice
+            interviewer with tailored questions
+          </div>
         </div>
-      </section>
+
+        {/* Job Description Section */}
+        <div className="border border-terminal-green/30 p-6 mb-6">
+          <h2 className="text-terminal-green text-sm mb-3">job.description</h2>
+          <div className="mb-4">
+            <span className="text-terminal-green/60 font-mono text-xs">
+              Paste job description to generate personalized questions
+            </span>
+          </div>
+          <Textarea
+            ref={textareaRef}
+            placeholder="We're looking for a Senior Full-Stack Engineer with experience in React, Node.js, and system design..."
+            value={jobDescription}
+            onChange={(e) => setJobDescription(e.target.value)}
+            className="min-h-32 font-mono bg-background border border-terminal-green/30 text-terminal-green placeholder:text-terminal-green/40 focus:outline-none focus:border-terminal-green/50 w-full"
+            disabled={balance < 15}
+          />
+
+          <div className="mt-4 flex items-center justify-between">
+            <span
+              className={`text-xs font-mono ${
+                jobDescription.length > 0 && jobDescription.length < 50
+                  ? "text-terminal-amber"
+                  : "text-terminal-green/60"
+              }`}
+            >
+              {jobDescription.length}/50 chars minimum
+            </span>
+            {jobDescription.length >= 50 && (
+              <span className="text-terminal-green/60 text-xs">
+                ✓ Ready to start
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Experience Level Section */}
+        <div className="border border-terminal-green/30 p-6 mb-6">
+          <h2 className="text-terminal-green text-sm mb-3">experience.level</h2>
+          <div className="mb-4">
+            <span className="text-terminal-green/60 font-mono text-xs">
+              Select your experience level for perfectly tailored question
+              difficulty
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {[
+              {
+                value: "junior" as const,
+                label: "Junior (0-2 years)",
+              },
+              { value: "mid" as const, label: "Mid (2-5 years)" },
+              {
+                value: "senior" as const,
+                label: "Senior (5+ years)",
+              },
+              { value: "staff" as const, label: "Staff/Principal" },
+            ].map((level) => (
+              <button
+                key={level.value}
+                type="button"
+                onClick={() =>
+                  setExperienceLevel(
+                    experienceLevel === level.value ? null : level.value,
+                  )
+                }
+                disabled={balance < 15}
+                aria-pressed={experienceLevel === level.value}
+                className={`font-mono text-xs border px-3 py-2 transition-colors h-10 min-w-24 ${
+                  balance < 15
+                    ? "border-terminal-green/10 text-terminal-green/30 cursor-not-allowed"
+                    : experienceLevel === level.value
+                      ? "border-terminal-amber text-terminal-amber bg-terminal-amber/10"
+                      : "border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber cursor-pointer"
+                }`}
+              >
+                {level.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        {/* Sample Job Descriptions Section - Optional */}
+        <div className="border border-terminal-green/20 p-6 mb-6 bg-terminal-green/5">
+          <h2 className="text-terminal-green/70 text-sm mb-3">
+            sample.descriptions
+            <span className="text-terminal-green/50 text-xs ml-2">
+              (optional)
+            </span>
+          </h2>
+          <div className="mb-4">
+            <span className="text-terminal-green/60 font-mono text-xs">
+              Click any sample to autofill the job description field, or skip to
+              write your own
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {(showAllPresets
+              ? JD_PRESETS
+              : JD_PRESETS.slice(0, PRIMARY_PRESET_COUNT)
+            ).map((preset) => {
+              const company = preset.label.split(" — ")[0] || preset.label;
+              return (
+                <Tooltip key={preset.id}>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        startTransition(() => {
+                          setJobDescription(preset.description.trim());
+                        });
+                        textareaRef.current?.focus();
+                      }}
+                      disabled={balance < 15}
+                      className={`font-mono text-xs border px-3 py-2 transition-colors h-10 min-w-20 ${
+                        balance < 15
+                          ? "border-terminal-green/10 text-terminal-green/30 cursor-not-allowed"
+                          : "border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber cursor-pointer"
+                      }`}
+                    >
+                      {company}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <span className="font-mono">{preset.label}</span>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+            {JD_PRESETS.length > PRIMARY_PRESET_COUNT && (
+              <button
+                type="button"
+                onClick={() => setShowAllPresets((v) => !v)}
+                disabled={balance < 15}
+                className={`font-mono text-xs border px-3 py-2 transition-colors h-10 min-w-20 ${
+                  balance < 15
+                    ? "border-terminal-green/10 text-terminal-green/30 cursor-not-allowed"
+                    : "border-terminal-green/30 text-terminal-green hover:bg-terminal-green/10 hover:text-terminal-amber cursor-pointer"
+                }`}
+              >
+                {showAllPresets ? "./less" : "./more"}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Action Section */}
+        <div className="border border-terminal-green/30 p-6">
+          <h2 className="text-terminal-green text-sm mb-4">actions</h2>
+
+          <div className="flex gap-3 mb-4">
+            <Button
+              onClick={startInterview}
+              disabled={
+                !jobDescription.trim() ||
+                jobDescription.trim().length < 50 ||
+                isCreating ||
+                balance < 15
+              }
+              className={`font-mono text-xs px-6 py-2 transition-colors h-10 min-w-32 ${
+                !jobDescription.trim() ||
+                jobDescription.trim().length < 50 ||
+                isCreating ||
+                balance < 15
+                  ? "bg-transparent border border-terminal-green/10 text-terminal-green/30 cursor-not-allowed"
+                  : "bg-terminal-amber text-black hover:bg-terminal-amber/80 cursor-pointer"
+              }`}
+            >
+              <Play className="w-4 h-4 mr-2" />
+              {isCreating ? "starting..." : "./start.interview"}
+            </Button>
+          </div>
+
+          {(!jobDescription.trim() || jobDescription.trim().length < 50) &&
+            balance >= 15 && (
+              <div className="text-terminal-green/60 text-xs">
+                Enter a job description (minimum 50 characters) to begin
+              </div>
+            )}
+        </div>
+      </div>
 
       <WelcomeDiscountBanner isEligible={isWelcomeEligible} />
     </div>

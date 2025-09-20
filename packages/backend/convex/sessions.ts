@@ -14,105 +14,20 @@ import {
 import { env } from "./env";
 import { checkRateLimit } from "./rate_limit/helpers";
 import { requireUser } from "./users";
+import {
+  DomainTrackValidator,
+  ExperienceLevelValidator,
+  FailureCodeValidator,
+  HighlightValidator,
+  QuestionValidator,
+  ScoresValidator,
+  SessionValidator,
+} from "./validators";
 
 const GATEWAY_MODELS = {
   ADVANCED: "google/gemini-2.5-flash",
   CLASSIFICATION: "google/gemini-2.5-flash-lite",
 } as const;
-
-const StatusValidator = v.union(
-  v.literal("setup"),
-  v.literal("active"),
-  v.literal("analyzing"),
-  v.literal("complete"),
-  v.literal("failed"),
-);
-
-const FailureCodeValidator = v.union(
-  v.literal("AUTH"),
-  v.literal("UNAUTHORIZED"),
-  v.literal("NOT_FOUND"),
-  v.literal("CREDITS"),
-  v.literal("RATE_LIMIT"),
-  v.literal("PARSE"),
-  v.literal("UNKNOWN"),
-);
-
-const ExperienceLevelValidator = v.union(
-  v.literal("junior"),
-  v.literal("mid"),
-  v.literal("senior"),
-  v.literal("staff"),
-);
-
-const DomainTrackValidator = v.union(
-  v.literal("web"),
-  v.literal("infrastructure"),
-  v.literal("analytics"),
-  v.literal("edge"),
-);
-
-const QuestionValidator = v.object({
-  id: v.string(),
-  text: v.string(),
-  type: v.string(),
-  difficulty: v.number(),
-  expectedDuration: v.optional(v.number()),
-  tags: v.optional(v.array(v.string())),
-  followUps: v.optional(v.array(v.string())),
-});
-
-const HighlightValidator = v.object({
-  id: v.string(),
-  timestamp: v.number(),
-  type: v.union(
-    v.literal("strength"),
-    v.literal("improvement"),
-    v.literal("concern"),
-  ),
-  text: v.string(),
-  analysis: v.string(),
-  transcriptId: v.string(),
-});
-
-const ScoresValidator = v.object({
-  overall: v.number(),
-  technical: v.number(),
-  communication: v.number(),
-  problemSolving: v.number(),
-  comments: v.object({
-    strengths: v.array(v.string()),
-    improvements: v.array(v.string()),
-    nextSteps: v.array(v.string()),
-  }),
-});
-
-const SessionValidator = v.object({
-  _id: v.id("interview_sessions"),
-  _creationTime: v.number(),
-  userId: v.id("users"),
-  status: StatusValidator,
-  createdAt: v.number(),
-  updatedAt: v.number(),
-  completedAt: v.optional(v.number()),
-  jobDescription: v.string(),
-  failureCode: v.optional(FailureCodeValidator),
-  failureMessage: v.optional(v.string()),
-  experienceLevel: v.optional(ExperienceLevelValidator),
-  domainTrack: v.optional(DomainTrackValidator),
-  detectedSkills: v.optional(v.array(v.string())),
-  questions: v.optional(v.array(QuestionValidator)),
-  currentQuestionIndex: v.optional(v.number()),
-  highlights: v.optional(v.array(HighlightValidator)),
-  scores: v.optional(ScoresValidator),
-  duration: v.optional(v.number()),
-  elevenlabsSessionId: v.optional(v.string()),
-  elevenlabsConversationId: v.optional(v.string()),
-  reportGeneratedAt: v.optional(v.number()),
-  chargeCommittedAt: v.optional(v.number()),
-  startedAt: v.optional(v.number()),
-  micOnAt: v.optional(v.number()),
-});
 
 const MinimalQuestionSchema = z.object({
   id: z.string(),
@@ -274,6 +189,7 @@ export const createSession = internalMutation({
     const sessionId = await ctx.db.insert("interview_sessions", {
       userId: user._id,
       status: "setup",
+      mode: "technical",
       createdAt: now,
       updatedAt: now,
       jobDescription: jobDescription.trim(),
@@ -859,8 +775,18 @@ export const getConversationToken = action({
     }
 
     try {
+      // Determine ElevenLabs agent by session mode
+      const session = await ctx.runQuery(internal.sessions.getInternal, {
+        sessionId,
+      });
+      if (!session) throw new Error("Session not found");
+      const isBehavioral = session.mode === "behavioral";
+      const agentId = isBehavioral
+        ? env.ELEVENLABS_BEHAVIORAL_AGENT_ID
+        : env.ELEVENLABS_AGENT_ID;
+
       const response = await fetch(
-        `https://api.elevenlabs.io/v1/convai/conversation/token?agent_id=${env.ELEVENLABS_AGENT_ID}`,
+        `https://api.elevenlabs.io/v1/convai/conversation/token?agent_id=${agentId}`,
         {
           method: "GET",
           headers: {
@@ -1051,6 +977,114 @@ export const getCompletedSessionsList = query({
 
     return {
       page: result.page.map((s) => ({
+        _id: s._id,
+        createdAt: s.createdAt,
+        duration: s.duration,
+        status: "complete" as const,
+        scores: s.scores ? { overall: s.scores.overall } : undefined,
+      })),
+      isDone: result.isDone,
+      continueCursor: result.continueCursor,
+    };
+  },
+});
+
+export const getAllCompletedSessionsList = query({
+  args: { paginationOpts: paginationOptsValidator },
+  returns: v.object({
+    page: v.array(
+      v.object({
+        _id: v.id("interview_sessions"),
+        createdAt: v.number(),
+        duration: v.optional(v.number()),
+        status: v.literal("complete"),
+        mode: v.optional(
+          v.union(v.literal("technical"), v.literal("behavioral")),
+        ),
+        scores: v.optional(
+          v.object({
+            overall: v.number(),
+          }),
+        ),
+      }),
+    ),
+    isDone: v.boolean(),
+    continueCursor: v.string(),
+  }),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkUserId", identity.subject))
+      .unique();
+    if (!user) throw new Error("User not found");
+
+    const result = await ctx.db
+      .query("interview_sessions")
+      .withIndex("by_user_status", (q) =>
+        q.eq("userId", user._id).eq("status", "complete"),
+      )
+      .order("desc")
+      .paginate(args.paginationOpts);
+
+    return {
+      page: result.page.map((s) => ({
+        _id: s._id,
+        createdAt: s.createdAt,
+        duration: s.duration,
+        status: "complete" as const,
+        mode: s.mode,
+        scores: s.scores ? { overall: s.scores.overall } : undefined,
+      })),
+      isDone: result.isDone,
+      continueCursor: result.continueCursor,
+    };
+  },
+});
+
+export const getBehavioralCompletedSessionsList = query({
+  args: { paginationOpts: paginationOptsValidator },
+  returns: v.object({
+    page: v.array(
+      v.object({
+        _id: v.id("interview_sessions"),
+        createdAt: v.number(),
+        duration: v.optional(v.number()),
+        status: v.literal("complete"),
+        scores: v.optional(
+          v.object({
+            overall: v.number(),
+          }),
+        ),
+      }),
+    ),
+    isDone: v.boolean(),
+    continueCursor: v.string(),
+  }),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkUserId", identity.subject))
+      .unique();
+    if (!user) throw new Error("User not found");
+
+    const result = await ctx.db
+      .query("interview_sessions")
+      .withIndex("by_user_status", (q) =>
+        q.eq("userId", user._id).eq("status", "complete"),
+      )
+      .order("desc")
+      .paginate(args.paginationOpts);
+
+    const filtered = result.page.filter((s) => s.mode === "behavioral");
+
+    return {
+      page: filtered.map((s) => ({
         _id: s._id,
         createdAt: s.createdAt,
         duration: s.duration,

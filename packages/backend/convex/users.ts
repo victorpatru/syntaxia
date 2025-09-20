@@ -32,6 +32,7 @@ export const getCurrentUserProfile = query({
       userId: v.id("users"),
       credits: v.number(),
       isWelcomeEligible: v.boolean(),
+      firstName: v.optional(v.string()),
     }),
   ),
   handler: async (ctx) => {
@@ -45,6 +46,7 @@ export const getCurrentUserProfile = query({
       userId: user._id,
       credits: user.credits ?? 0,
       isWelcomeEligible: !user.welcomeDiscountRedeemedAt,
+      firstName: user.firstName,
     };
   },
 });

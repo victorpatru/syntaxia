@@ -13,14 +13,21 @@ import { Route as SsoCallbackRouteImport } from './routes/sso-callback'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedRouteRouteImport } from './routes/_authed/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthedReportsRouteImport } from './routes/_authed/reports'
 import { Route as AuthedCreditsRouteImport } from './routes/_authed/credits'
 import { Route as AuthedInterviewIndexRouteImport } from './routes/_authed/interview/index'
+import { Route as AuthedBehavioralIndexRouteImport } from './routes/_authed/behavioral/index'
 import { Route as AuthedInterviewSetupFailedRouteImport } from './routes/_authed/interview/setup-failed'
 import { Route as AuthedInterviewSetupRouteImport } from './routes/_authed/interview/setup'
 import { Route as AuthedInterviewReportsRouteImport } from './routes/_authed/interview/reports'
+import { Route as AuthedBehavioralSetupRouteImport } from './routes/_authed/behavioral/setup'
+import { Route as AuthedBehavioralReportsRouteImport } from './routes/_authed/behavioral/reports'
 import { Route as AuthedInterviewSessionSessionIdRouteImport } from './routes/_authed/interview/session/$sessionId'
 import { Route as AuthedInterviewReportSessionIdRouteImport } from './routes/_authed/interview/report/$sessionId'
 import { Route as AuthedInterviewAnalysisSessionIdRouteImport } from './routes/_authed/interview/analysis/$sessionId'
+import { Route as AuthedBehavioralSessionSessionIdRouteImport } from './routes/_authed/behavioral/session/$sessionId'
+import { Route as AuthedBehavioralReportSessionIdRouteImport } from './routes/_authed/behavioral/report/$sessionId'
+import { Route as AuthedBehavioralAnalysisSessionIdRouteImport } from './routes/_authed/behavioral/analysis/$sessionId'
 
 const SsoCallbackRoute = SsoCallbackRouteImport.update({
   id: '/sso-callback',
@@ -41,6 +48,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedReportsRoute = AuthedReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AuthedRouteRoute,
+} as any)
 const AuthedCreditsRoute = AuthedCreditsRouteImport.update({
   id: '/credits',
   path: '/credits',
@@ -49,6 +61,11 @@ const AuthedCreditsRoute = AuthedCreditsRouteImport.update({
 const AuthedInterviewIndexRoute = AuthedInterviewIndexRouteImport.update({
   id: '/interview/',
   path: '/interview/',
+  getParentRoute: () => AuthedRouteRoute,
+} as any)
+const AuthedBehavioralIndexRoute = AuthedBehavioralIndexRouteImport.update({
+  id: '/behavioral/',
+  path: '/behavioral/',
   getParentRoute: () => AuthedRouteRoute,
 } as any)
 const AuthedInterviewSetupFailedRoute =
@@ -65,6 +82,16 @@ const AuthedInterviewSetupRoute = AuthedInterviewSetupRouteImport.update({
 const AuthedInterviewReportsRoute = AuthedInterviewReportsRouteImport.update({
   id: '/interview/reports',
   path: '/interview/reports',
+  getParentRoute: () => AuthedRouteRoute,
+} as any)
+const AuthedBehavioralSetupRoute = AuthedBehavioralSetupRouteImport.update({
+  id: '/behavioral/setup',
+  path: '/behavioral/setup',
+  getParentRoute: () => AuthedRouteRoute,
+} as any)
+const AuthedBehavioralReportsRoute = AuthedBehavioralReportsRouteImport.update({
+  id: '/behavioral/reports',
+  path: '/behavioral/reports',
   getParentRoute: () => AuthedRouteRoute,
 } as any)
 const AuthedInterviewSessionSessionIdRoute =
@@ -85,16 +112,41 @@ const AuthedInterviewAnalysisSessionIdRoute =
     path: '/interview/analysis/$sessionId',
     getParentRoute: () => AuthedRouteRoute,
   } as any)
+const AuthedBehavioralSessionSessionIdRoute =
+  AuthedBehavioralSessionSessionIdRouteImport.update({
+    id: '/behavioral/session/$sessionId',
+    path: '/behavioral/session/$sessionId',
+    getParentRoute: () => AuthedRouteRoute,
+  } as any)
+const AuthedBehavioralReportSessionIdRoute =
+  AuthedBehavioralReportSessionIdRouteImport.update({
+    id: '/behavioral/report/$sessionId',
+    path: '/behavioral/report/$sessionId',
+    getParentRoute: () => AuthedRouteRoute,
+  } as any)
+const AuthedBehavioralAnalysisSessionIdRoute =
+  AuthedBehavioralAnalysisSessionIdRouteImport.update({
+    id: '/behavioral/analysis/$sessionId',
+    path: '/behavioral/analysis/$sessionId',
+    getParentRoute: () => AuthedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/sso-callback': typeof SsoCallbackRoute
   '/credits': typeof AuthedCreditsRoute
+  '/reports': typeof AuthedReportsRoute
+  '/behavioral/reports': typeof AuthedBehavioralReportsRoute
+  '/behavioral/setup': typeof AuthedBehavioralSetupRoute
   '/interview/reports': typeof AuthedInterviewReportsRoute
   '/interview/setup': typeof AuthedInterviewSetupRoute
   '/interview/setup-failed': typeof AuthedInterviewSetupFailedRoute
+  '/behavioral': typeof AuthedBehavioralIndexRoute
   '/interview': typeof AuthedInterviewIndexRoute
+  '/behavioral/analysis/$sessionId': typeof AuthedBehavioralAnalysisSessionIdRoute
+  '/behavioral/report/$sessionId': typeof AuthedBehavioralReportSessionIdRoute
+  '/behavioral/session/$sessionId': typeof AuthedBehavioralSessionSessionIdRoute
   '/interview/analysis/$sessionId': typeof AuthedInterviewAnalysisSessionIdRoute
   '/interview/report/$sessionId': typeof AuthedInterviewReportSessionIdRoute
   '/interview/session/$sessionId': typeof AuthedInterviewSessionSessionIdRoute
@@ -104,10 +156,17 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/sso-callback': typeof SsoCallbackRoute
   '/credits': typeof AuthedCreditsRoute
+  '/reports': typeof AuthedReportsRoute
+  '/behavioral/reports': typeof AuthedBehavioralReportsRoute
+  '/behavioral/setup': typeof AuthedBehavioralSetupRoute
   '/interview/reports': typeof AuthedInterviewReportsRoute
   '/interview/setup': typeof AuthedInterviewSetupRoute
   '/interview/setup-failed': typeof AuthedInterviewSetupFailedRoute
+  '/behavioral': typeof AuthedBehavioralIndexRoute
   '/interview': typeof AuthedInterviewIndexRoute
+  '/behavioral/analysis/$sessionId': typeof AuthedBehavioralAnalysisSessionIdRoute
+  '/behavioral/report/$sessionId': typeof AuthedBehavioralReportSessionIdRoute
+  '/behavioral/session/$sessionId': typeof AuthedBehavioralSessionSessionIdRoute
   '/interview/analysis/$sessionId': typeof AuthedInterviewAnalysisSessionIdRoute
   '/interview/report/$sessionId': typeof AuthedInterviewReportSessionIdRoute
   '/interview/session/$sessionId': typeof AuthedInterviewSessionSessionIdRoute
@@ -119,10 +178,17 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/sso-callback': typeof SsoCallbackRoute
   '/_authed/credits': typeof AuthedCreditsRoute
+  '/_authed/reports': typeof AuthedReportsRoute
+  '/_authed/behavioral/reports': typeof AuthedBehavioralReportsRoute
+  '/_authed/behavioral/setup': typeof AuthedBehavioralSetupRoute
   '/_authed/interview/reports': typeof AuthedInterviewReportsRoute
   '/_authed/interview/setup': typeof AuthedInterviewSetupRoute
   '/_authed/interview/setup-failed': typeof AuthedInterviewSetupFailedRoute
+  '/_authed/behavioral/': typeof AuthedBehavioralIndexRoute
   '/_authed/interview/': typeof AuthedInterviewIndexRoute
+  '/_authed/behavioral/analysis/$sessionId': typeof AuthedBehavioralAnalysisSessionIdRoute
+  '/_authed/behavioral/report/$sessionId': typeof AuthedBehavioralReportSessionIdRoute
+  '/_authed/behavioral/session/$sessionId': typeof AuthedBehavioralSessionSessionIdRoute
   '/_authed/interview/analysis/$sessionId': typeof AuthedInterviewAnalysisSessionIdRoute
   '/_authed/interview/report/$sessionId': typeof AuthedInterviewReportSessionIdRoute
   '/_authed/interview/session/$sessionId': typeof AuthedInterviewSessionSessionIdRoute
@@ -134,10 +200,17 @@ export interface FileRouteTypes {
     | '/login'
     | '/sso-callback'
     | '/credits'
+    | '/reports'
+    | '/behavioral/reports'
+    | '/behavioral/setup'
     | '/interview/reports'
     | '/interview/setup'
     | '/interview/setup-failed'
+    | '/behavioral'
     | '/interview'
+    | '/behavioral/analysis/$sessionId'
+    | '/behavioral/report/$sessionId'
+    | '/behavioral/session/$sessionId'
     | '/interview/analysis/$sessionId'
     | '/interview/report/$sessionId'
     | '/interview/session/$sessionId'
@@ -147,10 +220,17 @@ export interface FileRouteTypes {
     | '/login'
     | '/sso-callback'
     | '/credits'
+    | '/reports'
+    | '/behavioral/reports'
+    | '/behavioral/setup'
     | '/interview/reports'
     | '/interview/setup'
     | '/interview/setup-failed'
+    | '/behavioral'
     | '/interview'
+    | '/behavioral/analysis/$sessionId'
+    | '/behavioral/report/$sessionId'
+    | '/behavioral/session/$sessionId'
     | '/interview/analysis/$sessionId'
     | '/interview/report/$sessionId'
     | '/interview/session/$sessionId'
@@ -161,10 +241,17 @@ export interface FileRouteTypes {
     | '/login'
     | '/sso-callback'
     | '/_authed/credits'
+    | '/_authed/reports'
+    | '/_authed/behavioral/reports'
+    | '/_authed/behavioral/setup'
     | '/_authed/interview/reports'
     | '/_authed/interview/setup'
     | '/_authed/interview/setup-failed'
+    | '/_authed/behavioral/'
     | '/_authed/interview/'
+    | '/_authed/behavioral/analysis/$sessionId'
+    | '/_authed/behavioral/report/$sessionId'
+    | '/_authed/behavioral/session/$sessionId'
     | '/_authed/interview/analysis/$sessionId'
     | '/_authed/interview/report/$sessionId'
     | '/_authed/interview/session/$sessionId'
@@ -207,6 +294,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/reports': {
+      id: '/_authed/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthedReportsRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
     '/_authed/credits': {
       id: '/_authed/credits'
       path: '/credits'
@@ -219,6 +313,13 @@ declare module '@tanstack/react-router' {
       path: '/interview'
       fullPath: '/interview'
       preLoaderRoute: typeof AuthedInterviewIndexRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
+    '/_authed/behavioral/': {
+      id: '/_authed/behavioral/'
+      path: '/behavioral'
+      fullPath: '/behavioral'
+      preLoaderRoute: typeof AuthedBehavioralIndexRouteImport
       parentRoute: typeof AuthedRouteRoute
     }
     '/_authed/interview/setup-failed': {
@@ -242,6 +343,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedInterviewReportsRouteImport
       parentRoute: typeof AuthedRouteRoute
     }
+    '/_authed/behavioral/setup': {
+      id: '/_authed/behavioral/setup'
+      path: '/behavioral/setup'
+      fullPath: '/behavioral/setup'
+      preLoaderRoute: typeof AuthedBehavioralSetupRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
+    '/_authed/behavioral/reports': {
+      id: '/_authed/behavioral/reports'
+      path: '/behavioral/reports'
+      fullPath: '/behavioral/reports'
+      preLoaderRoute: typeof AuthedBehavioralReportsRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
     '/_authed/interview/session/$sessionId': {
       id: '/_authed/interview/session/$sessionId'
       path: '/interview/session/$sessionId'
@@ -263,15 +378,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedInterviewAnalysisSessionIdRouteImport
       parentRoute: typeof AuthedRouteRoute
     }
+    '/_authed/behavioral/session/$sessionId': {
+      id: '/_authed/behavioral/session/$sessionId'
+      path: '/behavioral/session/$sessionId'
+      fullPath: '/behavioral/session/$sessionId'
+      preLoaderRoute: typeof AuthedBehavioralSessionSessionIdRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
+    '/_authed/behavioral/report/$sessionId': {
+      id: '/_authed/behavioral/report/$sessionId'
+      path: '/behavioral/report/$sessionId'
+      fullPath: '/behavioral/report/$sessionId'
+      preLoaderRoute: typeof AuthedBehavioralReportSessionIdRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
+    '/_authed/behavioral/analysis/$sessionId': {
+      id: '/_authed/behavioral/analysis/$sessionId'
+      path: '/behavioral/analysis/$sessionId'
+      fullPath: '/behavioral/analysis/$sessionId'
+      preLoaderRoute: typeof AuthedBehavioralAnalysisSessionIdRouteImport
+      parentRoute: typeof AuthedRouteRoute
+    }
   }
 }
 
 interface AuthedRouteRouteChildren {
   AuthedCreditsRoute: typeof AuthedCreditsRoute
+  AuthedReportsRoute: typeof AuthedReportsRoute
+  AuthedBehavioralReportsRoute: typeof AuthedBehavioralReportsRoute
+  AuthedBehavioralSetupRoute: typeof AuthedBehavioralSetupRoute
   AuthedInterviewReportsRoute: typeof AuthedInterviewReportsRoute
   AuthedInterviewSetupRoute: typeof AuthedInterviewSetupRoute
   AuthedInterviewSetupFailedRoute: typeof AuthedInterviewSetupFailedRoute
+  AuthedBehavioralIndexRoute: typeof AuthedBehavioralIndexRoute
   AuthedInterviewIndexRoute: typeof AuthedInterviewIndexRoute
+  AuthedBehavioralAnalysisSessionIdRoute: typeof AuthedBehavioralAnalysisSessionIdRoute
+  AuthedBehavioralReportSessionIdRoute: typeof AuthedBehavioralReportSessionIdRoute
+  AuthedBehavioralSessionSessionIdRoute: typeof AuthedBehavioralSessionSessionIdRoute
   AuthedInterviewAnalysisSessionIdRoute: typeof AuthedInterviewAnalysisSessionIdRoute
   AuthedInterviewReportSessionIdRoute: typeof AuthedInterviewReportSessionIdRoute
   AuthedInterviewSessionSessionIdRoute: typeof AuthedInterviewSessionSessionIdRoute
@@ -279,10 +422,18 @@ interface AuthedRouteRouteChildren {
 
 const AuthedRouteRouteChildren: AuthedRouteRouteChildren = {
   AuthedCreditsRoute: AuthedCreditsRoute,
+  AuthedReportsRoute: AuthedReportsRoute,
+  AuthedBehavioralReportsRoute: AuthedBehavioralReportsRoute,
+  AuthedBehavioralSetupRoute: AuthedBehavioralSetupRoute,
   AuthedInterviewReportsRoute: AuthedInterviewReportsRoute,
   AuthedInterviewSetupRoute: AuthedInterviewSetupRoute,
   AuthedInterviewSetupFailedRoute: AuthedInterviewSetupFailedRoute,
+  AuthedBehavioralIndexRoute: AuthedBehavioralIndexRoute,
   AuthedInterviewIndexRoute: AuthedInterviewIndexRoute,
+  AuthedBehavioralAnalysisSessionIdRoute:
+    AuthedBehavioralAnalysisSessionIdRoute,
+  AuthedBehavioralReportSessionIdRoute: AuthedBehavioralReportSessionIdRoute,
+  AuthedBehavioralSessionSessionIdRoute: AuthedBehavioralSessionSessionIdRoute,
   AuthedInterviewAnalysisSessionIdRoute: AuthedInterviewAnalysisSessionIdRoute,
   AuthedInterviewReportSessionIdRoute: AuthedInterviewReportSessionIdRoute,
   AuthedInterviewSessionSessionIdRoute: AuthedInterviewSessionSessionIdRoute,
