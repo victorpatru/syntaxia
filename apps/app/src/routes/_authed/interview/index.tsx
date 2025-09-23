@@ -8,7 +8,6 @@ import type { GenericId } from "convex/values";
 import { Play } from "lucide-react";
 import { startTransition, useRef, useState } from "react";
 import { toast } from "sonner";
-import { WelcomeDiscountBanner } from "@/components/WelcomeDiscountBanner";
 import { JD_PRESETS, PRIMARY_PRESET_COUNT } from "@/jd-presets";
 import type { ExperienceLevel } from "@/types/interview";
 import { isRateLimitFailure, showRateLimitToast } from "@/utils/rate-limit";
@@ -54,7 +53,6 @@ function InterviewStart() {
   const data = useQuery(api.users.getCurrentUserProfile, {});
 
   const balance = data?.credits ?? 0;
-  const isWelcomeEligible = data?.isWelcomeEligible ?? false;
 
   const convexCreateSession = useAction(api.sessions.createSessionValidated);
   const [isCreating, setIsCreating] = useState(false);
@@ -128,7 +126,7 @@ function InterviewStart() {
                 </div>
                 <Textarea
                   ref={textareaRef}
-                  placeholder="We're looking for a Senior Full-Stack Engineer with experience in React, Node.js, and system design..."
+                  placeholder="We're looking for a Full-Stack Engineer with experience in React, Node.js, and system design..."
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
                   className="min-h-32 font-mono bg-background border border-terminal-green/30 text-terminal-green placeholder:text-terminal-green/40 focus:outline-none focus:border-terminal-green/50"
@@ -136,7 +134,7 @@ function InterviewStart() {
                 <div className="mt-4">
                   <fieldset className="mb-4">
                     <legend className="text-terminal-green/60 font-mono text-xs mb-2">
-                      # Select your experience level (optional fine-tuning)
+                      # Select your experience level
                     </legend>
                     <div className="flex flex-wrap gap-2">
                       {[
@@ -278,8 +276,6 @@ function InterviewStart() {
           </div>
         </div>
       </section>
-
-      <WelcomeDiscountBanner isEligible={isWelcomeEligible} />
     </div>
   );
 }

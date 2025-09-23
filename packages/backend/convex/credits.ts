@@ -1,6 +1,5 @@
 import { Polar } from "@polar-sh/sdk";
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
 import {
   type ActionCtx,
   action,
@@ -114,21 +113,12 @@ export const createCheckout = action({
       server: env.POLAR_ENVIRONMENT,
     });
 
-    const eligibleForWelcomeDiscount =
-      packageId === env.POLAR_PRODUCT_ID_1_SESSION &&
-      (await ctx.runQuery(internal.users.isWelcomeDiscountEligible, {
-        clerkUserId: identity.subject,
-      }));
-
     const checkout = await polar.checkouts.create({
       products: [packageId],
       externalCustomerId: identity.subject,
       customerEmail: identity.email,
       metadata: { clerkUserId: identity.subject },
       successUrl: `${env.APP_URL}/credits?checkout_id={CHECKOUT_ID}`,
-      discountId: eligibleForWelcomeDiscount
-        ? env.POLAR_WELCOME_DISCOUNT_ID
-        : undefined,
     });
 
     return {
@@ -214,6 +204,45 @@ export const grantBetaCredits = internalMutation({
     });
 
     console.log(`Granted ${credits} beta credits to ${email}`);
+    return null;
+  },
+});
+
+export const grantWelcomeCredits = internalMutation({
+  args: {
+    clerkUserId: v.string(),
+    credits: v.optional(v.number()),
+  },
+  returns: v.null(),
+  handler: async (ctx, { clerkUserId, credits = 15 }) => {
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkUserId", clerkUserId))
+      .unique();
+    if (!user) throw new Error(`User not found: ${clerkUserId}`);
+
+    const existingWelcomeGrant = await ctx.db
+      .query("credits_log")
+      .withIndex("by_user_reason", (q) =>
+        q.eq("userId", user._id).eq("reason", "welcome:grant"),
+      )
+      .unique();
+
+    if (existingWelcomeGrant) {
+      return null;
+    }
+
+    await ctx.db.insert("credits_log", {
+      userId: user._id,
+      amount: credits,
+      reason: "welcome:grant",
+      orderId: `welcome-${Date.now()}`,
+    });
+
+    await ctx.db.patch(user._id, {
+      credits: (user.credits ?? 0) + credits,
+    });
+
     return null;
   },
 });

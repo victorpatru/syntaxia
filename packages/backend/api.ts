@@ -291,11 +291,7 @@ export type PublicApiType = {
       "query",
       "public",
       Record<string, never>,
-      null | {
-        credits: number;
-        isWelcomeEligible: boolean;
-        userId: Id<"users">;
-      }
+      null | { credits: number; userId: Id<"users"> }
     >;
   };
 };
