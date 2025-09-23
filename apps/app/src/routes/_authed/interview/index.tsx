@@ -136,7 +136,7 @@ function InterviewStart() {
                 <div className="mt-4">
                   <fieldset className="mb-4">
                     <legend className="text-terminal-green/60 font-mono text-xs mb-2">
-                      # Select your experience level (optional fine-tuning)
+                      # Select your experience level
                     </legend>
                     <div className="flex flex-wrap gap-2">
                       {[

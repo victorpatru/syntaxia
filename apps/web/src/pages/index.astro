@@ -86,16 +86,18 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL;
 			<!-- Hero Section -->
 			<div class="text-center mb-16">
 				<div class="mx-auto max-w-3xl md:max-w-4xl">
-					<h1 class="text-4xl md:text-5xl font-bold text-terminal-green leading-[1.15] tracking-tight mb-6 mt-10" style="text-wrap: balance">
-						<span class="text-terminal-amber">AI</span> phone screen practice
-						<span class="block">tailored to your job description</span>
+					<h1 class="text-4xl md:text-5xl font-bold text-terminal-green leading-[1.15] tracking-tight mb-2 mt-10" style="text-wrap: balance">
+						<span class="text-terminal-amber">AI</span> phone screen practice for bootcamp grads
 					</h1>
-					<p class="text-terminal-green/70 text-base md:text-lg leading-relaxed mt-5">
-						Paste your JD and talk through a 15-minute voice screen with an AI interviewer that adapts to your answers. Get a scorecard, action plan, and your first session is free.
+					<p class="text-terminal-green/70 text-base md:text-lg leading-relaxed">
+						Paste your JD and talk through a 15-minute voice screen with an AI interviewer that adapts to your answers. Get a scorecard and a prioritized action plan.
+					</p>
+					<p class="text-terminal-green/80 text-sm mt-3 font-mono">
+						Get your first 15-minute session for free when you sign up.
 					</p>
 					<div class="mt-6">
 						<CTAButton size="lg" href={`${APP_URL}`}>
-							Try 15 minutes for free
+							./start-free
 						</CTAButton>
 					</div>
 				</div>
@@ -254,6 +256,9 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL;
 			<!-- Pricing -->
 			<div id="pricing" class="mb-16">
 				<h2 class="text-xl font-bold text-terminal-green mb-6 text-center">$ ./pricing</h2>
+				<p class="text-center text-terminal-green/70 text-sm mb-4 font-mono">
+					First session is free (15 credits at signup). Packs for additional sessions:
+				</p>
 				<div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
 					<!-- 1 Session -->
 					<div class="border border-terminal-green/30 bg-card p-8 md:p-10 flex flex-col">
@@ -303,6 +308,78 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL;
 							LeetCode tests algorithm knowledge. Syntaxia practices the actual conversation skills and communication abilities that real phone screens require. You'll experience realistic technical discussions, not just algorithmic problem-solving.
 						</div>
 					</details>
+					<details class="border border-terminal-green/30 bg-card">
+						<summary class="p-4 cursor-pointer font-mono text-sm text-terminal-green hover:bg-terminal-green/5">
+							Q: Do I need real work experience?
+						</summary>
+						<div class="px-4 pb-4 text-terminal-green/80 text-sm">
+							No. We translate projects, coursework, and internships into impact stories and probe fundamentals you’ll see on entry-level screens.
+						</div>
+					</details>
+					<details class="border border-terminal-green/30 bg-card">
+						<summary class="p-4 cursor-pointer font-mono text-sm text-terminal-green hover:bg-terminal-green/5">
+							Q: Is this too advanced for me?
+						</summary>
+						<div class="px-4 pb-4 text-terminal-green/80 text-sm">
+							It’s built for entry-level candidates. You’ll get beginner-friendly scaffolding and rubric-aligned follow-ups.
+						</div>
+					</details>
+					<details class="border border-terminal-green/30 bg-card">
+						<summary class="p-4 cursor-pointer font-mono text-sm text-terminal-green hover:bg-terminal-green/5">
+							Q: How does the free session work?
+						</summary>
+						<div class="px-4 pb-4 text-terminal-green/80 text-sm">
+							When you sign up, 15 credits are automatically added. One 15-minute session costs 15 credits—your first one is free.
+						</div>
+					</details>
+					<details class="border border-terminal-green/30 bg-card">
+						<summary class="p-4 cursor-pointer font-mono text-sm text-terminal-green hover:bg-terminal-green/5">
+							Q: What if I don’t have a job description?
+						</summary>
+						<div class="px-4 pb-4 text-terminal-green/80 text-sm">
+							You can pick from entry-level templates or paste any posting later. Templates are tuned for typical junior roles.
+						</div>
+					</details>
+					<details class="border border-terminal-green/30 bg-card">
+						<summary class="p-4 cursor-pointer font-mono text-sm text-terminal-green hover:bg-terminal-green/5">
+							Q: What do I need to get started?
+						</summary>
+						<div class="px-4 pb-4 text-terminal-green/80 text-sm">
+							A quiet place and a mic. No scheduling—click start and you’re in a practice screen within seconds.
+						</div>
+					</details>
+					<details class="border border-terminal-green/30 bg-card">
+						<summary class="p-4 cursor-pointer font-mono text-sm text-terminal-green hover:bg-terminal-green/5">
+							Q: How realistic is the conversation?
+						</summary>
+						<div class="px-4 pb-4 text-terminal-green/80 text-sm">
+							It adapts like a real interviewer: clarifying questions, follow-ups, and trade-off prompts aligned to the JD.
+						</div>
+					</details>
+					<details class="border border-terminal-green/30 bg-card">
+						<summary class="p-4 cursor-pointer font-mono text-sm text-terminal-green hover:bg-terminal-green/5">
+							Q: What do I get after the session?
+						</summary>
+						<div class="px-4 pb-4 text-terminal-green/80 text-sm">
+							What went well, what you can improve and a plan on what to improve next.
+						</div>
+					</details>
+					<details class="border border-terminal-green/30 bg-card">
+						<summary class="p-4 cursor-pointer font-mono text-sm text-terminal-green hover:bg-terminal-green/5">
+							Q: How is my data used?
+						</summary>
+						<div class="px-4 pb-4 text-terminal-green/80 text-sm">
+							Your recordings and JDs are used to generate your report and improve your practice experience. We don't sell your data.
+						</div>
+					</details>
+					<details class="border border-terminal-green/30 bg-card">
+						<summary class="p-4 cursor-pointer font-mono text-sm text-terminal-green hover:bg-terminal-green/5">
+							Q: Is there a subscription or refund?
+						</summary>
+						<div class="px-4 pb-4 text-terminal-green/80 text-sm">
+							No subscription—pay per session or discount packs. If something breaks, contact us and we'll make it right.
+						</div>
+					</details>
 				</div>
 			</div>
 			
@@ -314,10 +391,10 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL;
 						Stop failing phone screens. Start landing offers.
 					</p>
 					<CTAButton size="lg" href={`${APP_URL}`}>
-						Try 15 minutes free
+						./start-free
 					</CTAButton>
 					<p class="text-terminal-green/50 text-sm mt-3 font-mono">
-						Sign up free • 15 credits added at signup • No subscription required
+						First session free via 15 credits at signup • No subscription
 					</p>
 				</div>
 			</div>
