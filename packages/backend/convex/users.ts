@@ -24,7 +24,7 @@ export const currentUserId = query({
   },
 });
 
-/** Get current user profile with credits and discount eligibility */
+/** Get current user profile with credits */
 export const getCurrentUserProfile = query({
   args: {},
   returns: v.union(
@@ -32,7 +32,6 @@ export const getCurrentUserProfile = query({
     v.object({
       userId: v.id("users"),
       credits: v.number(),
-      isWelcomeEligible: v.boolean(),
     }),
   ),
   handler: async (ctx) => {
@@ -45,7 +44,6 @@ export const getCurrentUserProfile = query({
     return {
       userId: user._id,
       credits: user.credits ?? 0,
-      isWelcomeEligible: !user.welcomeDiscountRedeemedAt,
     };
   },
 });
@@ -110,29 +108,6 @@ export const getUserIdByClerk = internalQuery({
   handler: async (ctx, { clerkUserId }) => {
     const user = await getUserByClerkId(ctx, clerkUserId);
     return user?._id ?? null;
-  },
-});
-
-/** Eligibility: Welcome discount not yet redeemed */
-export const isWelcomeDiscountEligible = internalQuery({
-  args: { clerkUserId: v.string() },
-  returns: v.boolean(),
-  handler: async (ctx, { clerkUserId }) => {
-    const user = await getUserByClerkId(ctx, clerkUserId);
-    return !!user && !user.welcomeDiscountRedeemedAt;
-  },
-});
-
-/** Mark welcome discount as redeemed */
-export const markWelcomeDiscountRedeemed = internalMutation({
-  args: { clerkUserId: v.string() },
-  returns: v.null(),
-  handler: async (ctx, { clerkUserId }) => {
-    const user = await getUserByClerkId(ctx, clerkUserId);
-    if (!user) return null;
-    if (user.welcomeDiscountRedeemedAt) return null;
-    await ctx.db.patch(user._id, { welcomeDiscountRedeemedAt: Date.now() });
-    return null;
   },
 });
 
