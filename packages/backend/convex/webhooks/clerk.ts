@@ -4,11 +4,12 @@ import { internal } from "../_generated/api";
 import { internalMutation } from "../_generated/server";
 
 export const handleWebhook = internalMutation({
-  args: { event: v.any() },
+  args: { event: v.any(), eventId: v.string() },
   returns: v.null(),
-  async handler(ctx, { event }: { event: WebhookEvent }) {
-    const eventId = event.data.id as string;
-
+  async handler(
+    ctx,
+    { event, eventId }: { event: WebhookEvent; eventId: string },
+  ) {
     const existingEvent = await ctx.db
       .query("webhook_events")
       .withIndex("by_event_id", (q) => q.eq("eventId", eventId))
@@ -36,7 +37,7 @@ export const handleWebhook = internalMutation({
         });
 
         await ctx.runMutation(internal.webhooks.events.markEventProcessed, {
-          eventId: subject,
+          eventId: eventId,
           eventType: event.type,
           clerkUserId: subject,
           source: "clerk",
@@ -45,10 +46,12 @@ export const handleWebhook = internalMutation({
       }
       case "user.deleted": {
         const subject = event.data.id as string;
-        await ctx.runMutation(internal.users.deleteUser, { id: subject });
+        await ctx.runMutation(internal.users.deleteUser, {
+          clerkUserId: subject,
+        });
 
         await ctx.runMutation(internal.webhooks.events.markEventProcessed, {
-          eventId: subject,
+          eventId: eventId,
           eventType: event.type,
           clerkUserId: subject,
           source: "clerk",
