@@ -3,7 +3,6 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
-    CONVEX_SITE_URL: z.url(),
     POLAR_ORGANIZATION_TOKEN: z.string().min(1),
     POLAR_WEBHOOK_SECRET: z.string().min(1),
     POLAR_PRODUCT_ID_1_SESSION: z.string().min(1),
@@ -20,7 +19,6 @@ export const env = createEnv({
     ELEVENLABS_AGENT_ID: z.string().min(1),
   },
   runtimeEnv: {
-    CONVEX_SITE_URL: process.env.CONVEX_SITE_URL,
     POLAR_ORGANIZATION_TOKEN: process.env.POLAR_ORGANIZATION_TOKEN,
     POLAR_WEBHOOK_SECRET: process.env.POLAR_WEBHOOK_SECRET,
     POLAR_PRODUCT_ID_1_SESSION: process.env.POLAR_PRODUCT_ID_1_SESSION,
