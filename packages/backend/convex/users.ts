@@ -1,5 +1,6 @@
 import type { UserJSON } from "@clerk/backend";
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import {
   internalMutation,
@@ -72,6 +73,9 @@ export const updateOrCreateUser = internalMutation({
         ...baseUserPatch,
         createdAt: clerkUser.created_at,
         credits: 0,
+      });
+      await ctx.runMutation(internal.credits.grantWelcomeCredits, {
+        clerkUserId: clerkUser.id,
       });
     }
     return null;

@@ -50,7 +50,7 @@ export const handleWebhook = internalAction({
 
     if (event.type === "order.paid") {
       const orderData = event.data as OrderData;
-      const { id: orderId, productId, metadata, discountId } = orderData;
+      const { id: orderId, productId, metadata } = orderData;
       const clerkUserId = metadata?.clerkUserId;
 
       if (clerkUserId && productId && orderId) {
@@ -66,16 +66,7 @@ export const handleWebhook = internalAction({
             orderId,
             credits,
           });
-
-          // Mark welcome discount as redeemed if this order used it
-          if (
-            productId === env.POLAR_PRODUCT_ID_1_SESSION &&
-            discountId === env.POLAR_WELCOME_DISCOUNT_ID
-          ) {
-            await ctx.runMutation(internal.users.markWelcomeDiscountRedeemed, {
-              clerkUserId,
-            });
-          }
+          // Welcome discount sunset: no discount redemption tracking
         } else {
           console.log("Product ID does not match expected value");
         }

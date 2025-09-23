@@ -33,6 +33,7 @@ export default defineSchema({
       v.literal("polar:purchase"),
       v.literal("session:usage"),
       v.literal("beta:grant"),
+      v.literal("welcome:grant"),
     ),
     orderId: v.optional(v.string()),
     sessionId: v.optional(v.id("interview_sessions")),
