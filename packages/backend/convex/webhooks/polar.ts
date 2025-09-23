@@ -66,7 +66,6 @@ export const handleWebhook = internalAction({
             orderId,
             credits,
           });
-          // Welcome discount sunset: no discount redemption tracking
         } else {
           console.log("Product ID does not match expected value");
         }
