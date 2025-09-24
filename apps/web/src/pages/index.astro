@@ -2,53 +2,47 @@
 import { Image } from "astro:assets";
 import CTAButton from "../components/CTAButton.astro";
 import { ThemeToggle } from "../components/ThemeToggle.tsx";
+import PostHogLayout from "../layouts/PostHogLayout.astro";
 import "../styles/global.css";
 
 const APP_URL = import.meta.env.PUBLIC_APP_URL;
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
-		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-		<link rel="manifest" href="/site.webmanifest" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<meta name="description" content="AI phone screen practice tailored to your target job. Run a realistic 15-minute voice screen and get a rubric-aligned scorecard with next steps. First session free." />
-		
-		<!-- Prevent dark mode flash -->
-		<script>
-			(function() {
-				function getSystemTheme() {
-					return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-				}
-				
-				const storedTheme = localStorage.getItem('theme') || 'system';
-				const theme = storedTheme === 'system' ? getSystemTheme() : storedTheme;
-				
-				if (theme === 'light') {
-					document.documentElement.classList.add('light');
-				}
-				// Dark mode is default, no class needed
-			})();
-		</script>
-		
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
-		
-		
-		<!-- Wistia Player -->
-		<script src="https://fast.wistia.com/player.js" async></script>
-		<script src="https://fast.wistia.com/embed/k06pni3j7d.js" async type="module"></script>
-		<style>wistia-player[media-id='k06pni3j7d']:not(:defined) { background: center / contain no-repeat url('https://fast.wistia.com/embed/medias/k06pni3j7d/swatch'); display: block; filter: blur(5px); padding-top:62.29%; }</style>
-		
-		<title>Syntaxia — AI phone screen practice tailored to your target job</title>
-		
-	</head>
+<PostHogLayout title="AI phone screen practice tailored to your target job">
+	<!-- Additional head elements for this page -->
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+	<link rel="manifest" href="/site.webmanifest" />
+	<meta name="description" content="AI phone screen practice tailored to your target job. Run a realistic 15-minute voice screen and get a rubric-aligned scorecard with next steps. First session free." />
+	
+	<!-- Prevent dark mode flash -->
+	<script>
+		(function() {
+			function getSystemTheme() {
+				return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+			}
+			
+			const storedTheme = localStorage.getItem('theme') || 'system';
+			const theme = storedTheme === 'system' ? getSystemTheme() : storedTheme;
+			
+			if (theme === 'light') {
+				document.documentElement.classList.add('light');
+			}
+			// Dark mode is default, no class needed
+		})();
+	</script>
+	
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
+	
+	
+	<!-- Wistia Player -->
+	<script src="https://fast.wistia.com/player.js" async></script>
+	<script src="https://fast.wistia.com/embed/k06pni3j7d.js" async type="module"></script>
+	<style>wistia-player[media-id='k06pni3j7d']:not(:defined) { background: center / contain no-repeat url('https://fast.wistia.com/embed/medias/k06pni3j7d/swatch'); display: block; filter: blur(5px); padding-top:62.29%; }</style>
+	
 	<body class="min-h-screen bg-background text-foreground font-mono" style="scroll-behavior: smooth;">
 		<header class="border-b border-terminal-green/30 bg-terminal-dark font-mono">
 			<div class="mx-auto max-w-6xl px-6 flex h-16 items-center justify-between">
@@ -475,4 +469,4 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL;
 			});
 		</script>
 	</body>
-</html>
+</PostHogLayout>

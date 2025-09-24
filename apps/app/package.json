@@ -27,6 +27,7 @@
     "date-fns": "^4.1.0",
     "lucide-react": "^0.539.0",
     "postcss": "catalog:frontend",
+    "posthog-js": "^1.268.2",
     "react": "catalog:frontend",
     "react-dom": "catalog:frontend",
     "tailwind-merge": "^3.3.1",

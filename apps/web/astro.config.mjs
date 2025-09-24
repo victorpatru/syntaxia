@@ -18,6 +18,14 @@ export default defineConfig({
         context: "client",
         access: "public",
       }),
+      PUBLIC_POSTHOG_KEY: envField.string({
+        context: "client",
+        access: "public",
+      }),
+      PUBLIC_POSTHOG_HOST: envField.string({
+        context: "client",
+        access: "public",
+      }),
     },
   },
   vite: {
