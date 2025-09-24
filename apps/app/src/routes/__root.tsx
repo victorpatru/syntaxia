@@ -17,8 +17,11 @@ import { createServerFn } from "@tanstack/react-start";
 import { getWebRequest } from "@tanstack/react-start/server";
 import type { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
+import posthog from "posthog-js";
+import { PostHogProvider } from "posthog-js/react";
 import type * as React from "react";
 import { MobileGuard } from "@/components/MobileGuard";
+import { env } from "@/env";
 import appCss from "@/styles/app.css?url";
 
 const fetchClerkAuth = createServerFn({ method: "GET" }).handler(async () => {
@@ -93,17 +96,28 @@ export const Route = createRootRouteWithContext<{
   component: RootComponent,
 });
 
+posthog.init(env.VITE_PUBLIC_POSTHOG_KEY, {
+  api_host: "/ingest/",
+  ui_host: env.VITE_PUBLIC_POSTHOG_HOST,
+  defaults: "2025-05-24",
+});
+
 function RootComponent() {
   const context = useRouteContext({ from: Route.id });
   return (
     <ClerkProvider>
-      <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
-        <RootDocument>
-          <MobileGuard>
-            <Outlet />
-          </MobileGuard>
-        </RootDocument>
-      </ConvexProviderWithClerk>
+      <PostHogProvider client={posthog}>
+        <ConvexProviderWithClerk
+          client={context.convexClient}
+          useAuth={useAuth}
+        >
+          <RootDocument>
+            <MobileGuard>
+              <Outlet />
+            </MobileGuard>
+          </RootDocument>
+        </ConvexProviderWithClerk>
+      </PostHogProvider>
     </ClerkProvider>
   );
 }
