@@ -289,6 +289,15 @@ export const createSession = internalMutation({
       },
     );
 
+    // Track session creation
+    await ctx.scheduler.runAfter(0, internal.analytics.trackEvent, {
+      distinctId: user.clerkUserId,
+      event: "interview_session_started",
+      properties: {
+        currentUrl: `${env.APP_URL}/interview/${sessionId}/setup`,
+      },
+    });
+
     return sessionId;
   },
 });
@@ -811,6 +820,22 @@ export const endSession = mutation({
     await ctx.scheduler.runAfter(0, internal.sessions.ensureCharge, {
       sessionId,
     });
+    // Track session completion for sessions >= 2:30 minutes
+    if (duration >= 150) {
+      await ctx.scheduler.runAfter(0, internal.analytics.trackEvent, {
+        distinctId: user.clerkUserId,
+        event: "interview_session_completed",
+        properties: {
+          sessionId,
+          duration,
+          experienceLevel: session.experienceLevel,
+          domainTrack: session.domainTrack,
+          hitChargeThreshold: session.chargeCommittedAt,
+          userId: user._id,
+        },
+        currentUrl: `${env.APP_URL}/interview/${sessionId}/complete`,
+      });
+    }
 
     return { sessionId, duration };
   },

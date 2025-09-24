@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as analytics from "../analytics.js";
 import type * as credits from "../credits.js";
 import type * as env from "../env.js";
 import type * as http_clerk from "../http/clerk.js";
@@ -40,6 +41,7 @@ import type {
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  analytics: typeof analytics;
   credits: typeof credits;
   env: typeof env;
   "http/clerk": typeof http_clerk;
