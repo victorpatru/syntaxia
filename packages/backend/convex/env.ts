@@ -17,6 +17,8 @@ export const env = createEnv({
     GOOGLE_GENERATIVE_AI_API_KEY: z.string().min(1),
     ELEVENLABS_API_KEY: z.string().min(1),
     ELEVENLABS_AGENT_ID: z.string().min(1),
+    POSTHOG_API_KEY: z.string().min(1),
+    POSTHOG_HOST: z.string().min(1),
   },
   runtimeEnv: {
     POLAR_ORGANIZATION_TOKEN: process.env.POLAR_ORGANIZATION_TOKEN,
@@ -33,6 +35,8 @@ export const env = createEnv({
     GOOGLE_GENERATIVE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
     ELEVENLABS_API_KEY: process.env.ELEVENLABS_API_KEY,
     ELEVENLABS_AGENT_ID: process.env.ELEVENLABS_AGENT_ID,
+    POSTHOG_API_KEY: process.env.POSTHOG_API_KEY,
+    POSTHOG_HOST: process.env.POSTHOG_HOST,
   },
   skipValidation: !process.env.VALIDATE_ENV,
 });

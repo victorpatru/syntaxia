@@ -8,6 +8,7 @@ import {
   type QueryCtx,
   query,
 } from "./_generated/server";
+import { env } from "./env";
 import { computePrimaryEmail } from "./utils/clerk";
 
 /** Get the current user ID (null if not authenticated) */
@@ -74,6 +75,13 @@ export const updateOrCreateUser = internalMutation({
       });
       await ctx.runMutation(internal.credits.grantWelcomeCredits, {
         clerkUserId: clerkUser.id,
+      });
+      await ctx.scheduler.runAfter(0, internal.analytics.trackEvent, {
+        distinctId: clerkUser.id,
+        event: "signup_completed",
+        properties: {
+          currentUrl: `${env.APP_URL}/dashboard`,
+        },
       });
     }
     return null;
