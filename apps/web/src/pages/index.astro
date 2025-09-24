@@ -87,7 +87,7 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL;
 			<!-- Hero Section -->
 			<div class="text-center mb-16">
 				<div class="mx-auto max-w-3xl md:max-w-4xl">
-					<h1 class="text-4xl md:text-5xl font-bold text-terminal-green leading-[1.15] tracking-tight mb-4 mt-10" style="text-wrap: balance">
+					<h1 class="text-4xl md:text-5xl font-bold text-terminal-green leading-[1.15] tracking-tight mb-6 mt-10" style="text-wrap: balance">
 						<span class="text-terminal-amber">AI</span> phone screen practice tailored to your target job
 					</h1>
 					<p class="text-terminal-green/70 text-base md:text-lg leading-relaxed">
@@ -98,7 +98,7 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL;
 					</p>
 					<div class="mt-6">
 						<CTAButton size="lg" href={`${APP_URL}`}>
-							./start-free
+							./practice-now
 						</CTAButton>
 					</div>
 				</div>
@@ -255,43 +255,62 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL;
 			<!-- Pricing -->
 			<div id="pricing" class="mb-16">
 				<h2 class="text-xl font-bold text-terminal-green mb-6 text-center">$ ./pricing</h2>
-				<p class="text-center text-terminal-green/70 text-sm mb-4 font-mono">
-					First session is free (15 credits at signup). Packs for additional sessions:
-				</p>
-				<div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
-					<!-- 1 Session -->
-					<div class="border border-terminal-green/30 bg-card p-8 md:p-10 flex flex-col">
-						<h3 class="text-terminal-green font-semibold text-lg md:text-xl mb-3 mt-3">./1-session</h3>
-						<p class="text-4xl md:text-5xl text-terminal-amber font-mono">$12.99</p>
-						<p class="text-terminal-green/70 text-sm mt-3">15-minute interview session</p>
-					</div>
-
-					<!-- 3 Sessions -->
-					<div class="border border-terminal-green/30 bg-card p-8 md:p-10 pt-14 flex flex-col relative">
-						<div class="absolute right-3 top-3 text-[11px] md:text-xs px-3 py-[6px] bg-terminal-green/10 border border-terminal-green/30 text-terminal-green font-mono">
-							Save $3.98 (10.2%)
-						</div>
-						<h3 class="text-terminal-green font-semibold text-lg md:text-xl mb-3 mt-3">./3-sessions</h3>
-						<p class="text-4xl md:text-5xl text-terminal-amber font-mono">$34.99</p>
-						<p class="text-terminal-green/70 text-sm mt-3">3 × 15-minute interview sessions</p>
-					</div>
-
-					<!-- 5 Sessions -->
-					<div class="border border-terminal-green/30 bg-card p-8 md:p-10 pt-14 flex flex-col relative">
-						<div class="absolute right-3 top-3 text-[11px] md:text-xs px-3 py-[6px] bg-terminal-green/10 border border-terminal-green/30 text-terminal-green font-mono">
-							Save $9.96 (15.3%)
-						</div>
-						<h3 class="text-terminal-green font-semibold text-lg md:text-xl mb-3 mt-3">./5-sessions</h3>
-						<p class="text-4xl md:text-5xl text-terminal-amber font-mono">$54.99</p>
-						<p class="text-terminal-green/70 text-sm mt-3">5 × 15-minute interview sessions</p>
-					</div>
-				</div>
-
-				<!-- Pricing info only - no CTA here -->
-				<div class="text-center mt-6">
-					<p class="text-terminal-green/60 text-sm font-mono">
-						No subscription • Pay per session
+				<div class="border border-terminal-green/30 bg-card px-6 md:px-10 py-10 md:py-12">
+					<p class="text-center text-terminal-green/70 text-sm font-mono mb-8">
+						First session is free (15 credits at signup). Packs for additional sessions:
 					</p>
+					
+					<!-- Mobile: Stack vertically, Desktop: 3-column grid -->
+					<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-5xl mx-auto">
+						<!-- 1 Session -->
+						<div class="border border-terminal-green/30 bg-card p-6 md:p-8 flex flex-col relative order-2 sm:order-1">
+							<h3 class="text-terminal-green font-semibold text-lg mb-2">./1-session</h3>
+							<div class="mb-4">
+								<p class="text-3xl md:text-4xl text-terminal-amber font-mono">$12.99</p>
+								<p class="text-terminal-green/60 text-xs font-mono">$12.99 per session</p>
+							</div>
+							<p class="text-terminal-green/70 text-sm">15-minute interview session</p>
+						</div>
+
+						<!-- 3 Sessions - Most Popular -->
+						<div class="border-2 border-terminal-amber bg-card p-6 md:p-8 flex flex-col relative order-1 sm:order-2 transform sm:scale-105">
+							<!-- Most Popular Badge -->
+							<div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-terminal-amber text-black px-4 py-1 text-xs font-mono font-bold">
+								MOST POPULAR
+							</div>
+							<!-- Savings Badge -->
+							<div class="absolute right-3 top-6 bg-terminal-green text-black px-3 py-1 text-xs font-mono font-bold">
+								Save 10.2%
+							</div>
+							<h3 class="text-terminal-green font-semibold text-lg mb-2 mt-6">./3-sessions</h3>
+							<div class="mb-4">
+								<p class="text-3xl md:text-4xl text-terminal-amber font-mono">$34.99</p>
+								<p class="text-terminal-green/60 text-xs font-mono">$11.66 per session</p>
+							</div>
+							<p class="text-terminal-green/70 text-sm mb-4">3 × 15-minute interview sessions</p>
+						</div>
+
+						<!-- 5 Sessions -->
+						<div class="border border-terminal-green/30 bg-card p-6 md:p-8 flex flex-col relative order-3">
+							<!-- Savings Badge -->
+							<div class="absolute right-3 top-3 bg-terminal-green/20 border border-terminal-green/50 text-terminal-green px-3 py-1 text-xs font-mono">
+								Save 15.3%
+							</div>
+							<h3 class="text-terminal-green font-semibold text-lg mb-2 mt-6">./5-sessions</h3>
+							<div class="mb-4">
+								<p class="text-3xl md:text-4xl text-terminal-amber font-mono">$54.99</p>
+								<p class="text-terminal-green/60 text-xs font-mono">$11.00 per session</p>
+							</div>
+							<p class="text-terminal-green/70 text-sm mb-4">5 × 15-minute interview sessions</p>
+						</div>
+					</div>
+
+					<!-- CTA Button inside pricing container -->
+					<div class="mt-10 flex justify-center">
+						<CTAButton size="lg" href={`${APP_URL}`}>
+							./practice-now
+						</CTAButton>
+					</div>
 				</div>
 			</div>
 
@@ -374,22 +393,6 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL;
 				</div>
 			</div>
 			
-			<!-- Primary CTA -->
-			<div class="text-center mb-12">
-				<div class="border border-terminal-green/30 bg-card px-8 py-16 mx-auto">
-					<h2 class="text-2xl font-bold text-terminal-green mb-4">$ ./ready-to-practice</h2>
-					<p class="text-terminal-green/80 text-base mb-6 font-mono">
-						Stop failing phone screens. Start landing offers.
-					</p>
-					<CTAButton size="lg" href={`${APP_URL}`}>
-						./start-free
-					</CTAButton>
-					<p class="text-terminal-green/50 text-sm mt-3 font-mono">
-						First session free via 15 credits at signup • No subscription
-					</p>
-				</div>
-			</div>
-
 			<!-- Footer -->
 			<div class="mt-12 text-center">
 				<div class="border-t border-terminal-green/20 pt-6">
@@ -409,7 +412,7 @@ const APP_URL = import.meta.env.PUBLIC_APP_URL;
 						</a>
 					</div>
 					<p class="text-terminal-green/50 text-sm">
-						Built for developers, by developers. Practice like you're already hired.
+						Built for developers, by developers.
 					</p>
 				</div>
 			</div>
