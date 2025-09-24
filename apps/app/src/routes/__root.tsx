@@ -96,11 +96,14 @@ export const Route = createRootRouteWithContext<{
   component: RootComponent,
 });
 
-posthog.init(env.VITE_PUBLIC_POSTHOG_KEY, {
-  api_host: "/ingest/",
-  ui_host: env.VITE_PUBLIC_POSTHOG_HOST,
-  defaults: "2025-05-24",
-});
+// Initialize PostHog
+if (typeof window !== "undefined") {
+  posthog.init(env.VITE_PUBLIC_POSTHOG_KEY, {
+    api_host: "/ingest",
+    ui_host: env.VITE_PUBLIC_POSTHOG_HOST,
+    defaults: "2025-05-24",
+  });
+}
 
 function RootComponent() {
   const context = useRouteContext({ from: Route.id });
