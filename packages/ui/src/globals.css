@@ -3,6 +3,17 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Departure Mono Font */
+@font-face {
+  font-family: "Departure Mono";
+  src:
+    url("/fonts/DepartureMono-Regular.woff2") format("woff2"),
+    url("/fonts/DepartureMono-Regular.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* Terminal-inspired color scheme */
   --background: oklch(0.98 0.01 120); /* Lightened background from very dark to a softer dark gray */
@@ -131,8 +142,12 @@
   --color-terminal-dark: var(--terminal-dark);
 
   /* Terminal-specific font configuration */
-  --font-sans: var(--font-jetbrains-mono);
-  --font-mono: var(--font-source-code-pro);
+  --font-sans:
+    "Departure Mono", ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  --font-mono:
+    "Departure Mono", ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
 }
 
 @layer base {
